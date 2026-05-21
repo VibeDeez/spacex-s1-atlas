@@ -23,4 +23,5 @@ jobs:
       # for this Vite/Tailwind toolchain; npm install is deterministic enough for CI here
       # because package-lock.json is committed and the release verifier checks outputs.
       - run: npm install
+      - run: npx playwright install --with-deps chromium
       - run: npm run release:check
