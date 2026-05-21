@@ -1,6 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { calculateKubinScenario, getScenarioDefaults } from './kubinScenario.js'
+import { loadAtlasData, loadSourcePayload } from './data/loadAtlasData.js'
+import { factFor, findRelatedPackets, riskFactorCount, riskPacketFor, rowFor, sourceCountLine, sourceCounts } from './data/selectors.js'
+import { publicAsset } from './lib/assets.js'
+import { balanceRow, capitalValue, financialPacket, margin, opMarginExplainer, opMarginLabel, pctChange, periodRow, segmentRowsFor, segmentTotal, signedClass } from './lib/calculations.js'
+import { PACKET_LABELS, POSTERS, SEGMENT_COLORS } from './lib/constants.js'
+import { formatPct, formatPlainPct, fmtMetric, hasNumber, money, number, trimText } from './lib/formatters.js'
+import { inferRiskTheme } from './lib/riskThemes.js'
+import { parseHash, setHash, scrollToId } from './lib/routing.js'
+import { exportPoster, makePosterSvg } from './poster/makePosterSvg.js'
+import { copyText, makeCaption, packetUrl, posterUrl, shareToDevice } from './share/shareActions.js'
 import {
   ChevronRight,
   Clipboard,
@@ -22,12 +32,6 @@ import {
   Users,
 } from 'lucide-react'
 
-const SEGMENT_COLORS = {
-  Space: '#B7D8FF',
-  Connectivity: '#74E3D4',
-  AI: '#F3BE63',
-}
-
 const NAV = [
   { id: 'flight-deck', hash: '/flight-deck', label: 'Overview' },
   { id: 'debate', hash: '/debate', label: 'Debate Map', mobileLabel: 'Debate' },
@@ -44,149 +48,9 @@ const MOBILE_PRIMARY_NAV = new Set(['flight-deck', 'debate', 'financials', 'atla
 
 const EXECUTIVE_CONCLUSION = 'A Connectivity-led operating model is funding a capital-intensive Space/AI expansion under concentrated control.'
 
-const PACKET_LABELS = {
-  fact: 'Filing fact',
-  section: 'Source section',
-  financial: 'Financial datum',
-  risk: 'Risk factor',
-  exhibit: 'Filed exhibit',
-  glossary: 'Glossary term',
-  ocr: 'Graphic OCR',
-  governance: 'Governance note',
-  related: 'Related-party item',
-}
-
-const POSTERS = [
-  { id: 'business-stack', label: 'Business Stack' },
-  { id: 'financial-telemetry', label: 'Financials' },
-  { id: 'risk-radar', label: 'Risk Radar' },
-  { id: 'governance-control', label: 'Governance' },
-]
-
-const SOURCE_COUNTS = {
-  sections: 22,
-  exhibits: 17,
-  graphics: 82,
-  risk_headings: 54,
-  glossary_terms: 117,
-}
-
-function sourceCounts(data) {
-  return data?.sourceCounts || SOURCE_COUNTS
-}
-
-function sourceCountLine(counts = SOURCE_COUNTS) {
-  const c = counts || SOURCE_COUNTS
-  return `${c.sections} sections · ${c.exhibits} exhibits · ${c.graphics} graphics/OCR · ${c.risk_headings} risk factors · ${c.glossary_terms} glossary terms`
-}
-
-function riskFactorCount(data) {
-  return sourceCounts(data).risk_headings || data?.risks?.length || SOURCE_COUNTS.risk_headings
-}
 
 function cn(...classes) {
   return classes.filter(Boolean).join(' ')
-}
-
-function number(value) {
-  return value?.toLocaleString?.() ?? value ?? '—'
-}
-
-function money(value) {
-  if (value === undefined || value === null || Number.isNaN(Number(value))) return '—'
-  const sign = value < 0 ? '−' : ''
-  const abs = Math.abs(Number(value))
-  return `${sign}$${abs >= 1000 ? `${(abs / 1000).toFixed(1)}B` : `${abs.toLocaleString()}M`}`
-}
-
-function pctChange(current, previous) {
-  const c = Number(current)
-  const p = Number(previous)
-  if (!Number.isFinite(c) || !Number.isFinite(p) || p === 0) return null
-  return ((c - p) / Math.abs(p)) * 100
-}
-
-function formatPct(value, digits = 0) {
-  if (value === null || value === undefined || !Number.isFinite(Number(value))) return '—'
-  const n = Number(value)
-  return `${n > 0 ? '+' : ''}${n.toFixed(digits)}%`
-}
-
-function formatPlainPct(value, digits = 0) {
-  if (value === null || value === undefined || !Number.isFinite(Number(value))) return '—'
-  return `${Number(value).toFixed(digits)}%`
-}
-
-function margin(numerator, denominator) {
-  const n = Number(numerator)
-  const d = Number(denominator)
-  if (!Number.isFinite(n) || !Number.isFinite(d) || d === 0) return null
-  return (n / d) * 100
-}
-
-function rowFor(rows, key, value) {
-  return rows?.find((row) => row[key] === value)
-}
-
-function factFor(data, key) {
-  return data.facts?.find((fact) => fact.k === key)
-}
-
-function riskPacketFor(data, pattern) {
-  return data.atlasRows?.find((row) => row.type === 'risk' && pattern.test(row.title))
-}
-
-function findRelatedPackets(packet, data, limit = 3) {
-  if (!packet || !data?.atlasRows?.length) return []
-  const stop = new Set(['with', 'that', 'this', 'from', 'into', 'will', 'could', 'would', 'have', 'their', 'there', 'which', 'including', 'source', 'lines'])
-  const tokens = new Set((`${packet.title} ${packet.detail}`.toLowerCase().match(/[a-z0-9]{4,}/g) || []).filter((token) => !stop.has(token)))
-  return data.atlasRows
-    .filter((row) => row.id !== packet.id)
-    .map((row) => {
-      const hay = `${row.type} ${row.title} ${row.detail}`.toLowerCase()
-      let score = row.type === packet.type ? 2 : 0
-      tokens.forEach((token) => { if (hay.includes(token)) score += 1 })
-      return { row, score }
-    })
-    .filter(({ score }) => score >= 3)
-    .sort((a, b) => b.score - a.score || a.row.title.localeCompare(b.row.title))
-    .slice(0, limit)
-    .map(({ row }) => row)
-}
-
-function trimText(value, n = 220) {
-  const text = String(value ?? '').replace(/\s+/g, ' ').trim()
-  return text.length > n ? `${text.slice(0, n - 1)}…` : text
-}
-
-function encodeParams(params = {}) {
-  const sp = new URLSearchParams()
-  Object.entries(params).forEach(([k, v]) => {
-    if (v !== undefined && v !== null && String(v).length > 0 && v !== 'all') sp.set(k, String(v))
-  })
-  return sp.toString()
-}
-
-function parseHash(hash = window.location.hash) {
-  const raw = hash.replace(/^#/, '') || '/flight-deck'
-  const [pathRaw, queryRaw = ''] = raw.split('?')
-  const path = pathRaw.startsWith('/') ? pathRaw : `/${pathRaw}`
-  const parts = path.split('/').filter(Boolean)
-  const params = Object.fromEntries(new URLSearchParams(queryRaw).entries())
-  if (parts[0] === 'poster') return { view: 'poster', poster: parts[1] || 'business-stack', params, path }
-  if (parts[0] === 'packet') return { view: 'packet', packetType: parts[1], packetId: parts.slice(2).join('/'), params, path }
-  const view = ['flight-deck', 'debate', 'atlas', 'segments', 'financials', 'risks', 'governance', 'model', 'sources'].includes(parts[0]) ? parts[0] : 'flight-deck'
-  return { view, params, path: `/${view}` }
-}
-
-function setHash(path, params = {}) {
-  const qs = encodeParams(params)
-  window.location.hash = `${path}${qs ? `?${qs}` : ''}`
-}
-
-function scrollToId(id) {
-  if (typeof document === 'undefined') return
-  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
 function useRoute() {
@@ -213,33 +77,14 @@ function useMediaQuery(query) {
   return matches
 }
 
-function publicAsset(path) {
-  const rel = String(path || '').replace(/^\/+/, '')
-  return `${import.meta.env.BASE_URL || '/'}${rel}`
-}
-
-async function loadJson(path) {
-  const url = publicAsset(path)
-  const res = await fetch(url)
-  if (!res.ok) throw new Error(`Failed to load ${url}: ${res.status}`)
-  return res.json()
-}
-
 function useAtlasData() {
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
   useEffect(() => {
     let cancelled = false
-    Promise.all([
-      loadJson('/summary.json'),
-      loadJson('/financials.json'),
-      loadJson('/risks.json'),
-      loadJson('/atlas-index.json'),
-      loadJson('/debate-lenses.json'),
-      loadJson('/jared-kubin-model.json'),
-    ])
-      .then(([summary, financials, riskPayload, atlasPayload, debatePayload, kubinModel]) => {
-        if (!cancelled) setData({ ...summary, financials, risks: riskPayload.risks, atlasRows: atlasPayload.rows, debate: debatePayload, kubinModel })
+    loadAtlasData()
+      .then((payload) => {
+        if (!cancelled) setData(payload)
       })
       .catch((err) => { if (!cancelled) setError(err.message) })
     return () => { cancelled = true }
@@ -255,12 +100,7 @@ function useSourcePayload(active) {
     if (source || loading) return source
     setLoading(true)
     try {
-      const [main, exhibits, ocr] = await Promise.all([
-        loadJson('/source-main.json'),
-        loadJson('/source-exhibits.json'),
-        loadJson('/ocr.json'),
-      ])
-      const payload = { ...main, exhibits: exhibits.exhibits, ocr: ocr.ocr, ocrItems: ocr.items }
+      const payload = await loadSourcePayload()
       setSource(payload)
       return payload
     } catch (err) {
@@ -274,199 +114,6 @@ function useSourcePayload(active) {
     if (active === 'sources') load()
   }, [active])
   return { source, loading, error, load }
-}
-
-function appOrigin() {
-  if (typeof window === 'undefined') return '/'
-  return new URL('.', window.location.href).href
-}
-
-function packetUrl(packet) {
-  return packet?.id ? `${appOrigin()}share/packet/${packet.id}/` : `${appOrigin()}#/flight-deck`
-}
-
-function posterUrl(variant) {
-  return `${appOrigin()}share/${variant}/`
-}
-
-function makeCaption({ type, title, url, source }) {
-  if (type === 'poster') {
-    return `${title}\n\nA source-cited map of SpaceX's S‑1: business stack, financials, risks, and sources.\n\n${url}`
-  }
-  return `SpaceX S‑1 Atlas\n\nPacket: ${title}\nSource: ${source}\n\n${url}`
-}
-
-async function copyText(text, setCopied) {
-  try {
-    await navigator.clipboard.writeText(text)
-  } catch {
-    const el = document.createElement('textarea')
-    el.value = text
-    document.body.appendChild(el)
-    el.select()
-    document.execCommand('copy')
-    document.body.removeChild(el)
-  }
-  setCopied?.(true)
-  window.setTimeout(() => setCopied?.(false), 1400)
-}
-
-async function shareToDevice({ title, caption, url, setCopied }) {
-  const text = caption.replace(url, '').trim()
-  if (navigator.share) {
-    try {
-      await navigator.share({ title, text, url })
-      return
-    } catch {
-      // User canceled or webview rejected the share payload. Fall back to copy.
-    }
-  }
-  await copyText(`${caption}`, setCopied)
-}
-
-function escapeXml(value) {
-  return String(value ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[ch]))
-}
-
-function makePosterSvg({ variant, data, packet }) {
-  const titles = {
-    'business-stack': ['Business Stack', 'Space · Connectivity · AI'],
-    'financial-telemetry': ['Financials', 'Revenue, segment results, cash and Starlink metrics'],
-    'risk-radar': ['Risk Radar', 'Actual S‑1 risk factors made navigable'],
-    'governance-control': ['Governance', 'Management, related parties and offering mechanics'],
-  }
-  const [title, subtitle] = titles[variant] || titles['business-stack']
-  if (variant === 'financial-telemetry') {
-    const y2024 = periodRow(data.financials.consolidated, '2024')
-    const y2025 = periodRow(data.financials.consolidated, '2025')
-    const q12025 = periodRow(data.financials.consolidated, 'Q1 2025')
-    const q12026 = periodRow(data.financials.consolidated, 'Q1 2026')
-    const latest = balanceRow(data.financials.balance, 'Mar 31 2026')
-    const cashAndSec = Number(latest?.cash || 0) + Number(latest?.marketable_securities || 0)
-    const q1Segments = segmentRowsFor(data, 'Q1 2026')
-    const q1Revenue = segmentTotal(data, 'Q1 2026', 'revenue')
-    const q1Capex = segmentTotal(data, 'Q1 2026', 'capex')
-    const aiQ1 = q1Segments.find((row) => row.segment === 'AI')
-    const stars = Array.from({ length: 48 }, (_, i) => `<circle cx="${(61 + i * 227) % 1130 + 36}" cy="${(31 + i * 113) % 560 + 28}" r="${i % 8 === 0 ? 1.9 : 1.05}" fill="#fff" opacity="${i % 6 === 0 ? .78 : .38}"/>`).join('')
-    const metricCards = [
-      ['2025 revenue', money(y2025?.revenue), `${formatPct(pctChange(y2025?.revenue, y2024?.revenue), 1)} YoY`],
-      ['Q1 revenue', money(q12026?.revenue), `${formatPct(pctChange(q12026?.revenue, q12025?.revenue), 1)} YoY`],
-      ['Q1 op. margin', formatPlainPct(margin(q12026?.op_income, q12026?.revenue), 1), 'op income / revenue'],
-      ['Cash + securities', money(cashAndSec), 'Mar. 31 2026'],
-      ['AI capex share', formatPlainPct(margin(aiQ1?.capex, q1Capex), 1), 'Q1 segment capex'],
-      ['Q1 Adj. EBITDA, as filed margin', formatPlainPct(margin(q12026?.adjusted_ebitda, q12026?.revenue), 1), 'filed Adj. EBITDA, as filed'],
-    ].map((m, i) => {
-      const x = 64 + (i % 3) * 225
-      const y = 244 + Math.floor(i / 3) * 126
-      return `<rect x="${x}" y="${y}" width="196" height="94" rx="18" fill="#090a0d" stroke="rgba(255,255,255,.10)"/><text x="${x + 18}" y="${y + 30}" fill="#8b94a3" font-size="11" font-family="ui-monospace,Menlo,monospace" font-weight="700" letter-spacing="1.2">${escapeXml(m[0]).toUpperCase()}</text><text x="${x + 18}" y="${y + 62}" fill="#f7f8f8" font-size="28" font-family="Inter,system-ui,sans-serif" font-weight="720">${escapeXml(m[1])}</text><text x="${x + 18}" y="${y + 82}" fill="#b7d8ff" font-size="12" font-family="Inter,system-ui,sans-serif">${escapeXml(m[2])}</text>`
-    }).join('')
-    const segmentBars = q1Segments.map((row, i) => {
-      const y = 288 + i * 70
-      const revW = Math.max(8, margin(row.revenue, q1Revenue) * 2.2)
-      const capexW = Math.max(8, margin(row.capex, q1Capex) * 2.2)
-      return `<text x="748" y="${y}" fill="${SEGMENT_COLORS[row.segment]}" font-size="18" font-family="Inter,system-ui,sans-serif" font-weight="700">${row.segment}</text><rect x="748" y="${y + 12}" width="250" height="9" rx="5" fill="rgba(255,255,255,.08)"/><rect x="748" y="${y + 12}" width="${revW}" height="9" rx="5" fill="${SEGMENT_COLORS[row.segment]}"/><text x="1010" y="${y + 20}" fill="#c6d0dd" font-size="13" font-family="ui-monospace,Menlo,monospace">rev ${formatPlainPct(margin(row.revenue, q1Revenue), 1)}</text><rect x="748" y="${y + 32}" width="250" height="9" rx="5" fill="rgba(255,255,255,.08)"/><rect x="748" y="${y + 32}" width="${capexW}" height="9" rx="5" fill="#F3BE63"/><text x="1010" y="${y + 40}" fill="#c6d0dd" font-size="13" font-family="ui-monospace,Menlo,monospace">capex ${formatPlainPct(margin(row.capex, q1Capex), 1)}</text>`
-    }).join('')
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-      <defs><radialGradient id="bg" cx="50%" cy="110%" r="88%"><stop offset="0" stop-color="#18283f"/><stop offset=".42" stop-color="#080a0e"/><stop offset="1" stop-color="#030304"/></radialGradient></defs>
-      <rect width="1200" height="630" fill="url(#bg)"/>${stars}<circle cx="590" cy="760" r="630" fill="none" stroke="#b7d8ff" opacity=".13" stroke-width="2"/><text x="56" y="104" fill="#f7f8f8" font-size="74" font-family="Inter,system-ui,sans-serif" font-weight="650" letter-spacing="-4">SpaceX S‑1 Atlas</text><text x="62" y="162" fill="#b7d8ff" font-size="31" font-family="Inter,system-ui,sans-serif" font-weight="560">Financial workbench</text><text x="62" y="210" fill="#8b94a3" font-size="19" font-family="Inter,system-ui,sans-serif">Derived from filing values · no market data · no valuation layer</text>${metricCards}<rect x="704" y="218" width="416" height="272" rx="26" fill="#090a0d" stroke="#27303c"/><text x="748" y="262" fill="#f3be63" font-size="25" font-family="Inter,system-ui,sans-serif" font-weight="700">Q1 segment mix</text>${segmentBars}<text x="56" y="580" fill="#8b94a3" font-size="18" font-family="Inter,system-ui,sans-serif">Revenue growth · margins · capex intensity · balance sheet · source packets</text><text x="56" y="608" fill="#b7d8ff" font-size="17" font-family="Inter,system-ui,sans-serif">Source-grounded from the S‑1 package</text>
-    </svg>`
-  }
-  const starSvg = Array.from({ length: 52 }, (_, i) => {
-    const x = (73 + i * 211) % 1160 + 20
-    const y = (41 + i * 97) % 570 + 24
-    const r = i % 11 === 0 ? 2.1 : i % 5 === 0 ? 1.45 : 0.95
-    const opacity = i % 7 === 0 ? 0.86 : i % 3 === 0 ? 0.58 : 0.38
-    return `<circle cx="${x}" cy="${y}" r="${r}" fill="#ffffff" opacity="${opacity}"/>`
-  }).join('')
-  const shellSvg = data.segments.map((s, i) => {
-    const color = SEGMENT_COLORS[s.name]
-    const y = 300 + i * 62
-    return `<rect x="62" y="${y}" width="390" height="46" rx="14" fill="#0b0c10" stroke="${color}" opacity=".96"/><circle cx="88" cy="${y + 23}" r="6" fill="${color}"/><text x="108" y="${y + 29}" fill="${color}" font-size="20" font-family="ui-monospace,Menlo,monospace" font-weight="700">${escapeXml(s.name)}</text>`
-  }).join('')
-  const themeNames = ['Launch / Starship', 'Starlink / Network', 'AI / Compute', 'Regulatory', 'Operations / Market', 'Offering / Control']
-  const themeColors = ['#B7D8FF', '#74E3D4', '#F3BE63', '#EF7D7D', '#C6D0DD', '#9DB9FF']
-  const themeLabels = ['Launch', 'Starlink', 'AI', 'Reg.', 'Ops', 'Control']
-  const themed = data.risks.map((risk) => ({ ...risk, theme: inferRiskTheme(risk.heading, risk.group) }))
-  const riskNodes = themeNames.map((theme, i) => {
-    const angle = (i / themeNames.length) * Math.PI * 2 - Math.PI / 2
-    const x = 872 + Math.cos(angle) * 100
-    const y = 382 + Math.sin(angle) * 100
-    const lx = 872 + Math.cos(angle) * 128
-    const ly = 382 + Math.sin(angle) * 128
-    const count = themed.filter((r) => r.theme === theme).length
-    const anchor = Math.cos(angle) > 0.35 ? 'start' : Math.cos(angle) < -0.35 ? 'end' : 'middle'
-    return `<line x1="872" y1="382" x2="${x}" y2="${y}" stroke="rgba(255,255,255,.08)"/><circle cx="${x}" cy="${y}" r="12" fill="${themeColors[i]}" opacity=".92" stroke="#050506" stroke-width="2"/><text x="${x}" y="${y + 4}" text-anchor="middle" fill="#050506" font-size="11" font-family="ui-monospace,Menlo,monospace" font-weight="800">${count}</text><text x="${lx}" y="${ly + 4}" text-anchor="${anchor}" fill="${themeColors[i]}" opacity=".78" font-size="10" font-family="ui-monospace,Menlo,monospace" font-weight="700">${themeLabels[i]}</text>`
-  }).join('')
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-    <defs>
-      <radialGradient id="bg" cx="50%" cy="112%" r="86%"><stop offset="0" stop-color="#1b2b43"/><stop offset=".40" stop-color="#080a0e"/><stop offset="1" stop-color="#030304"/></radialGradient>
-      <filter id="glow"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-    </defs>
-    <rect width="1200" height="630" fill="url(#bg)"/>
-    ${starSvg}
-    <circle cx="620" cy="720" r="650" fill="none" stroke="#b7d8ff" opacity=".13" stroke-width="2"/>
-    <circle cx="620" cy="720" r="470" fill="none" stroke="#ffffff" opacity=".08" stroke-dasharray="8 18"/>
-    <text x="56" y="112" fill="#f7f8f8" font-size="78" font-family="Inter,system-ui,sans-serif" font-weight="650" letter-spacing="-4">SpaceX S‑1 Atlas</text>
-    <text x="62" y="172" fill="#b7d8ff" font-size="30" font-family="Inter,system-ui,sans-serif" font-weight="520">Business stack · financials · risks · sources</text>
-    <text x="62" y="224" fill="#8b94a3" font-size="20" font-family="Inter,system-ui,sans-serif">A filing map built from the S‑1 package.</text>
-    ${shellSvg}
-    <rect x="688" y="188" width="370" height="332" rx="26" fill="#090a0d" stroke="#27303c"/>
-    <text x="728" y="236" fill="#ef7d7d" font-size="28" font-family="Inter,system-ui,sans-serif" font-weight="650">Risk Radar</text>
-    <circle cx="872" cy="382" r="126" fill="none" stroke="rgba(255,255,255,.13)"/>
-    <circle cx="872" cy="382" r="88" fill="none" stroke="rgba(255,255,255,.10)" stroke-dasharray="7 12"/>
-    <circle cx="872" cy="382" r="48" fill="none" stroke="rgba(255,255,255,.08)"/>
-    ${riskNodes}
-    <text x="872" y="374" text-anchor="middle" fill="#f7f8f8" font-size="34" font-family="Inter,system-ui,sans-serif" font-weight="700">${riskFactorCount(data)}</text>
-    <text x="872" y="398" text-anchor="middle" fill="#a6adb9" font-size="10" font-family="ui-monospace,Menlo,monospace" font-weight="700" letter-spacing="1.1">RISK</text>
-    <text x="872" y="412" text-anchor="middle" fill="#a6adb9" font-size="10" font-family="ui-monospace,Menlo,monospace" font-weight="700" letter-spacing=".7">FACTORS</text>
-    <text x="56" y="580" fill="#8b94a3" font-size="18" font-family="Inter,system-ui,sans-serif">${escapeXml(sourceCountLine(sourceCounts(data)))}</text>
-    <text x="56" y="608" fill="#b7d8ff" font-size="17" font-family="Inter,system-ui,sans-serif">Source-grounded from the S‑1 package</text>
-  </svg>`
-}
-
-async function exportPoster({ variant, data, packet, share = false }) {
-  const svg = makePosterSvg({ variant, data, packet })
-  const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' })
-  const url = URL.createObjectURL(blob)
-  const img = new Image()
-  await new Promise((resolve, reject) => {
-    img.onload = resolve
-    img.onerror = reject
-    img.src = url
-  })
-  const canvas = document.createElement('canvas')
-  canvas.width = 1200
-  canvas.height = 630
-  const ctx = canvas.getContext('2d')
-  ctx.drawImage(img, 0, 0)
-  URL.revokeObjectURL(url)
-  const pngBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'))
-  if (!pngBlob) throw new Error('PNG export failed')
-  const file = new File([pngBlob], `spacex-s1-${variant}.png`, { type: 'image/png' })
-  if (share && navigator.canShare?.({ files: [file] })) {
-    try {
-      await navigator.share({ files: [file], title: 'SpaceX S‑1 Atlas', text: 'A source-cited map of SpaceX’s S‑1.' })
-      return
-    } catch {
-      // User canceled or the browser rejected file sharing; fall through to download.
-    }
-  }
-  const pngUrl = URL.createObjectURL(pngBlob)
-  const link = document.createElement('a')
-  link.download = file.name
-  link.href = pngUrl
-  link.click()
-  window.setTimeout(() => URL.revokeObjectURL(pngUrl), 5000)
-}
-
-function inferRiskTheme(heading, group) {
-  const h = heading.toLowerCase()
-  if (/starship|launch|rocket|reusable|dragon|mission|payload|orbital/.test(h)) return 'Launch / Starship'
-  if (/starlink|satellite|connectivity|broadband|mobile|spectrum/.test(h)) return 'Starlink / Network'
-  if (/ai|xai|grok|compute|model|data center/.test(h)) return 'AI / Compute'
-  if (/government|regulat|law|fda|license|faa|fcc|export|security|defense/.test(h)) return 'Regulatory'
-  if (/stock|voting|offering|controlled|class|shares|market/.test(h) || group !== 'Business') return 'Offering / Control'
-  return 'Operations / Market'
 }
 
 function Shell({ children }) {
@@ -560,7 +207,7 @@ function Source({ children }) {
   return (
     <p className="source-line mt-2 max-w-full rounded-md border border-white/[0.08] bg-white/[0.026] px-2 py-1 font-mono text-[11px] leading-4 text-white/72">
       <span className="font-semibold uppercase tracking-normal text-cyan/80">SRC</span>
-      <span className="text-white/56"> · </span>
+      <span className="text-white/62"> · </span>
       <span className="break-words">{children}</span>
     </p>
   )
@@ -570,7 +217,7 @@ function SourceChip({ children, label = 'Source' }) {
   if (!children) return null
   return (
     <span title={String(children)} className="source-chip mt-2 inline-flex max-w-full items-center gap-1 rounded-md border border-white/[0.08] bg-white/[0.024] px-2 py-1 font-mono text-[10px] uppercase tracking-normal text-white/62">
-      <span className="text-cyan/76">{label}</span> <span className="text-white/42">·</span> <span className="min-w-0 truncate normal-case tracking-normal text-white/70">{trimText(children, 74)}</span>
+      <span className="text-cyan/76">{label}</span> <span className="text-white/58">·</span> <span className="min-w-0 truncate normal-case tracking-normal text-white/70">{trimText(children, 74)}</span>
     </span>
   )
 }
@@ -585,18 +232,18 @@ function MetricPill({ label, value, sub }) {
   )
 }
 
-function DataTable({ columns, rows, mobileCard, className = '', maxHeight = 'max-h-[620px]', empty }) {
+function DataTable({ columns, rows, mobileCard, className = '', maxHeight = 'max-h-[620px]', empty, ariaLabel = 'Disclosure data table' }) {
   return (
     <div className={cn('data-table-shell overflow-hidden rounded-lg border border-white/[0.085] bg-black/22', className)}>
       {mobileCard && (
         <div className="grid gap-2 p-2 md:hidden">
           {rows.map((row, idx) => <div key={row.id ?? idx}>{mobileCard(row, idx)}</div>)}
-          {!rows.length && <div className="p-6 text-center text-sm text-white/56">{empty || 'No matching disclosures. Try a broader term or clear the filter.'}</div>}
+          {!rows.length && <div className="p-6 text-center text-sm text-white/62">{empty || 'No matching disclosures. Try a broader term or clear the filter.'}</div>}
         </div>
       )}
       <div className={cn(mobileCard && 'hidden md:block')}>
         <div className={cn('overflow-auto overscroll-x-contain', maxHeight)}>
-          <table className="data-table min-w-full border-collapse text-left text-[13.5px]">
+          <table aria-label={ariaLabel} className="data-table min-w-full border-collapse text-left text-[13.5px]">
             <thead className="sticky top-0 z-10 bg-[#101318] text-[11px] uppercase tracking-normal text-white/68">
               <tr>{columns.map((col) => <th key={col.key} className="border-b border-white/[0.095] px-3 py-2.5 font-[650]">{col.label}</th>)}</tr>
             </thead>
@@ -608,7 +255,7 @@ function DataTable({ columns, rows, mobileCard, className = '', maxHeight = 'max
               ))}
             </tbody>
           </table>
-          {!rows.length && <div className="p-8 text-center text-sm text-white/56">{empty || 'No matching disclosures. Try a broader term or clear the filter.'}</div>}
+          {!rows.length && <div className="p-8 text-center text-sm text-white/62">{empty || 'No matching disclosures. Try a broader term or clear the filter.'}</div>}
         </div>
       </div>
     </div>
@@ -634,29 +281,29 @@ function ShareActions({ packet, data, variant = 'business-stack', title, source,
 
 function DisclosurePacket({ packet, data, variant = 'risk-radar' }) {
   if (!packet) {
-    return <Panel><p className="text-sm text-white/56">Select a disclosure packet to create a shareable, source-labeled card.</p></Panel>
+    return <Panel><p className="text-sm text-white/62">Select a disclosure packet to create a shareable, source-labeled card.</p></Panel>
   }
   const related = findRelatedPackets(packet, data)
   return (
     <Panel pad="p-4" className="relative overflow-hidden">
       <div className="absolute -right-24 -top-24 h-56 w-56 rounded-full border border-white/[0.055]" />
-      <p className="font-mono text-[10px] uppercase tracking-normal text-white/54">Disclosure packet · {PACKET_LABELS[packet.type] || packet.type}</p>
+      <p className="font-mono text-[10px] uppercase tracking-normal text-white/62">Disclosure packet · {PACKET_LABELS[packet.type] || packet.type}</p>
       <h3 className="mt-3 text-xl font-[640] leading-6 tracking-normal text-spacex">{packet.title}</h3>
       <div className="mt-4 rounded-xl border border-white/[0.07] bg-black/25 p-3">
-        <p className="font-mono text-[9px] uppercase tracking-normal text-white/50">Claim / extracted metric</p>
+        <p className="font-mono text-[9px] uppercase tracking-normal text-white/62">Claim / extracted metric</p>
         <p className="mt-2 text-sm leading-6 text-white/76">{packet.detail}</p>
       </div>
       <div className="mt-3 rounded-xl border border-white/[0.07] bg-white/[0.02] p-3">
-        <p className="font-mono text-[9px] uppercase tracking-normal text-white/50">Source context</p>
+        <p className="font-mono text-[9px] uppercase tracking-normal text-white/62">Source context</p>
         <Source>{packet.source}</Source>
       </div>
       {related.length > 0 && (
         <div className="mt-3 rounded-xl border border-white/[0.07] bg-white/[0.018] p-3">
-          <p className="font-mono text-[9px] uppercase tracking-normal text-white/50">Related packets</p>
+          <p className="font-mono text-[9px] uppercase tracking-normal text-white/62">Related packets</p>
           <div className="mt-2 grid gap-2">
             {related.map((item) => (
               <button key={item.id} onClick={() => setHash(item.hash)} className="rounded-lg border border-white/[0.06] bg-black/20 px-3 py-2 text-left text-xs leading-5 text-white/70 hover:bg-white/[0.045] focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60">
-                <span className="font-mono text-[9px] uppercase tracking-normal text-white/44">{PACKET_LABELS[item.type] || item.type}</span>
+                <span className="font-mono text-[9px] uppercase tracking-normal text-white/58">{PACKET_LABELS[item.type] || item.type}</span>
                 <span className="mt-1 block text-white/78">{trimText(item.title, 110)}</span>
               </button>
             ))}
@@ -679,14 +326,14 @@ function FilingReadPanel({ data }) {
     <div className="rounded-lg border border-white/[0.08] bg-black/20 p-3">
       <div className="mb-3 flex items-center justify-between gap-3">
         <p className="font-mono text-[10px] uppercase tracking-normal text-white/58">90-second filing read</p>
-        <p className="hidden text-[11px] text-white/54 sm:block">What this S‑1 says before the tables</p>
+        <p className="hidden text-[11px] text-white/62 sm:block">What this S‑1 says before the tables</p>
       </div>
       <div className="grid gap-2">
         {cards.map((fact) => (
           <button key={fact.k} onClick={() => setHash('/atlas', { q: fact.k, type: 'fact' })} className="rounded-lg border border-white/[0.07] bg-white/[0.025] p-3 text-left transition hover:border-white/16 hover:bg-white/[0.045] focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60">
             <span className="block text-sm font-[650] leading-5 text-white/86">{fact.k}</span>
             <span className="mt-1 block text-xs leading-5 text-white/68">{fact.v}</span>
-            <span className="mt-2 block font-mono text-[9px] leading-4 text-white/52">SRC · {fact.src}</span>
+            <span className="mt-2 block font-mono text-[9px] leading-4 text-white/62">SRC · {fact.src}</span>
           </button>
         ))}
       </div>
@@ -779,16 +426,16 @@ function BriefingReadout({ data }) {
           <p className="font-mono text-[11px] uppercase tracking-normal text-cyan/78">Critical readout</p>
           <h2 className="mt-1 text-2xl font-[690] tracking-normal text-spacex">What to understand first</h2>
         </div>
-        <FileSearch size={18} className="mt-1 text-white/48" />
+        <FileSearch size={18} className="mt-1 text-white/58" />
       </div>
       <div className="mt-4 divide-y divide-white/[0.075]">
         {rows.map((row) => (
           <button key={row.label} onClick={() => setHash(row.label.includes('Governance') ? '/governance' : row.label.includes('Segment') || row.label.includes('Financial') || row.label.includes('Profitability') || row.label.includes('Liquidity') ? '/financials' : '/atlas')} className="grid w-full gap-2 py-3 text-left transition hover:bg-white/[0.025] focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60 sm:grid-cols-[10rem_minmax(0,1fr)] sm:px-2">
-            <p className="font-mono text-[10px] uppercase tracking-normal text-white/54">{row.label}</p>
+            <p className="font-mono text-[10px] uppercase tracking-normal text-white/62">{row.label}</p>
             <div>
               <p className={cn('text-lg font-[700] leading-6 tracking-normal', row.tone === 'red' ? 'text-red' : row.tone === 'cyan' ? 'text-cyan' : row.tone === 'amber' ? 'text-amber' : 'text-spacex')}>{row.value}</p>
               <p className="mt-1 text-[13px] leading-6 text-white/76">{row.detail}</p>
-              <p className="mt-1 font-mono text-[10px] leading-4 text-white/52">SRC · {row.source}</p>
+              <p className="mt-1 font-mono text-[10px] leading-4 text-white/62">SRC · {row.source}</p>
             </div>
           </button>
         ))}
@@ -1114,7 +761,7 @@ function ValueCreationBridge({ data }) {
       <div className="grid gap-3 lg:grid-cols-4">
         {rows.map((row) => (
           <Panel key={row.title} pad="p-3" className={cn(row.tone === 'red' && 'border-red/18 bg-red/10', row.tone === 'amber' && 'border-amber/18 bg-amber/10', row.tone === 'cyan' && 'border-cyan/18 bg-cyan/10')}>
-            <p className="font-mono text-[9px] uppercase tracking-normal text-white/48">Filed / derived bridge</p>
+            <p className="font-mono text-[9px] uppercase tracking-normal text-white/58">Filed / derived bridge</p>
             <p className={cn('mt-1 text-2xl font-[720] tracking-normal', row.tone === 'red' ? 'text-red' : row.tone === 'amber' ? 'text-amber' : 'text-cyan')}>{row.metric}</p>
             <h3 className="mt-2 text-base font-[700] leading-6 text-white/88">{row.title}</h3>
             <p className="mt-2 text-[13px] leading-6 text-white/68">{row.detail}</p>
@@ -1193,13 +840,13 @@ function QuestionTree({ data }) {
         <div className="grid gap-2">
           {questions.map((item, idx) => (
             <button key={item.id} onClick={() => setHash(item.route)} className="grid gap-3 rounded-lg border border-white/[0.08] bg-black/18 p-3 text-left transition hover:border-white/18 hover:bg-white/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60 md:grid-cols-[4rem_minmax(0,1fr)_auto] md:items-start">
-              <span className="font-mono text-[10px] uppercase tracking-normal text-white/42">Q{idx + 1}</span>
+              <span className="font-mono text-[10px] uppercase tracking-normal text-white/58">Q{idx + 1}</span>
               <span>
                 <span className="block text-base font-[720] leading-6 text-white/88">{item.question}</span>
                 <span className="mt-1 block text-[13px] leading-6 text-white/66">{item.answer}</span>
                 <SourceChip>{item.source}</SourceChip>
               </span>
-              <span className="hidden min-h-9 items-center gap-1 rounded-md border border-white/[0.08] bg-white/[0.025] px-2 font-mono text-[10px] uppercase tracking-normal text-white/52 md:inline-flex">Open <ChevronRight size={12} /></span>
+              <span className="hidden min-h-9 items-center gap-1 rounded-md border border-white/[0.08] bg-white/[0.025] px-2 font-mono text-[10px] uppercase tracking-normal text-white/62 md:inline-flex">Open <ChevronRight size={12} /></span>
             </button>
           ))}
         </div>
@@ -1306,7 +953,7 @@ function RiskControlMap({ data }) {
           </table>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/[0.07] px-3 py-3">
-          <p className="text-xs leading-5 text-white/56">No severity or probability score is assigned. Rows pair filed risk language with filed or derived operating metrics.</p>
+          <p className="text-xs leading-5 text-white/62">No severity or probability score is assigned. Rows pair filed risk language with filed or derived operating metrics.</p>
           <button onClick={() => setHash('/risks')} className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-red/20 bg-red/10 px-3 text-xs font-[620] text-white/78 hover:bg-red/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60"><Radar size={14} /> Open visual Risk Radar</button>
         </div>
       </Panel>
@@ -1385,9 +1032,9 @@ function OverviewHero({ data }) {
                 <Source>{filingStatus?.src}</Source>
               </div>
               <div className="rounded-lg border border-white/[0.08] bg-black/20 p-3 lg:w-[18rem]">
-                <p className="font-mono text-[10px] uppercase tracking-normal text-white/54">Listing marker</p>
+                <p className="font-mono text-[10px] uppercase tracking-normal text-white/62">Listing marker</p>
                 <p className="mt-1 text-sm font-[650] leading-5 text-white/82">{ticker?.v}</p>
-                <p className="mt-2 font-mono text-[10px] leading-4 text-white/50">SRC · {ticker?.src}</p>
+                <p className="mt-2 font-mono text-[10px] leading-4 text-white/62">SRC · {ticker?.src}</p>
               </div>
             </div>
           </div>
@@ -1464,16 +1111,16 @@ function SegmentEconomics({ data, onPacket }) {
                 <span className="rounded-md border border-white/[0.09] bg-black/20 px-2 py-1 font-mono text-[10px] text-white/64">Q1 2026</span>
               </div>
               <dl className="mt-4 grid grid-cols-3 gap-2 text-xs">
-                <div><dt className="font-mono text-[9px] uppercase tracking-normal text-white/54">Revenue</dt><dd className="mt-1 text-lg font-[700] text-white/90">{money(segment.revenue)}</dd></div>
-                <div><dt className="font-mono text-[9px] uppercase tracking-normal text-white/54">Op. income</dt><dd className={cn('mt-1 text-lg font-[700]', segment.op_income < 0 ? 'text-red' : 'text-cyan')}>{money(segment.op_income)}</dd></div>
-                <div><dt className="font-mono text-[9px] uppercase tracking-normal text-white/54">Capex</dt><dd className="mt-1 text-lg font-[700] text-amber">{money(segment.capex)}</dd></div>
+                <div><dt className="font-mono text-[9px] uppercase tracking-normal text-white/62">Revenue</dt><dd className="mt-1 text-lg font-[700] text-white/90">{money(segment.revenue)}</dd></div>
+                <div><dt className="font-mono text-[9px] uppercase tracking-normal text-white/62">Op. income</dt><dd className={cn('mt-1 text-lg font-[700]', segment.op_income < 0 ? 'text-red' : 'text-cyan')}>{money(segment.op_income)}</dd></div>
+                <div><dt className="font-mono text-[9px] uppercase tracking-normal text-white/62">Capex</dt><dd className="mt-1 text-lg font-[700] text-amber">{money(segment.capex)}</dd></div>
               </dl>
               <div className="mt-4 grid gap-2">
                 <MiniBar value={segment.revenue} max={q1Revenue} color={SEGMENT_COLORS[segment.segment]} label={`Revenue mix ${formatPlainPct(mix, 1)}`} />
                 <MiniBar value={segment.capex} max={q1Capex} color="#F3BE63" label={`Capex mix ${formatPlainPct(capexMix, 1)}`} />
               </div>
               <p className="mt-4 text-[13px] leading-6 text-white/74">{callouts[segment.segment]} Capex / revenue: <span className="font-[650] text-white/88">{formatPlainPct(capexRatio, 1)}</span>.</p>
-              <p className="mt-2 font-mono text-[10px] text-white/54">SRC · Segment tables / summary</p>
+              <p className="mt-2 font-mono text-[10px] text-white/62">SRC · Segment tables / summary</p>
             </button>
           )
         })}
@@ -1550,11 +1197,11 @@ function FilingTensions({ data }) {
             </div>
             <div>
               <div className="grid gap-2 sm:grid-cols-2">
-                <p className="rounded-lg border border-white/[0.07] bg-black/18 p-3 text-[13px] leading-6 text-white/74"><span className="mb-1 block font-mono text-[10px] uppercase tracking-normal text-white/54">Disclosure A</span>{card.a}</p>
-                <p className="rounded-lg border border-white/[0.07] bg-black/18 p-3 text-[13px] leading-6 text-white/74"><span className="mb-1 block font-mono text-[10px] uppercase tracking-normal text-white/54">Disclosure B</span>{card.b}</p>
+                <p className="rounded-lg border border-white/[0.07] bg-black/18 p-3 text-[13px] leading-6 text-white/74"><span className="mb-1 block font-mono text-[10px] uppercase tracking-normal text-white/62">Disclosure A</span>{card.a}</p>
+                <p className="rounded-lg border border-white/[0.07] bg-black/18 p-3 text-[13px] leading-6 text-white/74"><span className="mb-1 block font-mono text-[10px] uppercase tracking-normal text-white/62">Disclosure B</span>{card.b}</p>
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-2">
-                <p className="font-mono text-[10px] leading-4 text-white/54">SRC · {card.sources.filter(Boolean).join(' · ')}</p>
+                <p className="font-mono text-[10px] leading-4 text-white/62">SRC · {card.sources.filter(Boolean).join(' · ')}</p>
                 {card.packets.filter(Boolean).map((packet) => <button key={packet.id} onClick={() => setHash(packet.hash)} className="min-h-8 rounded-md border border-white/[0.09] bg-white/[0.04] px-2 text-[11px] text-white/72 hover:bg-white/[0.07] focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60">Open packet</button>)}
               </div>
             </div>
@@ -1575,10 +1222,10 @@ function BusinessStack({ data, onPacket }) {
           <button key={segment.name} onClick={() => packet && onPacket?.(packet)} className="group relative min-h-[250px] overflow-hidden rounded-xl border border-white/[0.085] bg-[#0A0B0D]/90 p-4 text-left shadow-[inset_0_1px_0_rgba(255,255,255,.045)] transition hover:border-white/18 hover:bg-white/[0.035] focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60">
             <div className="absolute -right-24 -top-24 h-56 w-56 rounded-full border border-white/[0.06] transition group-hover:scale-105" />
             <div className="absolute right-5 top-5 h-3 w-3 rounded-full" style={{ backgroundColor: SEGMENT_COLORS[segment.name], boxShadow: `0 0 22px ${SEGMENT_COLORS[segment.name]}` }} />
-            <p className="font-mono text-[10px] uppercase tracking-normal text-white/44">Operating shell</p>
+            <p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Operating shell</p>
             <h3 className="mt-2 text-3xl font-[560] tracking-normal text-spacex">{segment.name}</h3>
             <p className="mt-3 text-sm leading-6 text-white/68">{segment.one_liner}</p>
-            <ul className="mt-3 space-y-1.5 text-xs leading-5 text-white/52">
+            <ul className="mt-3 space-y-1.5 text-xs leading-5 text-white/62">
               {segment.details.slice(0, 2).map((item) => <li key={item}>• {item}</li>)}
             </ul>
             <Source>{segment.src}</Source>
@@ -1597,7 +1244,7 @@ function OperatingMetrics({ data }) {
   const q1Segments = data.financials.segments.filter((x) => x.period === 'Q1 2026')
   return (
     <Panel pad="p-3" className="overflow-hidden">
-      <div className="mb-3 flex items-center justify-between"><p className="font-mono text-[10px] uppercase tracking-normal text-white/48">Financials</p><Gauge size={16} className="text-white/40" /></div>
+      <div className="mb-3 flex items-center justify-between"><p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Financials</p><Gauge size={16} className="text-white/40" /></div>
       <div className="grid gap-2 md:grid-cols-4">
         <MetricPill label="2025 revenue" value={money(y2025?.revenue)} sub="consolidated" />
         <MetricPill label="Q1 2026 revenue" value={money(q1?.revenue)} sub="consolidated" />
@@ -1636,7 +1283,7 @@ function RiskRadar({ data, selected, onPacket, compact = false }) {
   })
   return (
     <Panel pad="p-4" className="overflow-hidden">
-      <div className="mb-3 flex items-center justify-between"><p className="font-mono text-[10px] uppercase tracking-normal text-white/48">Risk radar · risk factors</p><Radar size={16} className="text-red" /></div>
+      <div className="mb-3 flex items-center justify-between"><p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Risk radar · risk factors</p><Radar size={16} className="text-red" /></div>
       <div className={cn('grid gap-4', compact ? 'xl:grid-cols-[minmax(0,1fr)_360px]' : 'xl:grid-cols-[minmax(0,1fr)_420px]')}>
         <svg viewBox="0 0 360 360" className="order-2 aspect-square w-full rounded-xl border border-white/[0.06] bg-black/30 xl:sticky xl:top-24" role="img" aria-label="Risk radar grouped by S-1 risk factors">
           <defs>
@@ -1683,7 +1330,7 @@ function RiskRadar({ data, selected, onPacket, compact = false }) {
               </div>
             )
           })}
-          <p className="sm:col-span-2 mt-1 text-xs leading-5 text-white/56">Themes are keyword-derived navigation over exact filing headings. No severity or probability score is invented.</p>
+          <p className="sm:col-span-2 mt-1 text-xs leading-5 text-white/62">Themes are keyword-derived navigation over exact filing headings. No severity or probability score is invented.</p>
         </div>
       </div>
     </Panel>
@@ -1698,10 +1345,10 @@ function MobileOrbitStack({ segments }) {
         {segments.map((segment, idx) => (
           <div key={segment.name} className="relative rounded-lg border border-white/[0.06] bg-white/[0.025] p-3">
             <div className="absolute right-3 top-3 h-2.5 w-2.5 rounded-full" style={{ backgroundColor: SEGMENT_COLORS[segment.name], boxShadow: `0 0 16px ${SEGMENT_COLORS[segment.name]}` }} />
-            <p className="font-mono text-[9px] uppercase tracking-normal text-white/42">Layer 0{idx + 1}</p>
+            <p className="font-mono text-[9px] uppercase tracking-normal text-white/58">Layer 0{idx + 1}</p>
             <p className="mt-1 text-lg font-[650] tracking-normal" style={{ color: SEGMENT_COLORS[segment.name] }}>{segment.name}</p>
             <p className="mt-1 text-xs leading-5 text-white/58">{trimText(segment.one_liner, 90)}</p>
-            <p className="mt-2 font-mono text-[9px] leading-4 text-white/42">SRC · {trimText(segment.src, 72)}</p>
+            <p className="mt-2 font-mono text-[9px] leading-4 text-white/58">SRC · {trimText(segment.src, 72)}</p>
           </div>
         ))}
       </div>
@@ -1715,16 +1362,16 @@ function MobileOrbitStackCompact({ segments }) {
       <div className="absolute left-1/2 top-[118px] h-[220px] w-[220px] -translate-x-1/2 rounded-full border border-spacex/20" />
       <div className="absolute left-1/2 top-[78px] h-[152px] w-[152px] -translate-x-1/2 rounded-full border border-cyan/25" />
       <div className="absolute left-1/2 top-[42px] h-[84px] w-[84px] -translate-x-1/2 rounded-full border border-amber/35" />
-      <p className="relative z-10 font-mono text-[9px] uppercase tracking-normal text-white/42">Operating stack</p>
+      <p className="relative z-10 font-mono text-[9px] uppercase tracking-normal text-white/58">Operating stack</p>
       <div className="relative z-10 mt-4 grid grid-cols-3 gap-2">
         {segments.map((segment, idx) => (
           <div key={segment.name} className="rounded-lg border border-white/[0.07] bg-[#0A0B0D]/88 p-2 text-center">
-            <p className="font-mono text-[8px] uppercase tracking-normal text-white/38">L0{idx + 1}</p>
+            <p className="font-mono text-[8px] uppercase tracking-normal text-white/62">L0{idx + 1}</p>
             <p className="mt-1 text-[13px] font-[650] tracking-normal" style={{ color: SEGMENT_COLORS[segment.name] }}>{segment.name}</p>
           </div>
         ))}
       </div>
-      <p className="relative z-10 mt-3 font-mono text-[9px] leading-4 text-white/42">SRC · Business / segment disclosures</p>
+      <p className="relative z-10 mt-3 font-mono text-[9px] leading-4 text-white/58">SRC · Business / segment disclosures</p>
     </div>
   )
 }
@@ -1747,7 +1394,7 @@ function MobileFlightDeck({ data, packet, onPacket }) {
         <p className="mt-3 text-[15px] leading-6 text-white/78">A source-cited filing map for financial deltas, segment economics, risks and control terms.</p>
         <div className="mt-4 rounded-lg border border-white/[0.085] bg-black/22 p-3">
           <p className="text-sm leading-6 text-white/76">{filingStatus?.v}</p>
-          <p className="mt-2 font-mono text-[10px] leading-4 text-white/54">SRC · {filingStatus?.src}</p>
+          <p className="mt-2 font-mono text-[10px] leading-4 text-white/62">SRC · {filingStatus?.src}</p>
         </div>
         <div className="mt-3 grid grid-cols-2 gap-2">
           <MetricPill label="2025 revenue" value={money(y2025?.revenue)} sub="SRC · consolidated" />
@@ -1763,15 +1410,15 @@ function MobileFlightDeck({ data, packet, onPacket }) {
           <div><MobileOrbitStackCompact segments={data.segments} /></div>
         </div>
         <button onClick={() => setHash('/risks')} className="mt-3 flex min-h-12 w-full items-center justify-between rounded-xl border border-red/25 bg-red/10 px-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60">
-          <span><span className="block text-sm font-[650] text-white/86">Risk radar</span><span className="block font-mono text-[10px] uppercase tracking-normal text-white/50">{riskFactorCount(data)} risk factors · SRC · Risk Factors</span>{packet && <span className="mt-1 block text-xs leading-4 text-spacex">Packet · {trimText(packet.title, 58)}</span>}</span>
-          <ChevronRight size={16} className="text-white/50" />
+          <span><span className="block text-sm font-[650] text-white/86">Risk radar</span><span className="block font-mono text-[10px] uppercase tracking-normal text-white/62">{riskFactorCount(data)} risk factors · SRC · Risk Factors</span>{packet && <span className="mt-1 block text-xs leading-4 text-spacex">Packet · {trimText(packet.title, 58)}</span>}</span>
+          <ChevronRight size={16} className="text-white/62" />
         </button>
         <div className="mt-3"><ShareActions data={data} packet={packet} variant="business-stack" title="SpaceX S‑1 Atlas" /></div>
         {packet && (
           <button onClick={() => setHash(packet.hash)} className="mt-2 block min-h-14 w-full rounded-xl border border-white/[0.08] bg-white/[0.025] px-3 py-2 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60">
-            <span className="font-mono text-[10px] uppercase tracking-normal text-white/48">Disclosure packet</span>
+            <span className="font-mono text-[10px] uppercase tracking-normal text-white/58">Disclosure packet</span>
             <span className="mt-1 block text-sm font-[620] leading-5 text-spacex">{trimText(packet.title, 92)}</span>
-            <span className="mt-1 block font-mono text-[10px] leading-4 text-white/50">SRC · {trimText(packet.source, 84)}</span>
+            <span className="mt-1 block font-mono text-[10px] leading-4 text-white/62">SRC · {trimText(packet.source, 84)}</span>
           </button>
         )}
       </Panel>
@@ -1816,25 +1463,25 @@ function Atlas({ data, route }) {
     <Section dense eyebrow="Disclosure atlas" title="Search, filter and share every packet" aside="This is the dense workbench. Each row is now a stable disclosure packet with a deep link, caption and exportable card.">
       <div className="grid gap-3 xl:grid-cols-[300px_1fr_440px]">
         <Panel pad="p-3" className="self-start">
-          <label className="flex min-h-11 items-center gap-2 rounded-lg border border-white/[0.1] bg-black/30 px-3 focus-within:border-white/24"><Search size={15} className="text-white/42" /><input value={query} onChange={(e) => { setQuery(e.target.value); update({ q: e.target.value }) }} placeholder="Search every indexed disclosure…" className="w-full bg-transparent text-base text-white/78 outline-none placeholder:text-white/36 sm:text-sm" /></label>
+          <label className="flex min-h-11 items-center gap-2 rounded-lg border border-white/[0.1] bg-black/30 px-3 focus-within:border-white/24"><Search size={15} className="text-white/58" /><input aria-label="Search every indexed disclosure" value={query} onChange={(e) => { setQuery(e.target.value); update({ q: e.target.value }) }} placeholder="Search every indexed disclosure…" className="w-full bg-transparent text-base text-white/78 outline-none placeholder:text-white/36 sm:text-sm" /></label>
           <div className="mt-3 grid grid-cols-2 gap-2 xl:grid-cols-1">
             {types.map((t) => {
               const count = t === 'all' ? data.atlasRows.length : data.atlasRows.filter((r) => r.type === t).length
-              return <button key={t} onClick={() => { setType(t); update({ type: t }) }} className={cn('flex min-h-11 items-center justify-between rounded-lg border px-3 py-2 text-left text-xs transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60', type === t ? 'border-spacex/35 bg-white/[0.07] text-spacex' : 'border-white/[0.07] bg-white/[0.02] text-white/58 hover:bg-white/[0.04]')}><span>{t === 'all' ? 'All disclosures' : PACKET_LABELS[t]}</span><span className="font-mono text-[10px] text-white/42">{count}</span></button>
+              return <button key={t} onClick={() => { setType(t); update({ type: t }) }} className={cn('flex min-h-11 items-center justify-between rounded-lg border px-3 py-2 text-left text-xs transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60', type === t ? 'border-spacex/35 bg-white/[0.07] text-spacex' : 'border-white/[0.07] bg-white/[0.02] text-white/58 hover:bg-white/[0.04]')}><span>{t === 'all' ? 'All disclosures' : PACKET_LABELS[t]}</span><span className="font-mono text-[10px] text-white/58">{count}</span></button>
             })}
           </div>
         </Panel>
         <DataTable maxHeight="max-h-[760px]" empty="No matching disclosures. Try a broader term or clear the type filter." columns={[
-          { key: 'type', label: 'Type', className: 'w-[145px]', render: (r) => <span className="rounded-md border border-white/[0.08] bg-white/[0.025] px-2 py-1 font-mono text-[10px] uppercase tracking-normal text-white/50">{r.type}</span> },
+          { key: 'type', label: 'Type', className: 'w-[145px]', render: (r) => <span className="rounded-md border border-white/[0.08] bg-white/[0.025] px-2 py-1 font-mono text-[10px] uppercase tracking-normal text-white/62">{r.type}</span> },
           { key: 'title', label: `Packets (${filtered.length})`, render: (r) => <button onClick={() => setHash(r.hash)} className="block max-w-4xl text-left text-[13px] font-[560] leading-5 text-white/82 hover:text-spacex focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60">{r.title}</button> },
-          { key: 'detail', label: 'Extract / metric', render: (r) => <span className="block max-w-4xl text-white/56">{trimText(r.detail, 180)}</span> },
-          { key: 'source', label: 'Source', className: 'w-[180px] font-mono text-[10px] text-white/42', render: (r) => trimText(r.source, 80) },
+          { key: 'detail', label: 'Extract / metric', render: (r) => <span className="block max-w-4xl text-white/62">{trimText(r.detail, 180)}</span> },
+          { key: 'source', label: 'Source', className: 'w-[180px] font-mono text-[10px] text-white/58', render: (r) => trimText(r.source, 80) },
         ]} rows={filtered} mobileCard={(r) => (
           <button onClick={() => setHash(r.hash)} className="block min-h-20 w-full rounded-lg border border-white/[0.07] bg-white/[0.025] p-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60">
-            <span className="font-mono text-[10px] uppercase tracking-normal text-white/50">{PACKET_LABELS[r.type] || r.type}</span>
+            <span className="font-mono text-[10px] uppercase tracking-normal text-white/62">{PACKET_LABELS[r.type] || r.type}</span>
             <span className="mt-1 block text-sm font-[620] leading-5 text-white/84">{r.title}</span>
             <span className="mt-2 block text-xs leading-5 text-white/58">{trimText(r.detail, 150)}</span>
-            <span className="mt-2 block font-mono text-[10px] leading-4 text-white/48">SRC · {trimText(r.source, 80)}</span>
+            <span className="mt-2 block font-mono text-[10px] leading-4 text-white/58">SRC · {trimText(r.source, 80)}</span>
           </button>
         )} />
         {selected ? <DisclosurePacket packet={selected} data={data} /> : <Panel><p className="text-sm leading-6 text-white/58">No packet selected because the current query returned no matches.</p></Panel>}
@@ -1850,7 +1497,7 @@ function PacketPage({ data, route }) {
       <div className="grid gap-3 lg:grid-cols-[1fr_420px]">
         <DisclosurePacket packet={packet} data={data} variant={packet?.type === 'risk' ? 'risk-radar' : 'business-stack'} />
         <Panel>
-          <p className="font-mono text-[10px] uppercase tracking-normal text-white/48">Why this is shareable</p>
+          <p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Why this is shareable</p>
           <p className="mt-3 text-sm leading-6 text-white/64">A packet is the atomic unit of the atlas: one claim, metric, risk heading, exhibit or source artifact with a stable URL and caption. It is meant to be quoted without losing the filing reference.</p>
           <div className="mt-4 flex flex-wrap gap-2">
             <button onClick={() => setHash('/atlas', { type: packet?.type })} className="rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2 text-xs text-white/74 hover:bg-white/[0.06]">Back to atlas</button>
@@ -1887,67 +1534,9 @@ function PanelTitle({ icon: Icon, title, kicker }) {
         {kicker && <p className="font-mono text-[10px] uppercase tracking-normal text-white/62">{kicker}</p>}
         <h3 className="text-base font-[650] tracking-normal text-spacex">{title}</h3>
       </div>
-      <Icon size={16} className="mt-1 shrink-0 text-white/54" />
+      <Icon size={16} className="mt-1 shrink-0 text-white/62" />
     </div>
   )
-}
-
-function hasNumber(value) {
-  return value !== undefined && value !== null && Number.isFinite(Number(value))
-}
-
-function fmtMetric(value, unit = 'money', digits = 1) {
-  if (!hasNumber(value)) return '—'
-  if (unit === 'money') return money(value)
-  if (unit === 'pct') return formatPlainPct(value, digits)
-  if (unit === 'signedPct') return formatPct(value, digits)
-  if (unit === 'multiple') return `${Number(value).toFixed(digits)}x`
-  if (unit === 'number') return Number(value).toLocaleString(undefined, { maximumFractionDigits: digits })
-  return String(value)
-}
-
-function signedClass(value, neutral = 'text-white/84') {
-  const n = Number(value)
-  if (!Number.isFinite(n) || n === 0) return neutral
-  return n < 0 ? 'text-red' : 'text-cyan'
-}
-
-function opMarginLabel(value) {
-  const n = Number(value)
-  if (!Number.isFinite(n)) return 'Op. margin'
-  return n < -100 ? 'Op. loss / revenue' : 'Op. margin'
-}
-
-function opMarginExplainer(row, value) {
-  const n = Number(value)
-  if (!Number.isFinite(n) || n >= -100) return null
-  return `Loss exceeds revenue: ${money(row.op_income)} operating income on ${money(row.revenue)} revenue.`
-}
-
-function periodRow(rows, period) {
-  return rows?.find((row) => row.period === period)
-}
-
-function balanceRow(rows, date) {
-  return rows?.find((row) => row.date === date)
-}
-
-function capitalValue(data, label) {
-  return data.capital?.actual_mar_31_2026?.find((row) => row.label === label)?.value
-}
-
-function segmentRowsFor(data, period) {
-  return data.financials.segments.filter((row) => row.period === period)
-}
-
-function segmentTotal(data, period, key) {
-  return segmentRowsFor(data, period).reduce((sum, row) => sum + Number(row[key] || 0), 0)
-}
-
-function financialPacket(data, matcher) {
-  if (!data?.atlasRows) return null
-  if (matcher instanceof RegExp) return data.atlasRows.find((row) => row.type === 'financial' && matcher.test(row.title))
-  return data.atlasRows.find((row) => row.type === 'financial' && row.title === matcher)
 }
 
 function inspectPayload({ title, value, formula, source, inputs = [], packet = null, note = '', tone = 'neutral', rawValue = null, status = 'derived' }) {
@@ -2044,7 +1633,7 @@ function DebateHero({ data, active, setActive }) {
           <div className="grid content-start gap-2 sm:grid-cols-2">
             {themes.map((theme) => (
               <button key={theme.id} onClick={() => setActive(theme.id)} className={cn('min-h-28 rounded-xl border p-3 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60', active === theme.id ? 'border-cyan/32 bg-cyan/10' : 'border-white/[0.075] bg-black/24 hover:bg-white/[0.04]')}>
-                <p className="font-mono text-[9px] uppercase tracking-normal text-white/42">{theme.label}</p>
+                <p className="font-mono text-[9px] uppercase tracking-normal text-white/58">{theme.label}</p>
                 <p className="mt-2 text-sm leading-5 text-white/78">{theme.question}</p>
               </button>
             ))}
@@ -2075,17 +1664,17 @@ function ValuationStressLab({ data }) {
           <p className="text-sm leading-6 text-white/68">Valuation is a scenario question. The filing does not give final share count or pricing, so this module lets the reader enter assumptions and compares them to filed revenue, income and capex.</p>
           <div className="mt-4 grid gap-3">
             <label className="grid gap-2 rounded-xl border border-white/[0.075] bg-black/22 p-3">
-              <span className="font-mono text-[10px] uppercase tracking-normal text-white/48">Scenario valuation ($B)</span>
+              <span className="font-mono text-[10px] uppercase tracking-normal text-white/58">Scenario valuation ($B)</span>
               <input className="min-h-11 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-base text-white outline-none focus:border-spacex/45" type="number" min="50" step="50" value={valuationB} onChange={(e) => setValuationB(Number(e.target.value))} />
               <input type="range" min="100" max="2500" step="25" value={valuationB} onChange={(e) => setValuationB(Number(e.target.value))} />
             </label>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="grid gap-2 rounded-xl border border-white/[0.075] bg-black/22 p-3">
-                <span className="font-mono text-[10px] uppercase tracking-normal text-white/48">Sales multiple</span>
+                <span className="font-mono text-[10px] uppercase tracking-normal text-white/58">Sales multiple</span>
                 <input className="min-h-11 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-base text-white outline-none focus:border-spacex/45" type="number" min="1" step="1" value={salesMultiple} onChange={(e) => setSalesMultiple(Number(e.target.value))} />
               </label>
               <label className="grid gap-2 rounded-xl border border-white/[0.075] bg-black/22 p-3">
-                <span className="font-mono text-[10px] uppercase tracking-normal text-white/48">Target net margin</span>
+                <span className="font-mono text-[10px] uppercase tracking-normal text-white/58">Target net margin</span>
                 <input className="min-h-11 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-base text-white outline-none focus:border-spacex/45" type="number" min="-50" max="60" step="1" value={targetMargin} onChange={(e) => setTargetMargin(Number(e.target.value))} />
               </label>
             </div>
@@ -2120,7 +1709,7 @@ function SegmentTugOfWar({ data }) {
           const totalCapex = segmentTotal(data, period, 'capex')
           return (
             <div key={period} className="rounded-xl border border-white/[0.075] bg-black/24 p-3">
-              <p className="font-mono text-[10px] uppercase tracking-normal text-white/50">{period}</p>
+              <p className="font-mono text-[10px] uppercase tracking-normal text-white/62">{period}</p>
               <div className="mt-3 grid gap-3">
                 {rows.map((row) => {
                   const revMix = margin(row.revenue, totalRevenue)
@@ -2129,7 +1718,7 @@ function SegmentTugOfWar({ data }) {
                     <button key={`${period}-${row.segment}`} onClick={() => setHash('/financials')} className="rounded-xl border border-white/[0.065] bg-white/[0.025] p-3 text-left hover:bg-white/[0.045] focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60">
                       <div className="flex items-start justify-between gap-3">
                         <p className="text-lg font-[650] tracking-normal" style={{ color: SEGMENT_COLORS[row.segment] }}>{row.segment}</p>
-                        <p className="font-mono text-[10px] text-white/50">capex mix <span className="text-amber">{formatPlainPct(capexMix, 1)}</span></p>
+                        <p className="font-mono text-[10px] text-white/62">capex mix <span className="text-amber">{formatPlainPct(capexMix, 1)}</span></p>
                       </div>
                       <div className="mt-3 grid gap-2">
                         <MiniBar value={row.revenue} max={totalRevenue} color={SEGMENT_COLORS[row.segment]} label="Revenue" />
@@ -2163,7 +1752,7 @@ function RelatedPartyLens({ data }) {
           <EvidenceCard {...facts.xaiTesla} query="xAI Tesla" packet={packet} />
         </div>
         <div className="rounded-xl border border-white/[0.075] bg-black/24 p-3">
-          <p className="font-mono text-[10px] uppercase tracking-normal text-white/46">Filed counterparties</p>
+          <p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Filed counterparties</p>
           <div className="mt-3 grid gap-2">
             {data.related?.map((party) => (
               <button key={party.party} onClick={() => setHash('/atlas', { q: party.party })} className="rounded-xl border border-white/[0.065] bg-white/[0.025] p-3 text-left hover:bg-white/[0.045] focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60">
@@ -2232,8 +1821,8 @@ function TreasuryOddities({ data }) {
           {treasury.map((item) => (
             <button key={item.label} onClick={() => setHash('/atlas', { q: item.label.includes('Bitcoin') ? 'digital assets' : item.label })} className="rounded-xl border border-white/[0.075] bg-black/24 p-3 text-left hover:bg-white/[0.045] focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60">
               <div className="flex items-start justify-between gap-3">
-                <p className="font-mono text-[9px] uppercase tracking-normal text-white/46">{item.label}</p>
-                <span className="rounded-full border border-white/10 px-2 py-1 text-[10px] text-white/50">{item.asOf}</span>
+                <p className="font-mono text-[9px] uppercase tracking-normal text-white/58">{item.label}</p>
+                <span className="rounded-full border border-white/10 px-2 py-1 text-[10px] text-white/62">{item.asOf}</span>
               </div>
               <p className="mt-2 text-2xl font-[680] tracking-normal text-spacex">{item.display}</p>
               {item.label !== 'Bitcoin units' && <MiniBar value={item.value} max={max} color={item.label.includes('Bitcoin') ? '#F3BE63' : '#B7D8FF'} />}
@@ -2257,7 +1846,7 @@ function HolderDecisionMap({ data }) {
       <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-5">
         {(data.debate?.holderPersonas || []).map((holder) => (
           <button key={holder.persona} onClick={() => setHash('/atlas', { q: holder.lookAt[0] })} className="rounded-xl border border-white/[0.075] bg-black/24 p-3 text-left hover:bg-white/[0.045] focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60">
-            <p className="font-mono text-[9px] uppercase tracking-normal text-white/46">{holder.persona}</p>
+            <p className="font-mono text-[9px] uppercase tracking-normal text-white/58">{holder.persona}</p>
             <p className="mt-2 text-base font-[650] tracking-normal text-white/86">{holder.question}</p>
             <ul className="mt-3 space-y-1.5 text-xs leading-5 text-white/64">
               {holder.lookAt.map((item) => <li key={item}>• {item}</li>)}
@@ -2285,7 +1874,7 @@ function RiskClaimChecker({ data }) {
       </div>
       <div className="grid gap-3 xl:grid-cols-[.8fr_1.2fr]">
         <div className="rounded-xl border border-white/[0.075] bg-black/24 p-3">
-          <p className="font-mono text-[10px] uppercase tracking-normal text-white/46">Active claim family</p>
+          <p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Active claim family</p>
           <p className="mt-2 text-xl font-[650] tracking-normal text-spacex">{claim?.label}</p>
           <p className="mt-2 text-sm leading-6 text-white/66">Matching is deliberately text-based over actual S‑1 risk-factor headings. No severity, probability or sentiment score is invented.</p>
           <button onClick={() => setHash('/risks', { q: claim?.label })} className="mt-3 min-h-11 rounded-lg border border-white/10 bg-white/[0.035] px-3 text-xs font-[560] text-white/70 hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60">Open Risk Radar</button>
@@ -2331,7 +1920,7 @@ function DebateMap({ data, route }) {
         <div className="mt-4 grid gap-3 lg:grid-cols-3">
           {(activeTheme?.sampleQuestions || []).map((thread) => (
             <div key={thread} className="rounded-xl border border-white/[0.065] bg-white/[0.025] p-3">
-              <p className="font-mono text-[9px] uppercase tracking-normal text-white/42">Question prompt</p>
+              <p className="font-mono text-[9px] uppercase tracking-normal text-white/58">Question prompt</p>
               <p className="mt-2 text-sm leading-5 text-white/70">{thread}</p>
             </div>
           ))}
@@ -2346,7 +1935,7 @@ function DebateMap({ data, route }) {
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {themes.map((theme) => (
             <button key={theme.id} onClick={() => setActive(theme.id)} className={cn('rounded-xl border p-3 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60', active === theme.id ? 'border-spacex/32 bg-spacex/10' : 'border-white/[0.075] bg-black/24 hover:bg-white/[0.045]')}>
-              <p className="font-mono text-[9px] uppercase tracking-normal text-white/42">{theme.label}</p>
+              <p className="font-mono text-[9px] uppercase tracking-normal text-white/58">{theme.label}</p>
               <p className="mt-2 text-sm leading-5 text-white/72">{theme.question}</p>
             </button>
           ))}
@@ -2394,7 +1983,7 @@ function FinancialBasisBanner({ data, onInspect }) {
           source: 'Offering summary; local S‑1 payload',
         }].map((item) => (
           <button key={item.label} onClick={() => onInspect(inspectPayload({ title: item.title, value: item.label, formula: 'Filed disclosure; no arithmetic', source: item.source, inputs: [item.body] }))} className="rounded-xl border border-white/[0.075] bg-black/20 p-3 text-left hover:bg-white/[0.035] focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60">
-            <p className="font-mono text-[9px] uppercase tracking-normal text-white/46">{item.label}</p>
+            <p className="font-mono text-[9px] uppercase tracking-normal text-white/58">{item.label}</p>
             <p className="mt-1 text-base font-[650] tracking-normal text-spacex">{item.title}</p>
             <p className="mt-2 text-xs leading-5 text-white/68">{item.body}</p>
             <Source>{item.source}</Source>
@@ -2429,7 +2018,7 @@ function InvestorKpiRibbon({ data, onInspect }) {
     <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
       {cards.map((card) => (
         <MetricButton key={card.title} metric={card} onInspect={onInspect} tone={card.tone}>
-          <p className="font-mono text-[9px] uppercase tracking-normal text-white/52">{card.title}</p>
+          <p className="font-mono text-[9px] uppercase tracking-normal text-white/62">{card.title}</p>
           <p className={cn('mt-1 text-2xl font-[690] tracking-normal', card.tone === 'negative' ? 'text-red' : card.tone === 'positive' ? 'text-cyan' : card.tone === 'warning' ? 'text-amber' : 'text-spacex')}>{card.value}</p>
           <FormulaPill>{card.formula}</FormulaPill>
         </MetricButton>
@@ -2454,11 +2043,11 @@ function ConsolidatedTrendStrip({ data, onInspect }) {
           const metricMaxAbs = Math.max(...rows.map((row) => Math.abs(Number(row[metric.key] || 0))), 1)
           return (
           <div key={metric.key} className="rounded-xl border border-white/[0.065] bg-black/22 p-3">
-            <p className="font-mono text-[9px] uppercase tracking-normal text-white/50">{metric.label}</p>
+            <p className="font-mono text-[9px] uppercase tracking-normal text-white/62">{metric.label}</p>
             <div className="mt-3 grid gap-2">
               {rows.map((row) => (
                 <button key={`${metric.key}-${row.period}`} onClick={() => onInspect(inspectPayload({ title: `${metric.label} · ${row.period}`, value: hasNumber(row[metric.key]) ? money(row[metric.key]) : '—', formula: metric.key === 'adjusted_ebitda' ? 'Adjusted EBITDA, as filed where disclosed; not back-filled for missing periods' : 'Filed consolidated line item', source: row.source || `financials.consolidated[period="${row.period}"]`, inputs: [`${row.period}: ${hasNumber(row[metric.key]) ? money(row[metric.key]) : 'not disclosed in payload'}`], packet: financialPacket(data, `Consolidated · ${row.period}`), status: hasNumber(row[metric.key]) ? 'filed' : 'derived' }))} className="grid grid-cols-[4.4rem_1fr_4.6rem] items-center gap-2 rounded-lg px-1 py-1 text-left hover:bg-white/[0.035] focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60">
-                  <span className="font-mono text-[10px] text-white/50">{row.period}</span>
+                  <span className="font-mono text-[10px] text-white/62">{row.period}</span>
                   <DivergingBar value={row[metric.key]} max={metricMaxAbs} />
                   <span className={cn('text-right font-mono text-[11px]', Number(row[metric.key]) < 0 ? 'text-red' : 'text-white/70')}>{hasNumber(row[metric.key]) ? money(row[metric.key]) : '—'}</span>
                 </button>
@@ -2500,15 +2089,15 @@ function SegmentCommandCenter({ data, period, setPeriod, onInspect }) {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-2xl font-[650] tracking-normal" style={{ color: SEGMENT_COLORS[row.segment] }}>{row.segment}</p>
-                  <p className="font-mono text-[9px] uppercase tracking-normal text-white/44">{period}</p>
+                  <p className="font-mono text-[9px] uppercase tracking-normal text-white/58">{period}</p>
                 </div>
-                <p className="text-right font-mono text-[10px] leading-4 text-white/48">rev mix<br /><span className="text-white/78">{formatPlainPct(revenueMix, 1)}</span></p>
+                <p className="text-right font-mono text-[10px] leading-4 text-white/58">rev mix<br /><span className="text-white/78">{formatPlainPct(revenueMix, 1)}</span></p>
               </div>
               <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
-                <div><dt className="font-mono text-[9px] uppercase tracking-normal text-white/42">Revenue</dt><dd className="mt-1 font-[650] text-white/84">{money(row.revenue)}</dd></div>
-                <div><dt className="font-mono text-[9px] uppercase tracking-normal text-white/42">{opMarginLabel(opMargin)}</dt><dd className={cn('mt-1 font-[650]', signedClass(opMargin))}>{formatPlainPct(opMargin, 1)}</dd></div>
-                <div><dt className="font-mono text-[9px] uppercase tracking-normal text-white/42">Adj. EBITDA margin</dt><dd className={cn('mt-1 font-[650]', signedClass(ebitdaMargin))}>{formatPlainPct(ebitdaMargin, 1)}</dd></div>
-                <div><dt className="font-mono text-[9px] uppercase tracking-normal text-white/42">Capex / revenue</dt><dd className="mt-1 font-[650] text-amber">{formatPlainPct(capexIntensity, 1)}</dd></div>
+                <div><dt className="font-mono text-[9px] uppercase tracking-normal text-white/58">Revenue</dt><dd className="mt-1 font-[650] text-white/84">{money(row.revenue)}</dd></div>
+                <div><dt className="font-mono text-[9px] uppercase tracking-normal text-white/58">{opMarginLabel(opMargin)}</dt><dd className={cn('mt-1 font-[650]', signedClass(opMargin))}>{formatPlainPct(opMargin, 1)}</dd></div>
+                <div><dt className="font-mono text-[9px] uppercase tracking-normal text-white/58">Adj. EBITDA margin</dt><dd className={cn('mt-1 font-[650]', signedClass(ebitdaMargin))}>{formatPlainPct(ebitdaMargin, 1)}</dd></div>
+                <div><dt className="font-mono text-[9px] uppercase tracking-normal text-white/58">Capex / revenue</dt><dd className="mt-1 font-[650] text-amber">{formatPlainPct(capexIntensity, 1)}</dd></div>
               </dl>
               {opNote && <p className="mt-2 rounded-md border border-red/18 bg-red/10 px-2 py-1.5 text-[11px] leading-4 text-white/72">{opNote}</p>}
               <div className="mt-3 grid gap-2">
@@ -2561,7 +2150,7 @@ function SegmentHeatmap({ data, lens, setLens, onInspect }) {
       </div>
       <div className="overflow-auto rounded-xl border border-white/[0.075] bg-black/25">
         <table className="min-w-[760px] w-full border-collapse text-left text-xs">
-          <thead className="bg-[#101114] font-mono text-[10px] uppercase tracking-normal text-white/48">
+          <thead className="bg-[#101114] font-mono text-[10px] uppercase tracking-normal text-white/58">
             <tr><th className="px-3 py-2">Segment</th>{periods.map((p) => <th key={p} className="px-3 py-2 text-right">{p}</th>)}</tr>
           </thead>
           <tbody className="divide-y divide-white/[0.055]">
@@ -2596,7 +2185,7 @@ function CashFlowFundingStack({ data, onInspect }) {
           const metric = inspectPayload({ title: `Cash flow stack · ${row.period}`, value: `${money(preFinancing)} pre-financing cash flow`, formula: 'Operating cash flow + investing cash flow; segment capex shown separately where available', source: 'Cash flow table; segment tables / summary', inputs: [`Operating cash flow ${money(row.operating)}`, `Investing cash flow ${money(row.investing)}`, `Financing cash flow ${money(row.financing)}`, capex ? `Segment capex ${money(capex)}; OCF coverage ${formatPlainPct(coverage, 1)}` : 'No segment capex row for this period'] })
           return (
             <button key={row.period} onClick={() => onInspect(metric)} className="rounded-xl border border-white/[0.07] bg-white/[0.025] p-3 text-left hover:bg-white/[0.045] focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60">
-              <div className="mb-2 flex items-center justify-between gap-3"><p className="font-mono text-[10px] uppercase tracking-normal text-white/54">{row.period}</p><p className={cn('font-mono text-xs', signedClass(preFinancing))}>Op. + investing {money(preFinancing)}</p></div>
+              <div className="mb-2 flex items-center justify-between gap-3"><p className="font-mono text-[10px] uppercase tracking-normal text-white/62">{row.period}</p><p className={cn('font-mono text-xs', signedClass(preFinancing))}>Op. + investing {money(preFinancing)}</p></div>
               <div className="grid gap-2 md:grid-cols-3">
                 <MiniBar value={row.operating} max={maxAbs} color="#74E3D4" label="Operating" />
                 <MiniBar value={Math.abs(row.investing)} max={maxAbs} color="#EF7D7D" label="Investing outflow" />
@@ -2629,10 +2218,10 @@ function LiquidityCapitalStack({ data, onInspect }) {
       <PanelTitle icon={Landmark} title="Liquidity and capitalization" kicker="Balance sheet interface" />
       <div className="grid gap-3 lg:grid-cols-[.9fr_1.1fr]">
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
-          {[inspectPayload({ title: 'Cash and marketable securities', value: money(cashAndSec), formula: 'Cash + marketable securities', source: 'Balance sheet at Mar. 31, 2026', inputs: [`Cash ${money(latest?.cash)}`, `Marketable securities ${money(latest?.marketable_securities)}`] }), inspectPayload({ title: 'Total liabilities / assets', value: formatPlainPct(margin(latest?.total_liabilities, latest?.total_assets), 1), formula: 'Total liabilities ÷ total assets', source: 'Balance sheet at Mar. 31, 2026', inputs: [`Total liabilities ${money(latest?.total_liabilities)}`, `Total assets ${money(latest?.total_assets)}`] }), inspectPayload({ title: 'PPE / assets', value: formatPlainPct(margin(latest?.pp_e_net, latest?.total_assets), 1), formula: 'Property, plant and equipment, net ÷ total assets', source: 'Balance sheet at Mar. 31, 2026', inputs: [`PP&E ${money(latest?.pp_e_net)}`, `Total assets ${money(latest?.total_assets)}`] }), inspectPayload({ title: 'Current ratio', value: fmtMetric(Number(latest?.total_current_assets) / Number(latest?.current_liabilities), 'multiple', 2), formula: 'Total current assets ÷ current liabilities', source: 'Balance sheet at Mar. 31, 2026', inputs: [`Current assets ${money(latest?.total_current_assets)}`, `Current liabilities ${money(latest?.current_liabilities)}`] })].map((metric) => <MetricButton key={metric.title} metric={metric} onInspect={onInspect}><p className="font-mono text-[9px] uppercase tracking-normal text-white/48">{metric.title}</p><p className="mt-1 text-2xl font-[650] tracking-normal text-spacex">{metric.value}</p><FormulaPill>{metric.formula}</FormulaPill></MetricButton>)}
+          {[inspectPayload({ title: 'Cash and marketable securities', value: money(cashAndSec), formula: 'Cash + marketable securities', source: 'Balance sheet at Mar. 31, 2026', inputs: [`Cash ${money(latest?.cash)}`, `Marketable securities ${money(latest?.marketable_securities)}`] }), inspectPayload({ title: 'Total liabilities / assets', value: formatPlainPct(margin(latest?.total_liabilities, latest?.total_assets), 1), formula: 'Total liabilities ÷ total assets', source: 'Balance sheet at Mar. 31, 2026', inputs: [`Total liabilities ${money(latest?.total_liabilities)}`, `Total assets ${money(latest?.total_assets)}`] }), inspectPayload({ title: 'PPE / assets', value: formatPlainPct(margin(latest?.pp_e_net, latest?.total_assets), 1), formula: 'Property, plant and equipment, net ÷ total assets', source: 'Balance sheet at Mar. 31, 2026', inputs: [`PP&E ${money(latest?.pp_e_net)}`, `Total assets ${money(latest?.total_assets)}`] }), inspectPayload({ title: 'Current ratio', value: fmtMetric(Number(latest?.total_current_assets) / Number(latest?.current_liabilities), 'multiple', 2), formula: 'Total current assets ÷ current liabilities', source: 'Balance sheet at Mar. 31, 2026', inputs: [`Current assets ${money(latest?.total_current_assets)}`, `Current liabilities ${money(latest?.current_liabilities)}`] })].map((metric) => <MetricButton key={metric.title} metric={metric} onInspect={onInspect}><p className="font-mono text-[9px] uppercase tracking-normal text-white/58">{metric.title}</p><p className="mt-1 text-2xl font-[650] tracking-normal text-spacex">{metric.value}</p><FormulaPill>{metric.formula}</FormulaPill></MetricButton>)}
         </div>
         <div className="rounded-xl border border-white/[0.07] bg-black/25 p-3">
-          <p className="font-mono text-[9px] uppercase tracking-normal text-white/48">Capitalization stack · Mar. 31, 2026</p>
+          <p className="font-mono text-[9px] uppercase tracking-normal text-white/58">Capitalization stack · Mar. 31, 2026</p>
           <div className="mt-4 overflow-hidden rounded-full border border-white/[0.06] bg-white/[0.04]">
             <div className="flex h-5">
               {stack.map((item) => <button key={item.label} title={`${item.label}: ${money(item.value)}`} onClick={() => onInspect(inspectPayload({ title: item.label, value: money(item.value), formula: 'Capitalization table line item', source: data.capital?.src, inputs: [`${item.label} ${money(item.value)}`, `Total capitalization ${money(totalCap)}`] }))} style={{ width: `${margin(item.value, totalCap)}%`, backgroundColor: item.color }} className="min-w-[3px] opacity-80 hover:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60" />)}
@@ -2642,7 +2231,7 @@ function LiquidityCapitalStack({ data, onInspect }) {
             {stack.map((item) => <div key={item.label} className="flex items-center justify-between gap-3 text-sm"><span className="inline-flex items-center gap-2 text-white/68"><span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: item.color }} />{item.label}</span><span className="font-mono text-white/82">{money(item.value)}</span></div>)}
           </div>
           <div className="mt-4 rounded-lg border border-white/[0.06] bg-white/[0.025] p-3">
-            <p className="font-mono text-[9px] uppercase tracking-normal text-white/48">Debt components</p>
+            <p className="font-mono text-[9px] uppercase tracking-normal text-white/58">Debt components</p>
             <div className="mt-2 grid gap-2">
               {data.capital?.debt?.map((item) => <button key={item.label} onClick={() => onInspect(inspectPayload({ title: item.label, value: money(item.value), formula: 'Filed capitalization debt component', source: data.capital?.src, inputs: [item.note] }))} className="flex justify-between gap-3 rounded-lg px-2 py-1.5 text-left text-xs hover:bg-white/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60"><span className="text-white/62">{item.label}</span><span className="font-mono text-white/80">{money(item.value)}</span></button>)}
             </div>
@@ -2679,7 +2268,7 @@ function OperatingKpiTerminal({ data, onInspect }) {
         {modules.map((mod) => <button key={mod.title} onClick={() => onInspect(inspectPayload({ title: mod.title, value: mod.rows[0][1], formula: mod.formula, source: mod.source, inputs: mod.rows.map((row) => `${row[0]}: ${row[1]} · ${row[2]}`) }))} className="rounded-xl border border-white/[0.075] bg-white/[0.025] p-3 text-left hover:bg-white/[0.045] focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60">
           <p className="text-lg font-[650] tracking-normal" style={{ color: mod.color }}>{mod.title}</p>
           <div className="mt-3 grid gap-2">
-            {mod.rows.map((row) => <div key={row[0]} className="grid grid-cols-[1fr_auto] gap-3 border-b border-white/[0.045] pb-1.5 last:border-0"><span className="text-xs text-white/58">{row[0]}<br /><span className="font-mono text-[9px] text-white/38">{row[2]}</span></span><span className="text-right font-mono text-sm text-white/82">{row[1]}</span></div>)}
+            {mod.rows.map((row) => <div key={row[0]} className="grid grid-cols-[1fr_auto] gap-3 border-b border-white/[0.045] pb-1.5 last:border-0"><span className="text-xs text-white/58">{row[0]}<br /><span className="font-mono text-[9px] text-white/62">{row[2]}</span></span><span className="text-right font-mono text-sm text-white/82">{row[1]}</span></div>)}
           </div>
           <Source>{mod.source}</Source>
         </button>)}
@@ -2692,7 +2281,7 @@ function CompactPacketPreview({ packet }) {
   if (!packet) return null
   return (
     <div className="mt-4 rounded-xl border border-white/[0.07] bg-white/[0.02] p-3">
-      <p className="font-mono text-[9px] uppercase tracking-normal text-white/46">Source packet</p>
+      <p className="font-mono text-[9px] uppercase tracking-normal text-white/58">Source packet</p>
       <p className="mt-2 text-sm font-[650] leading-5 text-spacex">{packet.title}</p>
       <p className="mt-2 text-xs leading-5 text-white/58">{trimText(packet.detail, 180)}</p>
       <Source>{packet.source}</Source>
@@ -2705,20 +2294,20 @@ function FinancialMetricInspector({ metric, data, compact = false, onClose }) {
   return (
     <Panel pad="p-3" className={cn(compact ? 'max-h-[78svh] overflow-auto' : 'sticky top-[72px] self-start xl:max-h-[calc(100svh-96px)] xl:overflow-auto')}>
       <div className="flex items-start justify-between gap-3">
-        <p className="font-mono text-[10px] uppercase tracking-normal text-white/48">Metric inspector</p>
+        <p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Metric inspector</p>
         {onClose && <button onClick={onClose} className="rounded-lg border border-white/10 bg-white/[0.035] px-2 py-1 text-xs text-white/62">Close</button>}
       </div>
       <h3 className="mt-2 text-xl font-[650] leading-6 tracking-normal text-spacex">{metric?.title || 'Select any financial metric'}</h3>
       <p className="mt-2 text-3xl font-[690] tracking-normal text-white/88">{metric?.value || 'Source-linked math'}</p>
       <div className="mt-4 rounded-xl border border-white/[0.07] bg-black/25 p-3">
-        <p className="font-mono text-[9px] uppercase tracking-normal text-white/46">Formula / method</p>
+        <p className="font-mono text-[9px] uppercase tracking-normal text-white/58">Formula / method</p>
         <p className="mt-2 text-sm leading-6 text-white/74">{metric?.formula || 'Click a KPI, segment cell, capital stack item, or operating metric to see the filed inputs and calculation method.'}</p>
       </div>
       <div className="mt-3 rounded-xl border border-white/[0.07] bg-white/[0.02] p-3">
-        <p className="font-mono text-[9px] uppercase tracking-normal text-white/46">Filed inputs</p>
+        <p className="font-mono text-[9px] uppercase tracking-normal text-white/58">Filed inputs</p>
         {metric?.inputs?.length ? <ul className="mt-2 space-y-1.5 text-sm leading-5 text-white/68">{metric.inputs.map((input) => <li key={input}>• {input}</li>)}</ul> : <p className="mt-2 text-sm leading-6 text-white/58">Inputs appear here after selection.</p>}
       </div>
-      <p className="mt-2 font-mono text-[9px] uppercase tracking-normal text-white/44">{metric?.status === 'filed' ? 'Filed value' : 'Derived from filed values'}{metric?.rawValue !== null && metric?.rawValue !== undefined ? ` · raw ${metric.rawValue}` : ''}</p>
+      <p className="mt-2 font-mono text-[9px] uppercase tracking-normal text-white/58">{metric?.status === 'filed' ? 'Filed value' : 'Derived from filed values'}{metric?.rawValue !== null && metric?.rawValue !== undefined ? ` · raw ${metric.rawValue}` : ''}</p>
       {metric?.note && <p className="mt-3 rounded-xl border border-amber/15 bg-amber/10 p-3 text-xs leading-5 text-amber/90">{metric.note}</p>}
       <Source>{metric?.source || 'Local S‑1 financial payload'}</Source>
       <div className="mt-4 flex flex-wrap gap-2">
@@ -2755,14 +2344,14 @@ function AuditFinancialTables({ data }) {
         { key: 'op_income', label: 'Op. income', render: (r) => <Value v={r.op_income} /> },
         { key: 'net_income', label: 'Net income', render: (r) => <Value v={r.net_income} /> },
         { key: 'adjusted_ebitda', label: 'Adj. EBITDA', render: (r) => hasNumber(r.adjusted_ebitda) ? money(r.adjusted_ebitda) : '—' },
-      ]} rows={data.financials.consolidated} mobileCard={(r) => <div className="rounded-lg border border-white/[0.07] bg-white/[0.025] p-3"><p className="font-mono text-[10px] uppercase tracking-normal text-white/50">{r.period}</p><div className="mt-2 grid grid-cols-2 gap-2 text-xs text-white/60"><span>Revenue <b className="block text-base text-white/84">{money(r.revenue)}</b></span><span>Net income <b className="block text-base text-white/84"><Value v={r.net_income} /></b></span><span>Op. income <b className="block text-base text-white/84"><Value v={r.op_income} /></b></span><span>Adj. EBITDA <b className="block text-base text-white/84">{hasNumber(r.adjusted_ebitda) ? money(r.adjusted_ebitda) : '—'}</b></span></div><p className="mt-2 font-mono text-[10px] text-white/46">SRC · Consolidated snapshot</p></div>} /></Panel>
+      ]} rows={data.financials.consolidated} mobileCard={(r) => <div className="rounded-lg border border-white/[0.07] bg-white/[0.025] p-3"><p className="font-mono text-[10px] uppercase tracking-normal text-white/62">{r.period}</p><div className="mt-2 grid grid-cols-2 gap-2 text-xs text-white/60"><span>Revenue <b className="block text-base text-white/84">{money(r.revenue)}</b></span><span>Net income <b className="block text-base text-white/84"><Value v={r.net_income} /></b></span><span>Op. income <b className="block text-base text-white/84"><Value v={r.op_income} /></b></span><span>Adj. EBITDA <b className="block text-base text-white/84">{hasNumber(r.adjusted_ebitda) ? money(r.adjusted_ebitda) : '—'}</b></span></div><p className="mt-2 font-mono text-[10px] text-white/58">SRC · Consolidated snapshot</p></div>} /></Panel>
       <Panel><PanelTitle icon={Layers3} title="Q1 2026 segment snapshot" kicker="Audit table" /><DataTable maxHeight="max-h-[330px]" columns={[
         { key: 'segment', label: 'Segment', render: (r) => <span style={{ color: SEGMENT_COLORS[r.segment] }} className="font-[650]">{r.segment}</span> },
         { key: 'revenue', label: 'Revenue', render: (r) => money(r.revenue) },
         { key: 'op_income', label: 'Op. income', render: (r) => <Value v={r.op_income} /> },
         { key: 'adj_ebitda', label: 'Seg. Adj. EBITDA', render: (r) => <Value v={r.adj_ebitda} /> },
         { key: 'capex', label: 'Capex', render: (r) => money(r.capex) },
-      ]} rows={q1Segments} mobileCard={(r) => <div className="rounded-lg border border-white/[0.07] bg-white/[0.025] p-3"><p className="text-base font-[650]" style={{ color: SEGMENT_COLORS[r.segment] }}>{r.segment}</p><p className="mt-2 text-xs leading-5 text-white/60">Revenue {money(r.revenue)} · Op. income {money(r.op_income)} · Segment Adj. EBITDA {money(r.adj_ebitda)} · Capex {money(r.capex)}</p><p className="mt-2 font-mono text-[10px] text-white/46">SRC · Q1 2026 segment snapshot</p></div>} /></Panel>
+      ]} rows={q1Segments} mobileCard={(r) => <div className="rounded-lg border border-white/[0.07] bg-white/[0.025] p-3"><p className="text-base font-[650]" style={{ color: SEGMENT_COLORS[r.segment] }}>{r.segment}</p><p className="mt-2 text-xs leading-5 text-white/60">Revenue {money(r.revenue)} · Op. income {money(r.op_income)} · Segment Adj. EBITDA {money(r.adj_ebitda)} · Capex {money(r.capex)}</p><p className="mt-2 font-mono text-[10px] text-white/58">SRC · Q1 2026 segment snapshot</p></div>} /></Panel>
       <Panel><PanelTitle icon={Database} title="Annual segment history" kicker="Audit table" /><DataTable maxHeight="max-h-[460px]" columns={[
         { key: 'period', label: 'Period', className: 'font-mono text-white/58' },
         { key: 'segment', label: 'Segment', render: (r) => <span style={{ color: SEGMENT_COLORS[r.segment] }}>{r.segment}</span> },
@@ -2770,13 +2359,13 @@ function AuditFinancialTables({ data }) {
         { key: 'op_income', label: 'Op. income', render: (r) => <Value v={r.op_income} /> },
         { key: 'adj_ebitda', label: 'Adj. EBITDA', render: (r) => <Value v={r.adj_ebitda} /> },
         { key: 'capex', label: 'Capex', render: (r) => money(r.capex) },
-      ]} rows={annualSegments} mobileCard={(r) => <div className="rounded-lg border border-white/[0.07] bg-white/[0.025] p-3"><p className="font-mono text-[10px] uppercase tracking-normal text-white/50">{r.period}</p><p className="mt-1 text-base font-[650]" style={{ color: SEGMENT_COLORS[r.segment] }}>{r.segment}</p><p className="mt-2 text-xs leading-5 text-white/60">Revenue {money(r.revenue)} · Op. income {money(r.op_income)} · Adj. EBITDA {money(r.adj_ebitda)} · Capex {money(r.capex)}</p><p className="mt-2 font-mono text-[10px] text-white/46">SRC · Annual segment history</p></div>} /></Panel>
+      ]} rows={annualSegments} mobileCard={(r) => <div className="rounded-lg border border-white/[0.07] bg-white/[0.025] p-3"><p className="font-mono text-[10px] uppercase tracking-normal text-white/62">{r.period}</p><p className="mt-1 text-base font-[650]" style={{ color: SEGMENT_COLORS[r.segment] }}>{r.segment}</p><p className="mt-2 text-xs leading-5 text-white/60">Revenue {money(r.revenue)} · Op. income {money(r.op_income)} · Adj. EBITDA {money(r.adj_ebitda)} · Capex {money(r.capex)}</p><p className="mt-2 font-mono text-[10px] text-white/58">SRC · Annual segment history</p></div>} /></Panel>
       <Panel><PanelTitle icon={Gauge} title="Liquidity / cash flow" kicker="Audit table" /><DataTable maxHeight="max-h-[220px]" columns={[
         { key: 'period', label: 'Period' },
         { key: 'operating', label: 'Operating', render: (r) => <Value v={r.operating} /> },
         { key: 'investing', label: 'Investing', render: (r) => <Value v={r.investing} /> },
         { key: 'financing', label: 'Financing', render: (r) => <Value v={r.financing} /> },
-      ]} rows={data.financials.cash_flows} mobileCard={(r) => <div className="rounded-lg border border-white/[0.07] bg-white/[0.025] p-3"><p className="font-mono text-[10px] uppercase tracking-normal text-white/50">{r.period}</p><p className="mt-2 text-xs leading-5 text-white/60">Operating {money(r.operating)} · Investing {money(r.investing)} · Financing {money(r.financing)}</p><p className="mt-2 font-mono text-[10px] text-white/46">SRC · Cash flow table</p></div>} /></Panel>
+      ]} rows={data.financials.cash_flows} mobileCard={(r) => <div className="rounded-lg border border-white/[0.07] bg-white/[0.025] p-3"><p className="font-mono text-[10px] uppercase tracking-normal text-white/62">{r.period}</p><p className="mt-2 text-xs leading-5 text-white/60">Operating {money(r.operating)} · Investing {money(r.investing)} · Financing {money(r.financing)}</p><p className="mt-2 font-mono text-[10px] text-white/58">SRC · Cash flow table</p></div>} /></Panel>
     </div>
   )
 }
@@ -2801,7 +2390,7 @@ function FinancialSpine({ data, onInspect }) {
     <div className="grid gap-2 xl:grid-cols-4">
       {cards.map((card) => (
         <MetricButton key={card.title} metric={card} onInspect={onInspect} tone={card.tone}>
-          <p className="font-mono text-[9px] uppercase tracking-normal text-white/50">Financial spine</p>
+          <p className="font-mono text-[9px] uppercase tracking-normal text-white/62">Financial spine</p>
           <h3 className="mt-1 text-lg font-[650] tracking-normal text-spacex">{card.title}</h3>
           <p className="mt-2 text-xl font-[670] leading-6 tracking-normal text-white/88">{card.value}</p>
           <FormulaPill>{card.formula}</FormulaPill>
@@ -2829,7 +2418,7 @@ function Financials({ data }) {
       <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_390px]">
         <div className="grid gap-3">
           <FinancialBasisBanner data={data} onInspect={inspect} />
-          <Panel pad="p-3" className="border-white/[0.07] bg-white/[0.018]"><p className="font-mono text-[10px] uppercase tracking-normal text-white/54">Units and method</p><p className="mt-1 text-xs leading-5 text-white/64">Financial statement values are normalized to USD millions in the local S‑1 payload; display values are rounded for readability. Ratio cards are marked as derived and show formulas in the inspector.</p></Panel>
+          <Panel pad="p-3" className="border-white/[0.07] bg-white/[0.018]"><p className="font-mono text-[10px] uppercase tracking-normal text-white/62">Units and method</p><p className="mt-1 text-xs leading-5 text-white/64">Financial statement values are normalized to USD millions in the local S‑1 payload; display values are rounded for readability. Ratio cards are marked as derived and show formulas in the inspector.</p></Panel>
           <FinancialSpine data={data} onInspect={inspect} />
           <InvestorKpiRibbon data={data} onInspect={inspect} />
           <ConsolidatedTrendStrip data={data} onInspect={inspect} />
@@ -2843,7 +2432,7 @@ function Financials({ data }) {
           <Panel pad="p-3">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-normal text-white/48">Audit mode</p>
+                <p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Audit mode</p>
                 <h3 className="mt-1 text-lg font-[650] tracking-normal text-spacex">Raw filing tables stay one click away</h3>
                 <p className="mt-1 text-sm leading-6 text-white/62">Use this when you want the source rows rather than the workbench’s derived ratios.</p>
               </div>
@@ -2873,7 +2462,7 @@ function Risks({ data, route }) {
     <Section dense eyebrow="Risk radar" title="Actual risk factors, linkable by theme" aside="No invented risk score: this is structure, grouping, search and source packets.">
       <div className="grid gap-3 xl:grid-cols-[300px_1fr]">
         <Panel pad="p-3" className="self-start">
-          <label className="flex min-h-11 items-center gap-2 rounded-lg border border-white/[0.1] bg-black/30 px-3 focus-within:border-white/24"><Search size={15} className="text-white/42" /><input value={query} onChange={(e) => { setQuery(e.target.value); update({ q: e.target.value }) }} placeholder="Search risk factors…" className="w-full bg-transparent text-base outline-none placeholder:text-white/36 sm:text-sm" /></label>
+          <label className="flex min-h-11 items-center gap-2 rounded-lg border border-white/[0.1] bg-black/30 px-3 focus-within:border-white/24"><Search size={15} className="text-white/58" /><input aria-label="Search risk factors" value={query} onChange={(e) => { setQuery(e.target.value); update({ q: e.target.value }) }} placeholder="Search risk factors…" className="w-full bg-transparent text-base outline-none placeholder:text-white/36 sm:text-sm" /></label>
           <div className="mt-3 space-y-2">{groups.map((g) => <button key={g} onClick={() => { setGroup(g); update({ group: g }) }} className={cn('flex min-h-11 w-full justify-between rounded-lg border px-3 py-2 text-left text-xs focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60', group === g ? 'border-red/40 bg-red/10 text-white/86' : 'border-white/[0.07] text-white/58 hover:bg-white/[0.035]')}><span>{g === 'all' ? 'All risk themes' : g}</span><span className="font-mono">{g === 'all' ? grouped.length : grouped.filter((r) => r.theme === g).length}</span></button>)}</div>
         </Panel>
         <div className="grid gap-3">
@@ -2885,7 +2474,7 @@ function Risks({ data, route }) {
             <button onClick={() => r.packet && setHash(r.packet.hash)} className="block min-h-16 w-full rounded-lg border border-white/[0.07] bg-white/[0.025] p-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60">
               <span className="font-mono text-[10px] uppercase tracking-normal text-amber">{r.theme}</span>
               <span className="mt-1 block text-sm leading-5 text-white/78">{r.heading}</span>
-              <span className="mt-2 block font-mono text-[10px] text-white/46">SRC · Risk Factors</span>
+              <span className="mt-2 block font-mono text-[10px] text-white/58">SRC · Risk Factors</span>
             </button>
           )} />
         </div>
@@ -2902,22 +2491,22 @@ function Governance({ data }) {
           <Panel><PanelTitle icon={Users} title="Directors and named executives" /><DataTable columns={[
             { key: 'name', label: 'Name', render: (r) => <span className="font-[650] text-white/82">{r.name}</span> },
             { key: 'role', label: 'Role' },
-            { key: 'age', label: 'Age', className: 'font-mono text-white/50' },
+            { key: 'age', label: 'Age', className: 'font-mono text-white/62' },
             { key: 'notes', label: 'Disclosure note', render: (r) => trimText(r.notes, 140) },
-            { key: 'src', label: 'Source', className: 'font-mono text-[10px] text-white/42', render: (r) => trimText(r.src, 80) },
-          ]} rows={data.governance} mobileCard={(r) => <div className="rounded-lg border border-white/[0.07] bg-white/[0.025] p-3"><p className="text-base font-[650] text-white/84">{r.name}</p><p className="mt-1 text-xs leading-5 text-white/62">{r.role}</p><p className="mt-2 text-xs leading-5 text-white/54">{trimText(r.notes, 180)}</p><p className="mt-2 font-mono text-[10px] text-white/46">SRC · {trimText(r.src, 80)}</p></div>} /></Panel>
+            { key: 'src', label: 'Source', className: 'font-mono text-[10px] text-white/58', render: (r) => trimText(r.src, 80) },
+          ]} rows={data.governance} mobileCard={(r) => <div className="rounded-lg border border-white/[0.07] bg-white/[0.025] p-3"><p className="text-base font-[650] text-white/84">{r.name}</p><p className="mt-1 text-xs leading-5 text-white/62">{r.role}</p><p className="mt-2 text-xs leading-5 text-white/62">{trimText(r.notes, 180)}</p><p className="mt-2 font-mono text-[10px] text-white/58">SRC · {trimText(r.src, 80)}</p></div>} /></Panel>
           <Panel><PanelTitle icon={Landmark} title="Executive compensation" /><DataTable columns={[
             { key: 'person', label: 'Person' },
             { key: '2025_total', label: '2025 total', className: 'font-mono text-white/74' },
             { key: 'notes', label: 'Notes', render: (r) => trimText(r.notes, 160) },
-          ]} rows={data.compensation} mobileCard={(r) => <div className="rounded-lg border border-white/[0.07] bg-white/[0.025] p-3"><p className="text-base font-[650] text-white/84">{r.person}</p><p className="mt-1 font-mono text-xs text-spacex">2025 total · {r['2025_total']}</p><p className="mt-2 text-xs leading-5 text-white/54">{trimText(r.notes, 180)}</p><p className="mt-2 font-mono text-[10px] text-white/46">SRC · Executive compensation</p></div>} /></Panel>
+          ]} rows={data.compensation} mobileCard={(r) => <div className="rounded-lg border border-white/[0.07] bg-white/[0.025] p-3"><p className="text-base font-[650] text-white/84">{r.person}</p><p className="mt-1 font-mono text-xs text-spacex">2025 total · {r['2025_total']}</p><p className="mt-2 text-xs leading-5 text-white/62">{trimText(r.notes, 180)}</p><p className="mt-2 font-mono text-[10px] text-white/58">SRC · Executive compensation</p></div>} /></Panel>
         </div>
       </Section>
       <Section dense eyebrow="Related parties" title="Related-party disclosures in one scan"><DataTable maxHeight="max-h-[560px]" columns={[
         { key: 'party', label: 'Party', className: 'w-[260px] font-[650] text-white/80' },
         { key: 'items', label: 'Disclosures', render: (r) => <ul className="space-y-1">{r.items.map((x) => <li key={x}>• {x}</li>)}</ul> },
-        { key: 'src', label: 'Source', className: 'w-[170px] font-mono text-[10px] text-white/42' },
-      ]} rows={data.related} mobileCard={(r) => <div className="rounded-lg border border-white/[0.07] bg-white/[0.025] p-3"><p className="text-base font-[650] text-white/84">{r.party}</p><ul className="mt-2 space-y-1 text-xs leading-5 text-white/58">{r.items.map((x) => <li key={x}>• {x}</li>)}</ul><p className="mt-2 font-mono text-[10px] text-white/46">SRC · {r.src}</p></div>} /></Section>
+        { key: 'src', label: 'Source', className: 'w-[170px] font-mono text-[10px] text-white/58' },
+      ]} rows={data.related} mobileCard={(r) => <div className="rounded-lg border border-white/[0.07] bg-white/[0.025] p-3"><p className="text-base font-[650] text-white/84">{r.party}</p><ul className="mt-2 space-y-1 text-xs leading-5 text-white/58">{r.items.map((x) => <li key={x}>• {x}</li>)}</ul><p className="mt-2 font-mono text-[10px] text-white/58">SRC · {r.src}</p></div>} /></Section>
     </>
   )
 }
@@ -2948,7 +2537,7 @@ function SourceTextReader({ current, snippetInfo, query }) {
         <ol className="min-w-0 divide-y divide-white/[0.045] py-2">
           {lines.map((line, i) => (
             <li key={`${snippetInfo?.startLine || 1}-${i}`} className="grid grid-cols-[3.25rem_minmax(0,1fr)] gap-3 px-3 py-1.5 sm:grid-cols-[4.5rem_minmax(0,1fr)] sm:px-4">
-              <span aria-hidden="true" className="select-none pt-[2px] text-right font-mono text-[11px] leading-6 text-white/48">{(snippetInfo?.startLine || 1) + i}</span>
+              <span aria-hidden="true" className="select-none pt-[2px] text-right font-mono text-[11px] leading-6 text-white/58">{(snippetInfo?.startLine || 1) + i}</span>
               <span className="whitespace-pre-wrap break-words font-mono text-[13px] leading-6 text-white/82 sm:text-[13.5px]">{line || '\u00A0'}</span>
             </li>
           ))}
@@ -3006,14 +2595,14 @@ function Sources({ data, sourceState, route }) {
     const start = Math.max(0, idx - 2200)
     return makeInfo(start, idx + 12000)
   }, [current, query, isMobile])
-  if (loading && !source) return <Section dense eyebrow="Audit layer" title="Loading source payload"><Panel><p className="text-sm text-white/60">Fetching full source/exhibit/OCR text on demand…</p></Panel></Section>
-  if (error) return <Section dense eyebrow="Audit layer" title="Source payload failed"><Panel><p className="text-sm text-red">{error}</p></Panel></Section>
+  if (loading && !source) return <Section dense eyebrow="Audit layer" title="Loading source payload"><Panel><p aria-live="polite" className="text-sm text-white/60">Fetching full source/exhibit/OCR text on demand…</p></Panel></Section>
+  if (error) return <Section dense eyebrow="Audit layer" title="Source payload failed"><Panel><p aria-live="polite" className="text-sm text-red">{error}</p></Panel></Section>
   return (
     <Section dense eyebrow="Audit layer" title="Full extracted source text" aside="Loaded only when requested so the public first paint is not blocked by megabytes of audit text.">
       <div className="grid gap-3 xl:grid-cols-[360px_1fr]">
-        <Panel pad="p-3"><div className="no-scrollbar flex gap-2 overflow-x-auto xl:block xl:max-h-[720px] xl:space-y-2 xl:overflow-auto">{sourceItems.map((item, i) => <button key={item.label} onClick={() => { setSelected(i); setQuery(''); setHash('/sources', { doc: item.label }) }} className={cn('block min-h-12 min-w-[210px] rounded-lg border px-3 py-2 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60 xl:w-full', i === selected ? 'border-spacex/30 bg-white/[0.06]' : 'border-white/[0.07] bg-white/[0.02] hover:bg-white/[0.04]')}><p className="text-xs font-[650] text-white/78">{item.label}</p><p className="mt-1 font-mono text-[10px] text-white/42">{number(item.text.length)} chars</p></button>)}</div></Panel>
+        <Panel pad="p-3"><div className="no-scrollbar flex gap-2 overflow-x-auto xl:block xl:max-h-[720px] xl:space-y-2 xl:overflow-auto">{sourceItems.map((item, i) => <button key={item.label} onClick={() => { setSelected(i); setQuery(''); setHash('/sources', { doc: item.label }) }} className={cn('block min-h-12 min-w-[210px] rounded-lg border px-3 py-2 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60 xl:w-full', i === selected ? 'border-spacex/30 bg-white/[0.06]' : 'border-white/[0.07] bg-white/[0.02] hover:bg-white/[0.04]')}><p className="text-xs font-[650] text-white/78">{item.label}</p><p className="mt-1 font-mono text-[10px] text-white/58">{number(item.text.length)} chars</p></button>)}</div></Panel>
         <Panel>
-          <label className="mb-3 flex min-h-11 items-center gap-2 rounded-lg border border-white/[0.1] bg-black/30 px-3 focus-within:border-white/24"><Search size={15} className="text-white/42" /><input value={query} onChange={(e) => { setQuery(e.target.value); setHash('/sources', { q: e.target.value, doc: current?.label }) }} placeholder="Search current source document…" className="w-full bg-transparent text-base outline-none placeholder:text-white/36 sm:text-sm" /></label>
+          <label className="mb-3 flex min-h-11 items-center gap-2 rounded-lg border border-white/[0.1] bg-black/30 px-3 focus-within:border-white/24"><Search size={15} className="text-white/58" /><input aria-label="Search current source document" value={query} onChange={(e) => { setQuery(e.target.value); setHash('/sources', { q: e.target.value, doc: current?.label }) }} placeholder="Search current source document…" className="w-full bg-transparent text-base outline-none placeholder:text-white/36 sm:text-sm" /></label>
           <div className="mb-3 flex flex-wrap gap-2">
             <button onClick={() => current && copyText(`SRC · ${current.label}`, () => {})} className="min-h-11 rounded-lg border border-white/10 bg-white/[0.035] px-3 text-xs text-white/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60">Copy source label</button>
             <button onClick={() => snippetInfo?.text && copyText(snippetInfo.text, () => {})} disabled={!snippetInfo?.text} className="min-h-11 rounded-lg border border-white/10 bg-white/[0.035] px-3 text-xs text-white/70 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60">Copy visible text</button>
@@ -3112,8 +2701,8 @@ function ExternalModel({ data }) {
               <label className="grid gap-1 text-sm text-white/74">Greenshoe exercise % <input className="min-h-11 rounded-lg border border-white/10 bg-black/35 px-3 font-mono text-spacex" type="number" step="1" value={(inputs.greenshoePct * 100).toFixed(0)} onChange={(event) => setInputs((prev) => ({ ...prev, greenshoePct: Number(event.target.value) / 100 }))} /></label>
               <label className="grid gap-1 text-sm text-white/74">Proceeds treatment <select className="min-h-11 rounded-lg border border-white/10 bg-black/35 px-3 text-white" value={inputs.proceedsTreatment} onChange={(event) => setInputs((prev) => ({ ...prev, proceedsTreatment: event.target.value }))}><option value="exclude">Exclude IPO proceeds from EV bridge</option><option value="primary">Include primary proceeds</option><option value="primary-plus-greenshoe">Include primary + greenshoe proceeds</option></select></label>
               <div className="grid gap-2 rounded-xl border border-white/[0.08] bg-white/[0.025] p-3">
-                <p className="font-mono text-[10px] uppercase tracking-normal text-white/48">Dilution toggles</p>
-                {[['includeOptions', 'Outstanding options', defaults.options], ['includeRsus', 'RSUs outstanding', defaults.rsus], ['includePerformanceAwards', 'Performance / market-condition awards', defaults.performanceAwards], ['includeEchostarShares', 'EchoStar spectrum shares', defaults.echostarShares]].map(([key, label, value]) => <label key={key} className="flex items-start justify-between gap-3 rounded-lg border border-white/[0.06] bg-black/20 p-2 text-sm text-white/74"><span>{label}<br /><span className="font-mono text-[10px] text-white/46">{fmtShares(value)} source/model component</span></span><input type="checkbox" checked={inputs[key]} onChange={(event) => setInputs((prev) => ({ ...prev, [key]: event.target.checked }))} /></label>)}
+                <p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Dilution toggles</p>
+                {[['includeOptions', 'Outstanding options', defaults.options], ['includeRsus', 'RSUs outstanding', defaults.rsus], ['includePerformanceAwards', 'Performance / market-condition awards', defaults.performanceAwards], ['includeEchostarShares', 'EchoStar spectrum shares', defaults.echostarShares]].map(([key, label, value]) => <label key={key} className="flex items-start justify-between gap-3 rounded-lg border border-white/[0.06] bg-black/20 p-2 text-sm text-white/74"><span>{label}<br /><span className="font-mono text-[10px] text-white/58">{fmtShares(value)} source/model component</span></span><input type="checkbox" checked={inputs[key]} onChange={(event) => setInputs((prev) => ({ ...prev, [key]: event.target.checked }))} /></label>)}
               </div>
             </div>
           </Panel>
@@ -3152,7 +2741,7 @@ function ExternalModel({ data }) {
         <Panel pad="p-0" className="overflow-hidden"><div className="border-b border-white/[0.08] p-3"><p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Model KPI bridge</p><h3 className="mt-1 text-xl font-[700] text-spacex">A quick bridge from S‑1 financials into model questions.</h3></div><div className="grid gap-2 p-2 md:hidden">{kpiRows.map((row) => <div key={row.Metric} className="rounded-lg border border-white/[0.07] bg-white/[0.024] p-3"><p className="text-sm font-[700] text-white/88">{row.Metric}</p><p className="mt-1 font-mono text-sm text-spacex">FY25 {row['FY 2025'] > 1 ? money(row['FY 2025'] / 1000) : pct(row['FY 2025'])}</p><p className="mt-1 text-xs leading-5 text-white/64">{row['Notes / Formula']}</p></div>)}</div><div className="hidden overflow-auto md:block"><table className="analyst-table min-w-[680px] w-full border-collapse text-left"><thead><tr>{['Metric','FY 2025','FY 2024','FY 2023','Formula / source'].map((h) => <th key={h} className="border-b border-white/[0.08] px-3 py-2.5 font-[650] uppercase">{h}</th>)}</tr></thead><tbody className="divide-y divide-white/[0.06]">{kpiRows.map((row) => <tr key={row.Metric}><td className="px-3 py-3 font-[700] text-white/88">{row.Metric}</td><td className="px-3 py-3 font-mono text-spacex">{row['FY 2025'] > 1 ? money(row['FY 2025'] / 1000) : pct(row['FY 2025'])}</td><td className="px-3 py-3 font-mono text-white/76">{row['FY 2024'] > 1 ? money(row['FY 2024'] / 1000) : pct(row['FY 2024'])}</td><td className="px-3 py-3 font-mono text-white/64">{row['FY 2023'] > 1 ? money(row['FY 2023'] / 1000) : pct(row['FY 2023'])}</td><td className="px-3 py-3 text-xs leading-5 text-white/64">{row['Notes / Formula']} · {row.Source}</td></tr>)}</tbody></table></div></Panel>
       </div>
       <div className="mt-3 grid gap-3 xl:grid-cols-2">
-        <Panel pad="p-4"><p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Share-count problem</p><h3 className="mt-1 text-xl font-[700] text-spacex">The model foregrounds fully diluted share count risk.</h3><div className="mt-3 grid gap-2">{shareRows.map((row) => <div key={`${row.Category}-${row.Component}`} className="rounded-lg border border-white/[0.065] bg-black/18 p-3"><p className="text-sm font-[700] text-white/86">{row.Component}</p><p className="mt-1 font-mono text-sm text-white/72">{row['Known Shares'] ? Number(row['Known Shares']).toLocaleString() : 'Pricing input / not disclosed yet'} · {row.Status}</p><p className="mt-1 text-xs leading-5 text-white/56">{row['Source / Notes']}</p></div>)}</div></Panel>
+        <Panel pad="p-4"><p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Share-count problem</p><h3 className="mt-1 text-xl font-[700] text-spacex">The model foregrounds fully diluted share count risk.</h3><div className="mt-3 grid gap-2">{shareRows.map((row) => <div key={`${row.Category}-${row.Component}`} className="rounded-lg border border-white/[0.065] bg-black/18 p-3"><p className="text-sm font-[700] text-white/86">{row.Component}</p><p className="mt-1 font-mono text-sm text-white/72">{row['Known Shares'] ? Number(row['Known Shares']).toLocaleString() : 'Pricing input / not disclosed yet'} · {row.Status}</p><p className="mt-1 text-xs leading-5 text-white/62">{row['Source / Notes']}</p></div>)}</div></Panel>
         <Panel pad="p-4"><p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Validation checks</p><h3 className="mt-1 text-xl font-[700] text-spacex">Model includes explicit tie-outs and caveats.</h3><div className="mt-3 grid gap-2">{checks.map((row) => <div key={row.Check} className="flex items-start justify-between gap-3 rounded-lg border border-white/[0.065] bg-black/18 p-3"><div><p className="text-sm font-[700] text-white/86">{row.Check}</p><p className="mt-1 text-xs leading-5 text-white/58">{trimText(row['Formula / Basis'], 130)}</p></div><span className="rounded-md border border-cyan/18 bg-cyan/10 px-2 py-1 font-mono text-[10px] text-cyan">{row.Status}</span></div>)}</div></Panel>
       </div>
     </Section>
@@ -3167,7 +2756,7 @@ function MobilePosterCard({ variant, data, packet }) {
   return (
     <Panel pad="p-4" className="relative overflow-hidden md:hidden">
       <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full border border-white/[0.06]" />
-      <p className="font-mono text-[10px] uppercase tracking-normal text-white/50">SpaceX S‑1 Atlas</p>
+      <p className="font-mono text-[10px] uppercase tracking-normal text-white/62">SpaceX S‑1 Atlas</p>
       <h3 className="mt-2 text-3xl font-[560] leading-none tracking-normal text-spacex">{label}</h3>
       <p className="mt-2 text-sm leading-5 text-white/64">Source-cited poster surface for phone screenshots and link sharing.</p>
       <div className="mt-4"><MobileOrbitStack segments={data.segments} /></div>
@@ -3177,8 +2766,8 @@ function MobilePosterCard({ variant, data, packet }) {
         <MetricPill label="Starlink subs" value={`${starlink?.subscribers_m}M`} sub="SRC · Starlink metrics" />
         <MetricPill label="Risk factors" value={riskFactorCount(data)} sub="SRC · Risk Factors" />
       </div>
-      {packet && <div className="mt-3 rounded-xl border border-white/[0.07] bg-white/[0.025] p-3"><p className="font-mono text-[10px] uppercase tracking-normal text-white/48">Disclosure packet</p><p className="mt-1 text-sm font-[620] leading-5 text-spacex">{trimText(packet.title, 105)}</p><p className="mt-2 font-mono text-[10px] text-white/46">SRC · {trimText(packet.source, 80)}</p></div>}
-      <p className="mt-3 font-mono text-[10px] leading-4 text-white/44">{sourceCountLine(sourceCounts(data))}</p>
+      {packet && <div className="mt-3 rounded-xl border border-white/[0.07] bg-white/[0.025] p-3"><p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Disclosure packet</p><p className="mt-1 text-sm font-[620] leading-5 text-spacex">{trimText(packet.title, 105)}</p><p className="mt-2 font-mono text-[10px] text-white/58">SRC · {trimText(packet.source, 80)}</p></div>}
+      <p className="mt-3 font-mono text-[10px] leading-4 text-white/58">{sourceCountLine(sourceCounts(data))}</p>
     </Panel>
   )
 }
@@ -3187,16 +2776,17 @@ function PosterMode({ data, route }) {
   const variant = POSTERS.find((p) => p.id === route.poster)?.id || 'business-stack'
   const packet = data.atlasRows.find((r) => r.type === (variant === 'risk-radar' ? 'risk' : 'financial')) || data.atlasRows[0]
   const svg = makePosterSvg({ variant, data, packet })
+  const posterLabel = POSTERS.find((p) => p.id === variant)?.label || 'Poster'
   return (
-    <Section dense eyebrow="Poster mode" title={POSTERS.find((p) => p.id === variant)?.label || 'Poster'} aside="Designed for clean link cards and manual image posts. Mobile gets a vertical card; desktop keeps the 1200×630 export preview.">
+    <Section dense eyebrow="Poster mode" title={posterLabel} aside="Designed for clean link cards and manual image posts. Mobile gets a vertical card; desktop keeps the 1200×630 export preview.">
       <div className="mb-3 flex flex-wrap gap-2">{POSTERS.map((p) => <button key={p.id} onClick={() => setHash(`/poster/${p.id}`)} className={cn('min-h-11 rounded-lg border px-3 py-2 text-xs focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60', variant === p.id ? 'border-spacex/35 bg-white/[0.07] text-spacex' : 'border-white/[0.08] bg-white/[0.025] text-white/62 hover:bg-white/[0.04]')}>{p.label}</button>)}</div>
       <div className="grid gap-3 xl:grid-cols-[1fr_360px]">
         <MobilePosterCard variant={variant} data={data} packet={packet} />
-        <Panel pad="p-2" className="hidden overflow-hidden md:block"><div className="mx-auto aspect-[1200/630] max-w-[1200px] overflow-hidden rounded-lg border border-white/[0.08] bg-black"><div dangerouslySetInnerHTML={{ __html: svg }} /></div></Panel>
+        <Panel pad="p-2" className="hidden overflow-hidden md:block"><div className="mx-auto aspect-[1200/630] max-w-[1200px] overflow-hidden rounded-lg border border-white/[0.08] bg-black"><img alt={`SpaceX S-1 Atlas ${posterLabel} poster preview`} src={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`} className="h-full w-full" /></div></Panel>
         <Panel className="self-start">
-          <p className="font-mono text-[10px] uppercase tracking-normal text-white/48">Share kit</p>
+          <p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Share kit</p>
           <p className="mt-3 text-sm leading-6 text-white/64">Use Share on phone, or copy a static /share link so preview crawlers can read route-specific metadata.</p>
-          <div className="mt-4"><ShareActions data={data} variant={variant} title={`SpaceX S‑1 Atlas · ${POSTERS.find((p) => p.id === variant)?.label}`} /></div>
+          <div className="mt-4"><ShareActions data={data} variant={variant} title={`SpaceX S‑1 Atlas · ${posterLabel}`} /></div>
         </Panel>
       </div>
     </Section>
@@ -3207,10 +2797,10 @@ function LoadingShell() {
   return (
     <Shell>
       <div className="mx-auto grid min-h-svh max-w-[1760px] place-items-center px-safe">
-        <div className="grid w-full gap-3 xl:grid-cols-[390px_1fr_430px]">
-          <Panel pad="p-5"><p className="font-mono text-[10px] uppercase tracking-normal text-white/52">S‑1 Filing Map</p><h1 className="mt-3 text-4xl font-[560] leading-[0.92] tracking-normal text-spacex sm:text-5xl">SpaceX S‑1 Atlas.</h1><p className="mt-4 text-sm leading-6 text-white/66">Business stack · financials · risks · sources</p></Panel>
+        <div aria-live="polite" className="grid w-full gap-3 xl:grid-cols-[390px_1fr_430px]">
+          <Panel pad="p-5"><p className="font-mono text-[10px] uppercase tracking-normal text-white/62">S‑1 Filing Map</p><h1 className="mt-3 text-4xl font-[560] leading-[0.92] tracking-normal text-spacex sm:text-5xl">SpaceX S‑1 Atlas.</h1><p className="mt-4 text-sm leading-6 text-white/66">Business stack · financials · risks · sources</p></Panel>
           <Panel className="min-h-[350px]"><div className="h-full rounded-xl border border-white/[0.07] bg-[radial-gradient(circle_at_50%_110%,rgba(183,216,255,.18),transparent_44%),linear-gradient(180deg,rgba(255,255,255,.02),rgba(0,0,0,.18))]" /></Panel>
-          <Panel><p className="font-mono text-[10px] uppercase tracking-normal text-white/48">Loading source-cited packets</p><p className="mt-3 text-sm text-white/62">{sourceCountLine()}</p></Panel>
+          <Panel><p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Loading source-cited packets</p><p className="mt-3 text-sm text-white/62">{sourceCountLine()}</p></Panel>
         </div>
       </div>
     </Shell>
@@ -3229,7 +2819,7 @@ function App() {
       // Storage can be blocked in private/webview contexts; persistence is non-critical.
     }
   }, [route.view])
-  if (error) return <div className="grid min-h-svh place-items-center bg-void p-8 text-red">{error}</div>
+  if (error) return <div aria-live="polite" className="grid min-h-svh place-items-center bg-void p-8 text-red">{error}</div>
   if (!data) return <LoadingShell />
   const view = {
     'flight-deck': <FlightDeck data={data} />,
@@ -3252,8 +2842,8 @@ function App() {
           {view}
         </motion.main>
       </AnimatePresence>
-      <footer className="mx-auto max-w-[1760px] border-t border-white/[0.06] px-safe py-6 text-[11px] leading-5 text-white/42">
-        Source discipline: only the SEC S‑1 package is used — main S‑1, filing-fee exhibit, filed exhibits and OCR from S‑1 graphics. This is a filing-review artifact, not investment advice. <a className="text-white/65 underline decoration-white/20 underline-offset-4" href={data.sourceUrl}>SEC source filing</a>.
+      <footer className="mx-auto max-w-[1760px] border-t border-white/[0.06] px-safe py-6 text-[11px] leading-5 text-white/58">
+        Source discipline: this source-cited filing map uses the SEC S‑1 package — main S‑1, filing-fee exhibit, filed exhibits and OCR from S‑1 graphics. It is not investment advice and is not affiliated with SpaceX or the SEC. External model assumptions are separate from filed facts. <a className="text-white/65 underline decoration-white/20 underline-offset-4" href={data.sourceUrl}>SEC source filing</a>.
       </footer>
     </Shell>
   )
