@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#050506" />
+    <title>SpaceX S-1 Atlas</title>
+    <meta name="description" content="A source-cited map of SpaceX's S-1: business stack, financials, risks, exhibits, OCR, and source packets." />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="SpaceX S-1 Atlas" />
+    <meta property="og:description" content="A source-cited map of the filing: business stack, financials, risks, and source packets." />
+    <meta property="og:image" content="/social/spacex-s1-atlas-card.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SpaceX S-1 Atlas" />
+    <meta name="twitter:description" content="Business stack, financials, risks, and source packets." />
+    <meta name="twitter:image" content="/social/spacex-s1-atlas-card.png" />
+    <style>
+      html { background: #050506; color: #f7f8f8; }
+      body { margin: 0; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #050506; }
+      .static-flight-deck { min-height: 100svh; display: grid; place-items: center; padding: max(20px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left)); background: radial-gradient(circle at 50% 112%, rgba(183,216,255,.20), transparent 38%), linear-gradient(180deg,#050506,#07080a 52%,#030304); overflow: hidden; }
+      .static-flight-deck::before { content: ""; position: fixed; inset: -20%; background: radial-gradient(circle at 7% 12%, rgba(255,255,255,.9) 0 1.35px, transparent 2px), radial-gradient(circle at 18% 35%, rgba(255,255,255,.58) 0 1px, transparent 1.7px), radial-gradient(circle at 31% 8%, rgba(183,216,255,.7) 0 1.1px, transparent 1.8px), radial-gradient(circle at 49% 18%, rgba(255,255,255,.62) 0 1px, transparent 1.7px), radial-gradient(circle at 69% 10%, rgba(255,255,255,.68) 0 1.25px, transparent 1.9px), radial-gradient(circle at 84% 28%, rgba(255,255,255,.72) 0 1.35px, transparent 2px), radial-gradient(circle at 91% 7%, rgba(255,255,255,.52) 0 1px, transparent 1.7px), radial-gradient(circle at 15% 78%, rgba(255,255,255,.48) 0 1px, transparent 1.7px), radial-gradient(circle at 63% 78%, rgba(183,216,255,.52) 0 1px, transparent 1.7px); opacity: .9; }
+      .static-grid { position: relative; width: min(1500px, 100%); display: grid; gap: 14px; grid-template-columns: 390px 1fr 410px; }
+      .static-card { border: 1px solid rgba(255,255,255,.09); background: rgba(10,11,13,.9); border-radius: 18px; padding: 22px; box-shadow: inset 0 1px 0 rgba(255,255,255,.045); }
+      .static-eyebrow { color: rgba(255,255,255,.52); font: 700 10px ui-monospace, Menlo, monospace; text-transform: uppercase; letter-spacing: .28em; }
+      .static-title { margin: 14px 0 0; max-width: 620px; font-size: clamp(40px, 5vw, 64px); line-height: .9; letter-spacing: -.065em; font-weight: 560; }
+      .static-copy { color: rgba(255,255,255,.66); font-size: 15px; line-height: 1.65; }
+      .static-metrics { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; margin-top: 18px; }
+      .static-metric { border: 1px solid rgba(255,255,255,.07); border-radius: 12px; padding: 12px; background: rgba(255,255,255,.025); }
+      .static-metric span { display: block; color: rgba(255,255,255,.48); font: 700 9px ui-monospace, Menlo, monospace; letter-spacing: .18em; text-transform: uppercase; }
+      .static-metric strong { display: block; margin-top: 6px; font-size: 28px; letter-spacing: -.055em; }
+      .static-orbit { min-height: 420px; position: relative; overflow: hidden; }
+      .static-orbit::before, .static-orbit::after { content: ""; position: absolute; left: 50%; top: 58%; transform: translate(-50%,-50%); border: 1px solid rgba(183,216,255,.16); border-radius: 50%; }
+      .static-orbit::before { width: 760px; height: 360px; }
+      .static-orbit::after { width: 520px; height: 240px; border-style: dashed; opacity: .8; }
+      .static-shell { position: relative; margin: 18px 0; max-width: 360px; border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 14px; background: rgba(0,0,0,.28); }
+      .static-shell strong { display: block; font-size: 22px; letter-spacing: -.03em; }
+      .static-shell p { margin: 6px 0 0; color: rgba(255,255,255,.58); font-size: 13px; line-height: 1.5; }
+      @media (max-width: 1100px) { .static-grid { grid-template-columns: 1fr; } .static-orbit { min-height: 320px; } }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <main class="static-flight-deck" aria-label="Static first-paint SpaceX S-1 Atlas preview">
+        <section class="static-grid">
+          <div class="static-card">
+            <div class="static-eyebrow">S‑1 Filing Map</div>
+            <h1 class="static-title">SpaceX S‑1 Atlas.</h1>
+            <p class="static-copy">Business stack, financials, risks and source links. Built to be read quickly and verified against the filing package.</p>
+            <div class="static-metrics">
+              <div class="static-metric"><span>Sections</span><strong>22</strong></div>
+              <div class="static-metric"><span>Exhibits</span><strong>17</strong></div>
+              <div class="static-metric"><span>Graphics / OCR</span><strong>82</strong></div>
+              <div class="static-metric"><span>Risk factors</span><strong>54</strong></div>
+            </div>
+          </div>
+          <div class="static-card static-orbit">
+            <div class="static-eyebrow">Business Stack</div>
+            <div class="static-shell"><strong style="color:#B7D8FF">Space</strong><p>Launch, spacecraft, mission services and mass to orbit.</p></div>
+            <div class="static-shell"><strong style="color:#74E3D4">Connectivity</strong><p>Starlink broadband, mobile, enterprise, government and satellite-to-mobile services.</p></div>
+            <div class="static-shell"><strong style="color:#F3BE63">AI</strong><p>xAI, Grok, compute infrastructure and planned orbital AI compute.</p></div>
+          </div>
+          <div class="static-card">
+            <div class="static-eyebrow">Disclosure Packet</div>
+            <h2 style="font-size:28px;letter-spacing:-.04em;margin:14px 0 0;color:#f7f8f8">Risks · Financials · Sources</h2>
+            <p class="static-copy">Every claim stays tied to the S‑1 package: main filing, exhibits, filing-fee exhibit and OCR from filing graphics.</p>
+            <p class="static-copy" style="color:#B7D8FF">Loading the interactive atlas…</p>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

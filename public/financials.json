@@ -1,0 +1,306 @@
+{
+  "consolidated": [
+    {
+      "period": "2023",
+      "revenue": 10387,
+      "op_income": -3505,
+      "net_income": -4628,
+      "source": "audited statements / MD&A tables"
+    },
+    {
+      "period": "2024",
+      "revenue": 14015,
+      "op_income": 466,
+      "net_income": 791,
+      "source": "audited statements / MD&A tables"
+    },
+    {
+      "period": "2025",
+      "revenue": 18674,
+      "op_income": -2589,
+      "net_income": -4937,
+      "adjusted_ebitda": 6584,
+      "source": "summary lines 1035–1038; MD&A tables"
+    },
+    {
+      "period": "Q1 2025",
+      "revenue": 4067,
+      "op_income": 27,
+      "net_income": -528,
+      "source": "MD&A table"
+    },
+    {
+      "period": "Q1 2026",
+      "revenue": 4694,
+      "op_income": -1943,
+      "net_income": -4276,
+      "adjusted_ebitda": 1127,
+      "source": "summary lines 1035–1038; MD&A table"
+    }
+  ],
+  "segments": [
+    {
+      "period": "2023",
+      "segment": "Space",
+      "revenue": 3557,
+      "op_income": -1,
+      "adj_ebitda": 997,
+      "capex": 1497
+    },
+    {
+      "period": "2023",
+      "segment": "Connectivity",
+      "revenue": 3869,
+      "op_income": 469,
+      "adj_ebitda": 1602,
+      "capex": 2455
+    },
+    {
+      "period": "2023",
+      "segment": "AI",
+      "revenue": 2961,
+      "op_income": -3973,
+      "adj_ebitda": 1222,
+      "capex": 463
+    },
+    {
+      "period": "2024",
+      "segment": "Space",
+      "revenue": 3796,
+      "op_income": 21,
+      "adj_ebitda": 1154,
+      "capex": 2032
+    },
+    {
+      "period": "2024",
+      "segment": "Connectivity",
+      "revenue": 7599,
+      "op_income": 2006,
+      "adj_ebitda": 3849,
+      "capex": 3498
+    },
+    {
+      "period": "2024",
+      "segment": "AI",
+      "revenue": 2620,
+      "op_income": -1561,
+      "adj_ebitda": 347,
+      "capex": 5633
+    },
+    {
+      "period": "2025",
+      "segment": "Space",
+      "revenue": 4086,
+      "op_income": -657,
+      "adj_ebitda": 653,
+      "capex": 3832
+    },
+    {
+      "period": "2025",
+      "segment": "Connectivity",
+      "revenue": 11387,
+      "op_income": 4423,
+      "adj_ebitda": 7168,
+      "capex": 4178
+    },
+    {
+      "period": "2025",
+      "segment": "AI",
+      "revenue": 3201,
+      "op_income": -6355,
+      "adj_ebitda": -1237,
+      "capex": 12727
+    },
+    {
+      "period": "Q1 2026",
+      "segment": "Space",
+      "revenue": 619,
+      "op_income": -662,
+      "adj_ebitda": -351,
+      "capex": 1052
+    },
+    {
+      "period": "Q1 2026",
+      "segment": "Connectivity",
+      "revenue": 3257,
+      "op_income": 1188,
+      "adj_ebitda": 2087,
+      "capex": 1332
+    },
+    {
+      "period": "Q1 2026",
+      "segment": "AI",
+      "revenue": 818,
+      "op_income": -2469,
+      "adj_ebitda": -609,
+      "capex": 7723
+    }
+  ],
+  "balance": [
+    {
+      "date": "Dec 31 2024",
+      "cash": 11385,
+      "total_current_assets": 16108,
+      "pp_e_net": 21147,
+      "total_assets": 57062,
+      "current_liabilities": 11791,
+      "total_liabilities": 31258,
+      "preferred_stock": 20941,
+      "shareholders_equity": 4863
+    },
+    {
+      "date": "Dec 31 2025",
+      "cash": 24747,
+      "total_current_assets": 30952,
+      "pp_e_net": 42602,
+      "total_assets": 92079,
+      "current_liabilities": 21400,
+      "total_liabilities": 50754,
+      "preferred_stock": 38752,
+      "shareholders_equity": 2573
+    },
+    {
+      "date": "Mar 31 2026",
+      "cash": 15852,
+      "marketable_securities": 7823,
+      "total_current_assets": 29732,
+      "pp_e_net": 53879,
+      "total_assets": 102094,
+      "current_liabilities": 24436,
+      "total_liabilities": 60512,
+      "preferred_stock": 7049,
+      "shareholders_equity": 34533
+    }
+  ],
+  "cash_flows": [
+    {
+      "period": "2023",
+      "operating": 4520,
+      "investing": -4867,
+      "financing": 422
+    },
+    {
+      "period": "2024",
+      "operating": 5776,
+      "investing": -10796,
+      "financing": 11830
+    },
+    {
+      "period": "2025",
+      "operating": 6785,
+      "investing": -19575,
+      "financing": 26350
+    },
+    {
+      "period": "Q1 2025",
+      "operating": 727,
+      "investing": -4170,
+      "financing": 354
+    },
+    {
+      "period": "Q1 2026",
+      "operating": 1047,
+      "investing": -16724,
+      "financing": 7125
+    }
+  ],
+  "metrics": {
+    "mass_to_orbit": [
+      {
+        "period": "2023",
+        "total": 1210,
+        "customer": 205,
+        "internal": 1005
+      },
+      {
+        "period": "2024",
+        "total": 1699,
+        "customer": 282,
+        "internal": 1418
+      },
+      {
+        "period": "2025",
+        "total": 2213,
+        "customer": 312,
+        "internal": 1901
+      },
+      {
+        "period": "Q1 2025",
+        "total": 450
+      },
+      {
+        "period": "Q1 2026",
+        "total": 556
+      }
+    ],
+    "falcon_launches": [
+      {
+        "period": "2023",
+        "total": 96,
+        "customer": 33,
+        "internal": 63
+      },
+      {
+        "period": "2024",
+        "total": 134,
+        "customer": 45,
+        "internal": 89
+      },
+      {
+        "period": "2025",
+        "total": 165,
+        "customer": 43,
+        "internal": 122
+      },
+      {
+        "period": "Q1 2025",
+        "total": 36,
+        "customer": 12,
+        "internal": 24
+      },
+      {
+        "period": "Q1 2026",
+        "total": 40,
+        "customer": 7,
+        "internal": 33
+      }
+    ],
+    "starlink": [
+      {
+        "period": "2023",
+        "subscribers_m": 2.3,
+        "arpu": 99
+      },
+      {
+        "period": "2024",
+        "subscribers_m": 4.4,
+        "arpu": 91
+      },
+      {
+        "period": "2025",
+        "subscribers_m": 8.9,
+        "arpu": 81
+      },
+      {
+        "period": "Q1 2025",
+        "subscribers_m": 5.0,
+        "arpu": 86
+      },
+      {
+        "period": "Q1 2026",
+        "subscribers_m": 10.3,
+        "arpu": 66
+      }
+    ],
+    "ai": [
+      {
+        "period": "Mar 31 2026",
+        "nameplate_compute_gw": 1.0,
+        "supported_accounts_b": 1.3,
+        "maus_m": 550,
+        "grok_ai_feature_maus_m": 117,
+        "daily_posts_m": 350
+      }
+    ]
+  }
+}

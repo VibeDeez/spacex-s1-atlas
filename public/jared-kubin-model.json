@@ -1,0 +1,2140 @@
+{
+  "source": {
+    "name": "Jared L. Kubin SpaceX IPO model",
+    "author": "Jared L. Kubin",
+    "xHandle": "@JaredKubin",
+    "originalUrl": "https://docs.google.com/spreadsheets/d/1VnnyM1h6-JS1yN3yFyflQ9gnw-C3fzU0/edit?usp=drivesdk&ouid=106068281888021367291&rtpof=true&sd=true",
+    "localXlsx": "/jared-kubin-spacex-ipo-model.xlsx",
+    "captionSummary": "Open-sourced \u201cOCCUPY MARS: SpaceX IPO first cut\u201d model shared on X as a starting point, with explicit caveat that it may contain mistakes and is not the final answer.",
+    "terms": [
+      "*THIS SHEET IS FOR EDUCATION AND INFORMATIONAL PURPOSES ONLY -> ASSUME THERE ARE ERRORS -> NOT AN ENDORSEMENT TO BUY OR SELL SECURITIES DO YOUR OWN WORK",
+      "*BY OPENING THIS SHEET YOU AGREE THIS IS FOR INFORMATIONAL PURPOSES AND NOTHING IN HERE IS ADVICE",
+      "**DRAFT SUBJECT TO CHANGE"
+    ],
+    "credit": "External model by Jared L. Kubin (@JaredKubin on X). Incorporated with attribution; assumptions are Jared\u2019s model assumptions, not S-1 filed facts unless separately marked."
+  },
+  "sheets": [
+    "COMPANY_INFO",
+    "TERMS",
+    "TAM",
+    "IPO_Analysis",
+    "Share_Count",
+    "Annual_Financials",
+    "KPIs",
+    "Checks"
+  ],
+  "tam": {
+    "headline": [
+      [
+        "SpaceX TAM & Market Opportunity \u2014 Per S-1 (May 20, 2026)",
+        null,
+        null,
+        null
+      ],
+      [
+        "All values in $B. Source: SpaceX S-1 preliminary filing, May 20, 2026.",
+        null,
+        null,
+        null
+      ],
+      [
+        "SECTION 1: HEADLINE TAM",
+        null,
+        null,
+        null
+      ],
+      [
+        "Company estimates quantifiable TAM at $28.5T (excludes China and Russia).",
+        null,
+        null,
+        null
+      ],
+      [
+        "Segment",
+        "TAM ($B)",
+        "% of Quantified TAM",
+        "Company Framing"
+      ],
+      [
+        "Space",
+        370,
+        0.013009845288326301,
+        "Launch, manufacturing, PNT, satellite ops, gov agency uncontracted spend"
+      ],
+      [
+        "Connectivity",
+        1610,
+        0.05661040787623066,
+        "Starlink Broadband + Starlink Mobile"
+      ],
+      [
+        "AI",
+        26460,
+        0.930379746835443,
+        "Infrastructure, subscriptions, advertising, enterprise applications"
+      ],
+      [
+        "Total quantified TAM (sum)",
+        28440,
+        1,
+        "Rounded company estimate = $28.5T"
+      ],
+      [
+        "Company rounded figure",
+        28500,
+        null,
+        null
+      ]
+    ],
+    "segments": [
+      {
+        "Segment": "Space",
+        "TAM ($B)": 370,
+        "% of Quantified TAM": 0.013009845288326301,
+        "Company Framing": "Launch, manufacturing, PNT, satellite ops, gov agency uncontracted spend"
+      },
+      {
+        "Segment": "Connectivity",
+        "TAM ($B)": 1610,
+        "% of Quantified TAM": 0.05661040787623066,
+        "Company Framing": "Starlink Broadband + Starlink Mobile"
+      },
+      {
+        "Segment": "AI",
+        "TAM ($B)": 26460,
+        "% of Quantified TAM": 0.930379746835443,
+        "Company Framing": "Infrastructure, subscriptions, advertising, enterprise applications"
+      }
+    ],
+    "companyRoundedTamB": 28500,
+    "totalQuantifiedTamB": 28440,
+    "notes": [
+      [
+        "SECTION 2: SEGMENT BUILD",
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "Sub-segment",
+        "TAM ($B)",
+        "Parent segment",
+        "Methodology / Source",
+        null
+      ],
+      [
+        "Space-enabled solutions",
+        370,
+        "Space",
+        "Novaspace 2025 market estimate",
+        null
+      ],
+      [
+        "Starlink Broadband \u2014 Consumer",
+        660,
+        "Connectivity",
+        "1.8B households \u00d7 $31/mo \u00d7 12 = $670B (rounded to $660B)",
+        null
+      ],
+      [
+        "Starlink Broadband \u2014 Enterprise",
+        200,
+        "Connectivity",
+        "Grand View Research, global biz broadband 2025",
+        null
+      ],
+      [
+        "Starlink Broadband \u2014 Government",
+        5,
+        "Connectivity",
+        "Novaspace, publicly disclosed gov programs only",
+        null
+      ],
+      [
+        "Starlink Mobile",
+        740,
+        "Connectivity",
+        "8.0B devices \u00d7 $8/mo \u00d7 12 = $768B (stated $740B)",
+        null
+      ],
+      [
+        "AI Infrastructure",
+        2400,
+        "AI",
+        "104M GPUs \u00d7 80% utilization \u00d7 8,760 hrs \u00d7 $3.33/GPU-hr = $2.43T",
+        null
+      ],
+      [
+        "AI Consumer Subscriptions",
+        760,
+        "AI",
+        "5.5B population age 10+ \u00d7 $12/mo \u00d7 12 = $792B",
+        null
+      ],
+      [
+        "AI Digital Advertising",
+        600,
+        "AI",
+        "S&P Global Market Intelligence, 2025 global digital ad spend",
+        null
+      ],
+      [
+        "AI Enterprise Applications",
+        22700,
+        "AI",
+        "DCO 2026 digital economy estimate (broad ceiling)",
+        null
+      ],
+      [
+        "Total quantified sub-segments",
+        28435,
+        null,
+        "Sum of all quantified sub-segments",
+        null
+      ],
+      [
+        "SECTION 3: KEY FORMULAS & ASSUMPTIONS",
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "Starlink Consumer Broadband",
+        "Input",
+        "Value",
+        "Notes",
+        null
+      ],
+      [
+        null,
+        "Global households (2025)",
+        1.8,
+        "Billions",
+        null
+      ],
+      [
+        null,
+        "Weighted avg monthly ARPU",
+        31,
+        "$/month",
+        null
+      ],
+      [
+        null,
+        "High-income ARPU",
+        43,
+        "$/month",
+        null
+      ],
+      [
+        null,
+        "Upper-middle ARPU",
+        16,
+        "$/month",
+        null
+      ],
+      [
+        null,
+        "Lower-middle / low-income ARPU",
+        9,
+        "$/month",
+        null
+      ],
+      [
+        null,
+        "Calculated TAM ($B)",
+        669.6,
+        "Households \u00d7 ARPU \u00d7 12",
+        null
+      ],
+      [
+        null,
+        "Company stated TAM ($B)",
+        660,
+        "Rounded / region-weighted",
+        null
+      ],
+      [
+        "Starlink Mobile",
+        "Input",
+        "Value",
+        "Notes",
+        null
+      ],
+      [
+        null,
+        "Global mobile devices (Dec 31 2025)",
+        8,
+        "Billions",
+        null
+      ],
+      [
+        null,
+        "Weighted avg monthly ARPU",
+        8,
+        "$/month",
+        null
+      ],
+      [
+        null,
+        "High-income ARPU",
+        18,
+        "$/month",
+        null
+      ],
+      [
+        null,
+        "Upper-middle ARPU",
+        5,
+        "$/month",
+        null
+      ],
+      [
+        null,
+        "Lower-middle / low-income ARPU",
+        2,
+        "$/month",
+        null
+      ],
+      [
+        null,
+        "Calculated TAM ($B)",
+        768,
+        "Devices \u00d7 ARPU \u00d7 12",
+        null
+      ],
+      [
+        null,
+        "Company stated TAM ($B)",
+        740,
+        "Rounded down for region weighting",
+        null
+      ],
+      [
+        "AI Infrastructure",
+        "Input",
+        "Value",
+        "Notes",
+        null
+      ],
+      [
+        null,
+        "Global data center demand 2030 (GW)",
+        235,
+        null,
+        null
+      ],
+      [
+        null,
+        "AI workload share",
+        0.7,
+        null,
+        null
+      ],
+      [
+        null,
+        "AI data center demand (GW)",
+        164.5,
+        null,
+        null
+      ],
+      [
+        null,
+        "Target PUE",
+        1.2,
+        null,
+        null
+      ],
+      [
+        null,
+        "IT load after PUE (GW)",
+        137.08333333333334,
+        null,
+        null
+      ],
+      [
+        null,
+        "GPU power (kW per GPU)",
+        1.3,
+        null,
+        null
+      ],
+      [
+        null,
+        "Implied GPU count (M)",
+        105448.71794871795,
+        null,
+        null
+      ],
+      [
+        null,
+        "Company stated GPU count (M)",
+        104,
+        null,
+        null
+      ],
+      [
+        null,
+        "Utilization rate",
+        0.8,
+        null,
+        null
+      ],
+      [
+        null,
+        "Hours per year",
+        8760,
+        null,
+        null
+      ],
+      [
+        null,
+        "GPU rental rate ($/GPU-hour)",
+        3.33,
+        null,
+        null
+      ]
+    ]
+  },
+  "offering": {
+    "primarySharesOffered": 800000000,
+    "greenshoeShares": 120000000,
+    "totalSharesInclGreenshoe": 920000000,
+    "rawRows": [
+      [
+        "SECTION 1: IPO OFFERING DETAILS & VALUATION",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "($ in thousands, except per share and share data)",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        null,
+        null,
+        "Assumptions",
+        null,
+        "Implied Valuation",
+        null,
+        null,
+        null
+      ],
+      [
+        "Offering Details",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "  Primary shares offered",
+        null,
+        800000000,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "  Greenshoe (15% over-allotment)",
+        null,
+        120000000,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "  Total shares offered (incl. greenshoe)",
+        null,
+        920000000,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "Price Range",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "  Low",
+        null,
+        110,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "  Midpoint",
+        null,
+        125,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "  High",
+        null,
+        140,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        null,
+        null,
+        115000,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "Gross Proceeds (at midpoint)",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "  Primary offering",
+        null,
+        null,
+        null,
+        100000000000,
+        null,
+        null,
+        null
+      ],
+      [
+        "  Incl. greenshoe",
+        null,
+        null,
+        null,
+        115000000000,
+        null,
+        null,
+        null
+      ],
+      [
+        "Share Count Summary",
+        null,
+        "Shares",
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "  Pre-IPO shares (Class A + B + N)",
+        null,
+        12520310769,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "  (+) Primary IPO shares",
+        null,
+        800000000,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "  (+) Greenshoe shares",
+        null,
+        120000000,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "  Basic shares post-IPO (excl. greenshoe)",
+        null,
+        13320310769,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "  Basic shares post-IPO (incl. greenshoe)",
+        null,
+        13440310769,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "  (+) Stock options outstanding",
+        null,
+        934000000,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "  (+) RSUs outstanding",
+        null,
+        129000000,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "  (+) Performance & market condition awards",
+        null,
+        0,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "  (+) EchoStar spectrum shares",
+        null,
+        261800000,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "  (+) Cursor acquisition option shares",
+        null,
+        0,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "  Fully diluted shares post-IPO",
+        null,
+        14765110769,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "Implied Valuation (at midpoint price)",
+        null,
+        null,
+        null,
+        "Basic",
+        "Fully Diluted",
+        null,
+        null
+      ],
+      [
+        "  Implied market capitalization",
+        null,
+        null,
+        null,
+        1680038846125,
+        1845638846125,
+        null,
+        null
+      ],
+      [
+        "  (\u2212) Cash & equivalents",
+        null,
+        null,
+        null,
+        -24747000000,
+        null,
+        null,
+        null
+      ],
+      [
+        "  (\u2212) Marketable securities",
+        null,
+        null,
+        null,
+        0,
+        null,
+        null,
+        null
+      ],
+      [
+        "  (\u2212) Digital assets",
+        null,
+        null,
+        null,
+        -1637000000,
+        null,
+        null,
+        null
+      ],
+      [
+        "  (\u2212) Net IPO proceeds (cash added by IPO)",
+        null,
+        null,
+        null,
+        -93000000000,
+        null,
+        null,
+        null
+      ],
+      [
+        "  (+) Total debt (current + LT)",
+        null,
+        null,
+        null,
+        22896000000,
+        null,
+        null,
+        null
+      ],
+      [
+        "  Net cash bridge (EV adjustment)",
+        null,
+        null,
+        null,
+        -96488000000,
+        null,
+        null,
+        null
+      ],
+      [
+        "  Implied enterprise value (EV)",
+        null,
+        null,
+        null,
+        1583550846125,
+        1749150846125,
+        null,
+        null
+      ],
+      [
+        "Valuation Multiples (at midpoint, FY 2025 basis)",
+        null,
+        null,
+        null,
+        "Basic",
+        "Fully Diluted",
+        null,
+        null
+      ]
+    ]
+  },
+  "shareCount": {
+    "components": [
+      {
+        "Category": "Existing / Old Shares",
+        "Component": "Pro forma Class A common (incl. preferred conversion & Class C reclass)",
+        "Class": "Class A",
+        "Known Shares": 6824581339,
+        "Include in User-Specified Total?": "Y",
+        "Include in Full Diluted Total?": "Y",
+        "Status": "disclosed",
+        "Source / Notes": "SpaceX S-1, \u00a714"
+      },
+      {
+        "Category": "Existing / Old Shares",
+        "Component": "Pro forma Class B common",
+        "Class": "Class B",
+        "Known Shares": 5695729430,
+        "Include in User-Specified Total?": "Y",
+        "Include in Full Diluted Total?": "Y",
+        "Status": "disclosed",
+        "Source / Notes": "SpaceX S-1, \u00a714"
+      },
+      {
+        "Category": "Existing / Old Shares",
+        "Component": "Post-3/31 share issuances (placeholder)",
+        "Class": "Class A",
+        "Known Shares": 0,
+        "Include in User-Specified Total?": "Y",
+        "Include in Full Diluted Total?": "Y",
+        "Status": "blank",
+        "Source / Notes": "Model input"
+      },
+      {
+        "Category": "IPO Shares",
+        "Component": "Common stock offered by company in IPO",
+        "Class": "Class A",
+        "Known Shares": null,
+        "Include in User-Specified Total?": "Y",
+        "Include in Full Diluted Total?": "Y",
+        "Status": "disclosed at pricing",
+        "Source / Notes": "Pricing prospectus \u2014 input in IPO_Analysis"
+      },
+      {
+        "Category": "IPO Shares",
+        "Component": "Underwriters' over-allotment option (greenshoe)",
+        "Class": "Class A",
+        "Known Shares": null,
+        "Include in User-Specified Total?": "Y",
+        "Include in Full Diluted Total?": "Y",
+        "Status": "disclosed at pricing",
+        "Source / Notes": "Computed in IPO_Analysis"
+      },
+      {
+        "Category": "Equity Awards",
+        "Component": "Outstanding stock options at Mar 31, 2026",
+        "Class": "Class A/B/C",
+        "Known Shares": 934000000,
+        "Include in User-Specified Total?": "Y",
+        "Include in Full Diluted Total?": "Y",
+        "Status": "disclosed",
+        "Source / Notes": "SpaceX S-1, \u00a715 reserve table"
+      },
+      {
+        "Category": "Equity Awards",
+        "Component": "Outstanding RSUs at Mar 31, 2026",
+        "Class": "Class A/B/C",
+        "Known Shares": 129000000,
+        "Include in User-Specified Total?": "Y",
+        "Include in Full Diluted Total?": "Y",
+        "Status": "disclosed",
+        "Source / Notes": "SpaceX S-1, \u00a715 reserve table"
+      },
+      {
+        "Category": "Equity Awards",
+        "Component": "Performance & market condition awards (excl. from diluted EPS)",
+        "Class": "Class B",
+        "Known Shares": 1319100000,
+        "Include in User-Specified Total?": "Y",
+        "Include in Full Diluted Total?": "Y",
+        "Status": "disclosed",
+        "Source / Notes": "SpaceX S-1, \u00a715 + \u00a716"
+      },
+      {
+        "Category": "Equity Awards",
+        "Component": "Founder / additional PRSUs (already in performance awards)",
+        "Class": "Class B",
+        "Known Shares": 0,
+        "Include in User-Specified Total?": "Y",
+        "Include in Full Diluted Total?": "Y",
+        "Status": "included in row 11",
+        "Source / Notes": "SpaceX S-1, \u00a715"
+      },
+      {
+        "Category": "Warrants",
+        "Component": "EchoStar spectrum equity consideration",
+        "Class": "Class A",
+        "Known Shares": 261800000,
+        "Include in User-Specified Total?": "N",
+        "Include in Full Diluted Total?": "Y",
+        "Status": "disclosed",
+        "Source / Notes": "SpaceX S-1, \u00a713 + \u00a715"
+      },
+      {
+        "Category": "Warrants",
+        "Component": "Cursor acquisition option ($60B / VWAP)",
+        "Class": "Class A",
+        "Known Shares": 0,
+        "Include in User-Specified Total?": "N",
+        "Include in Full Diluted Total?": "N",
+        "Status": "contingent",
+        "Source / Notes": "SpaceX S-1, \u00a716"
+      },
+      {
+        "Category": "Warrants",
+        "Component": null,
+        "Class": null,
+        "Known Shares": null,
+        "Include in User-Specified Total?": "N",
+        "Include in Full Diluted Total?": "N",
+        "Status": null,
+        "Source / Notes": null
+      },
+      {
+        "Category": "Warrants",
+        "Component": null,
+        "Class": null,
+        "Known Shares": null,
+        "Include in User-Specified Total?": "N",
+        "Include in Full Diluted Total?": "N",
+        "Status": null,
+        "Source / Notes": null
+      },
+      {
+        "Category": "Future Issuance Reserve",
+        "Component": "A&R 2024 Plan future grant reserve",
+        "Class": "Class A/C",
+        "Known Shares": 500000000,
+        "Include in User-Specified Total?": "Y",
+        "Include in Full Diluted Total?": "Y",
+        "Status": "disclosed",
+        "Source / Notes": "SpaceX S-1, \u00a715"
+      },
+      {
+        "Category": "Future Issuance Reserve",
+        "Component": "A&R 2017 ESPP reserve",
+        "Class": "Class A",
+        "Known Shares": 75000000,
+        "Include in User-Specified Total?": "Y",
+        "Include in Full Diluted Total?": "Y",
+        "Status": "disclosed",
+        "Source / Notes": "SpaceX S-1, \u00a715"
+      },
+      {
+        "Category": "Future Issuance Reserve",
+        "Component": "Prior plan recycling / forfeitures",
+        "Class": "Class A",
+        "Known Shares": 0,
+        "Include in User-Specified Total?": "Y",
+        "Include in Full Diluted Total?": "Y",
+        "Status": "future recycling",
+        "Source / Notes": null
+      },
+      {
+        "Category": "Future Issuance Reserve",
+        "Component": null,
+        "Class": null,
+        "Known Shares": 0,
+        "Include in User-Specified Total?": "N",
+        "Include in Full Diluted Total?": "N",
+        "Status": null,
+        "Source / Notes": null
+      },
+      {
+        "Category": "Summary",
+        "Component": "Formula / Definition",
+        "Class": "Known Shares",
+        "Known Shares": "Notes",
+        "Include in User-Specified Total?": null,
+        "Include in Full Diluted Total?": null,
+        "Status": null,
+        "Source / Notes": null
+      },
+      {
+        "Category": "Known old shares",
+        "Component": "Actual common + preferred conversion + post-12/31 Class N issued",
+        "Class": 12520310769,
+        "Known Shares": "Excludes unknown RSU net settlement and IPO shares",
+        "Include in User-Specified Total?": null,
+        "Include in Full Diluted Total?": null,
+        "Status": null,
+        "Source / Notes": null
+      },
+      {
+        "Category": "Known user-specified diluted subtotal",
+        "Component": "Rows marked Y in Include in User-Specified Total",
+        "Class": 15477410769,
+        "Known Shares": "Excludes blanks because preliminary filing omits some counts",
+        "Include in User-Specified Total?": null,
+        "Include in Full Diluted Total?": null,
+        "Status": null,
+        "Source / Notes": null
+      },
+      {
+        "Category": "Known fully diluted subtotal incl. warrants",
+        "Component": "Rows marked Y in Include in Full Diluted Total",
+        "Class": 15739210769,
+        "Known Shares": "Set F-column to Y for warrants that should be additive to fully diluted; flag exercised warrants N to avoid double-count",
+        "Include in User-Specified Total?": null,
+        "Include in Full Diluted Total?": null,
+        "Status": null,
+        "Source / Notes": null
+      },
+      {
+        "Category": "Required unknown share-count fields",
+        "Component": "Count of required included rows with missing Known Shares",
+        "Class": 2,
+        "Known Shares": "These must be populated after final pricing / later filing amendment",
+        "Include in User-Specified Total?": null,
+        "Include in Full Diluted Total?": null,
+        "Status": null,
+        "Source / Notes": null
+      }
+    ],
+    "rawRows": [
+      [
+        "SpaceX Fully Diluted Share Count Extract \u2014 Mar 31, 2026 pro forma",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "Category",
+        "Component",
+        "Class",
+        "Known Shares",
+        "Include in User-Specified Total?",
+        "Include in Full Diluted Total?",
+        "Status",
+        "Source / Notes"
+      ],
+      [
+        "Existing / Old Shares",
+        "Pro forma Class A common (incl. preferred conversion & Class C reclass)",
+        "Class A",
+        6824581339,
+        "Y",
+        "Y",
+        "disclosed",
+        "SpaceX S-1, \u00a714"
+      ],
+      [
+        "Existing / Old Shares",
+        "Pro forma Class B common",
+        "Class B",
+        5695729430,
+        "Y",
+        "Y",
+        "disclosed",
+        "SpaceX S-1, \u00a714"
+      ],
+      [
+        "Existing / Old Shares",
+        "Post-3/31 share issuances (placeholder)",
+        "Class A",
+        0,
+        "Y",
+        "Y",
+        "blank",
+        "Model input"
+      ],
+      [
+        "IPO Shares",
+        "Common stock offered by company in IPO",
+        "Class A",
+        null,
+        "Y",
+        "Y",
+        "disclosed at pricing",
+        "Pricing prospectus \u2014 input in IPO_Analysis"
+      ],
+      [
+        "IPO Shares",
+        "Underwriters' over-allotment option (greenshoe)",
+        "Class A",
+        null,
+        "Y",
+        "Y",
+        "disclosed at pricing",
+        "Computed in IPO_Analysis"
+      ],
+      [
+        "Equity Awards",
+        "Outstanding stock options at Mar 31, 2026",
+        "Class A/B/C",
+        934000000,
+        "Y",
+        "Y",
+        "disclosed",
+        "SpaceX S-1, \u00a715 reserve table"
+      ],
+      [
+        "Equity Awards",
+        "Outstanding RSUs at Mar 31, 2026",
+        "Class A/B/C",
+        129000000,
+        "Y",
+        "Y",
+        "disclosed",
+        "SpaceX S-1, \u00a715 reserve table"
+      ],
+      [
+        "Equity Awards",
+        "Performance & market condition awards (excl. from diluted EPS)",
+        "Class B",
+        1319100000,
+        "Y",
+        "Y",
+        "disclosed",
+        "SpaceX S-1, \u00a715 + \u00a716"
+      ],
+      [
+        "Equity Awards",
+        "Founder / additional PRSUs (already in performance awards)",
+        "Class B",
+        0,
+        "Y",
+        "Y",
+        "included in row 11",
+        "SpaceX S-1, \u00a715"
+      ],
+      [
+        "Warrants",
+        "EchoStar spectrum equity consideration",
+        "Class A",
+        261800000,
+        "N",
+        "Y",
+        "disclosed",
+        "SpaceX S-1, \u00a713 + \u00a715"
+      ],
+      [
+        "Warrants",
+        "Cursor acquisition option ($60B / VWAP)",
+        "Class A",
+        0,
+        "N",
+        "N",
+        "contingent",
+        "SpaceX S-1, \u00a716"
+      ],
+      [
+        "Warrants",
+        null,
+        null,
+        null,
+        "N",
+        "N",
+        null,
+        null
+      ],
+      [
+        "Warrants",
+        null,
+        null,
+        null,
+        "N",
+        "N",
+        null,
+        null
+      ],
+      [
+        "Future Issuance Reserve",
+        "A&R 2024 Plan future grant reserve",
+        "Class A/C",
+        500000000,
+        "Y",
+        "Y",
+        "disclosed",
+        "SpaceX S-1, \u00a715"
+      ],
+      [
+        "Future Issuance Reserve",
+        "A&R 2017 ESPP reserve",
+        "Class A",
+        75000000,
+        "Y",
+        "Y",
+        "disclosed",
+        "SpaceX S-1, \u00a715"
+      ],
+      [
+        "Future Issuance Reserve",
+        "Prior plan recycling / forfeitures",
+        "Class A",
+        0,
+        "Y",
+        "Y",
+        "future recycling",
+        null
+      ],
+      [
+        "Future Issuance Reserve",
+        null,
+        null,
+        0,
+        "N",
+        "N",
+        null,
+        null
+      ],
+      [
+        "Summary",
+        "Formula / Definition",
+        "Known Shares",
+        "Notes",
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "Known old shares",
+        "Actual common + preferred conversion + post-12/31 Class N issued",
+        12520310769,
+        "Excludes unknown RSU net settlement and IPO shares",
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "Known user-specified diluted subtotal",
+        "Rows marked Y in Include in User-Specified Total",
+        15477410769,
+        "Excludes blanks because preliminary filing omits some counts",
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "Known fully diluted subtotal incl. warrants",
+        "Rows marked Y in Include in Full Diluted Total",
+        15739210769,
+        "Set F-column to Y for warrants that should be additive to fully diluted; flag exercised warrants N to avoid double-count",
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "Required unknown share-count fields",
+        "Count of required included rows with missing Known Shares",
+        2,
+        "These must be populated after final pricing / later filing amendment",
+        null,
+        null,
+        null,
+        null
+      ]
+    ]
+  },
+  "annualFinancials": {
+    "rows": [
+      {
+        "Section": "Income Statement",
+        "Metric": "Revenue \u2014 Products (hardware)",
+        "Units": "$000",
+        "FY 2025": 1510000,
+        "FY 2024": 1470000,
+        "FY 2023": 1093000,
+        "YoY % (25/24)": 0.027210884353741527,
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Income Statement",
+        "Metric": "Revenue \u2014 Services (Connectivity services, Launch, Ads, AI)",
+        "Units": "$000",
+        "FY 2025": 17164000,
+        "FY 2024": 12545000,
+        "FY 2023": 9294000,
+        "YoY % (25/24)": 0.3681944998007174,
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Income Statement",
+        "Metric": "Total revenue",
+        "Units": "$000",
+        "FY 2025": 18674000,
+        "FY 2024": 14015000,
+        "FY 2023": 10387000,
+        "YoY % (25/24)": 0.3324295397788084,
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Income Statement",
+        "Metric": "Cost of revenue \u2014 Products",
+        "Units": "$000",
+        "FY 2025": null,
+        "FY 2024": null,
+        "FY 2023": 0,
+        "YoY % (25/24)": "n.m.",
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Income Statement",
+        "Metric": "Cost of revenue \u2014 Services",
+        "Units": "$000",
+        "FY 2025": null,
+        "FY 2024": null,
+        "FY 2023": 0,
+        "YoY % (25/24)": "n.m.",
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Income Statement",
+        "Metric": "Total cost of revenue",
+        "Units": "$000",
+        "FY 2025": 9451000,
+        "FY 2024": 7996000,
+        "FY 2023": 6110000,
+        "YoY % (25/24)": 0.1819659829914957,
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Income Statement",
+        "Metric": "Gross profit",
+        "Units": "$000",
+        "FY 2025": 9223000,
+        "FY 2024": 6019000,
+        "FY 2023": 4277000,
+        "YoY % (25/24)": 0.5323143379298887,
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Income Statement",
+        "Metric": "Research and development",
+        "Units": "$000",
+        "FY 2025": 8643000,
+        "FY 2024": 3464000,
+        "FY 2023": 2105000,
+        "YoY % (25/24)": 1.495092378752887,
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Income Statement",
+        "Metric": "Selling, general & administrative",
+        "Units": "$000",
+        "FY 2025": 2644000,
+        "FY 2024": 1813000,
+        "FY 2023": 1665000,
+        "YoY % (25/24)": 0.45835631549917255,
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Income Statement",
+        "Metric": "Restructuring charges",
+        "Units": "$000",
+        "FY 2025": 487000,
+        "FY 2024": 213000,
+        "FY 2023": 237000,
+        "YoY % (25/24)": 1.2863849765258215,
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Income Statement",
+        "Metric": "Impairment",
+        "Units": "$000",
+        "FY 2025": 38000,
+        "FY 2024": 63000,
+        "FY 2023": 3775000,
+        "YoY % (25/24)": -0.39682539682539686,
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Income Statement",
+        "Metric": "Loss from operations",
+        "Units": "$000",
+        "FY 2025": -2589000,
+        "FY 2024": 466000,
+        "FY 2023": -3505000,
+        "YoY % (25/24)": -6.555793991416309,
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Income Statement",
+        "Metric": "Interest expense",
+        "Units": "$000",
+        "FY 2025": -1945000,
+        "FY 2024": -1580000,
+        "FY 2023": -1693000,
+        "YoY % (25/24)": 0.231012658227848,
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Income Statement",
+        "Metric": "Interest income",
+        "Units": "$000",
+        "FY 2025": 492000,
+        "FY 2024": 371000,
+        "FY 2023": 249000,
+        "YoY % (25/24)": 0.3261455525606469,
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Income Statement",
+        "Metric": "Other income (expense), net",
+        "Units": "$000",
+        "FY 2025": -177000,
+        "FY 2024": 985000,
+        "FY 2023": -42000,
+        "YoY % (25/24)": -1.1796954314720813,
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Income Statement",
+        "Metric": "Loss before income taxes",
+        "Units": "$000",
+        "FY 2025": -4219000,
+        "FY 2024": 242000,
+        "FY 2023": -4991000,
+        "YoY % (25/24)": -18.43388429752066,
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Income Statement",
+        "Metric": "Provision for income taxes",
+        "Units": "$000",
+        "FY 2025": 718000,
+        "FY 2024": -549000,
+        "FY 2023": -363000,
+        "YoY % (25/24)": -2.3078324225865208,
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Income Statement",
+        "Metric": "Net loss",
+        "Units": "$000",
+        "FY 2025": -4937000,
+        "FY 2024": 791000,
+        "FY 2023": -4628000,
+        "YoY % (25/24)": -7.241466498103666,
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Income Statement",
+        "Metric": "Net loss attributable to common shareholders",
+        "Units": "$000",
+        "FY 2025": -4937000,
+        "FY 2024": 791000,
+        "FY 2023": -4628000,
+        "YoY % (25/24)": -7.241466498103666,
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Per Share",
+        "Metric": "Basic net loss per share",
+        "Units": "$/share",
+        "FY 2025": -1.69,
+        "FY 2024": 0.01,
+        "FY 2023": -1.68,
+        "YoY % (25/24)": -170,
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Per Share",
+        "Metric": "Diluted net loss per share",
+        "Units": "$/share",
+        "FY 2025": -1.69,
+        "FY 2024": 0,
+        "FY 2023": -1.68,
+        "YoY % (25/24)": "n.m.",
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Per Share",
+        "Metric": "Weighted average shares \u2014 Basic (000s)",
+        "Units": "000 shares",
+        "FY 2025": 2926000,
+        "FY 2024": 2848000,
+        "FY 2023": 2759000,
+        "YoY % (25/24)": 0.0273876404494382,
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Per Share",
+        "Metric": "Weighted average shares \u2014 Diluted (000s)",
+        "Units": "000 shares",
+        "FY 2025": 2926000,
+        "FY 2024": 9956000,
+        "FY 2023": 2759000,
+        "YoY % (25/24)": -0.7061068702290076,
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Non-GAAP",
+        "Metric": "Adjusted EBITDA",
+        "Units": "$000",
+        "FY 2025": 6584000,
+        "FY 2024": 5350000,
+        "FY 2023": 3821000,
+        "YoY % (25/24)": 0.23065420560747674,
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data. Operating loss excluding stock-based compensation"
+      },
+      {
+        "Section": "Non-GAAP",
+        "Metric": "Non-GAAP net loss (memo)",
+        "Units": "$000",
+        "FY 2025": null,
+        "FY 2024": null,
+        "FY 2023": 0,
+        "YoY % (25/24)": "n.m.",
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data. Net income/loss excluding stock-based compensation and FV change/extinguishment of forward contract liability"
+      },
+      {
+        "Section": "Stock-Based Compensation",
+        "Metric": "SBC \u2014 Cost of revenue",
+        "Units": "$000",
+        "FY 2025": null,
+        "FY 2024": null,
+        "FY 2023": 0,
+        "YoY % (25/24)": "n.m.",
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Stock-Based Compensation",
+        "Metric": "SBC \u2014 Research and development",
+        "Units": "$000",
+        "FY 2025": null,
+        "FY 2024": null,
+        "FY 2023": 0,
+        "YoY % (25/24)": "n.m.",
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Stock-Based Compensation",
+        "Metric": "SBC \u2014 Selling, general & administrative",
+        "Units": "$000",
+        "FY 2025": null,
+        "FY 2024": null,
+        "FY 2023": 0,
+        "YoY % (25/24)": "n.m.",
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Stock-Based Compensation",
+        "Metric": "SBC \u2014 Restructuring/Other",
+        "Units": "$000",
+        "FY 2025": null,
+        "FY 2024": null,
+        "FY 2023": 0,
+        "YoY % (25/24)": "n.m.",
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Stock-Based Compensation",
+        "Metric": "Total stock-based compensation expense",
+        "Units": "$000",
+        "FY 2025": 1307000,
+        "FY 2024": 981000,
+        "FY 2023": 727000,
+        "YoY % (25/24)": 0.3323139653414884,
+        "Source / Notes": "Prospectus Summary / Summary Consolidated Financial Data."
+      },
+      {
+        "Section": "Balance Sheet (period-end)",
+        "Metric": "Cash and cash equivalents",
+        "Units": "$000",
+        "FY 2025": 24747000,
+        "FY 2024": 11385000,
+        "FY 2023": 13362000,
+        "YoY % (25/24)": 1.1736495388669304,
+        "Source / Notes": "Consolidated Balance Sheets."
+      },
+      {
+        "Section": "Balance Sheet",
+        "Metric": "Marketable securities (short-term)",
+        "Units": "$000",
+        "FY 2025": 0,
+        "FY 2024": 800000,
+        "FY 2023": -800000,
+        "YoY % (25/24)": "n.m.",
+        "Source / Notes": "Consolidated Balance Sheets."
+      },
+      {
+        "Section": "Balance Sheet",
+        "Metric": "Digital assets",
+        "Units": "$000",
+        "FY 2025": 1637000,
+        "FY 2024": 1749000,
+        "FY 2023": -112000,
+        "YoY % (25/24)": -0.06403659233847914,
+        "Source / Notes": "Consolidated Balance Sheets."
+      },
+      {
+        "Section": "Balance Sheet",
+        "Metric": "Accounts receivable, net",
+        "Units": "$000",
+        "FY 2025": 1579000,
+        "FY 2024": 1052000,
+        "FY 2023": 527000,
+        "YoY % (25/24)": 0.5009505703422052,
+        "Source / Notes": "Consolidated Balance Sheets."
+      },
+      {
+        "Section": "Balance Sheet",
+        "Metric": "Inventory",
+        "Units": "$000",
+        "FY 2025": 2416000,
+        "FY 2024": 2003000,
+        "FY 2023": 413000,
+        "YoY % (25/24)": 0.20619071392910637,
+        "Source / Notes": "Consolidated Balance Sheets."
+      },
+      {
+        "Section": "Balance Sheet",
+        "Metric": "Prepaid and other current assets",
+        "Units": "$000",
+        "FY 2025": 2210000,
+        "FY 2024": 868000,
+        "FY 2023": 1342000,
+        "YoY % (25/24)": 1.5460829493087558,
+        "Source / Notes": "Consolidated Balance Sheets."
+      },
+      {
+        "Section": "Balance Sheet",
+        "Metric": "Total current assets",
+        "Units": "$000",
+        "FY 2025": 30952000,
+        "FY 2024": 16108000,
+        "FY 2023": 14844000,
+        "YoY % (25/24)": 0.9215296746958033,
+        "Source / Notes": "Consolidated Balance Sheets."
+      },
+      {
+        "Section": "Balance Sheet",
+        "Metric": "Property, plant & equipment, net",
+        "Units": "$000",
+        "FY 2025": 42602000,
+        "FY 2024": 21147000,
+        "FY 2023": 21455000,
+        "YoY % (25/24)": 1.01456471367097,
+        "Source / Notes": "Consolidated Balance Sheets."
+      },
+      {
+        "Section": "Balance Sheet",
+        "Metric": "Finance lease right-of-use assets",
+        "Units": "$000",
+        "FY 2025": 1260000,
+        "FY 2024": 1686000,
+        "FY 2023": -426000,
+        "YoY % (25/24)": -0.25266903914590744,
+        "Source / Notes": "Consolidated Balance Sheets."
+      },
+      {
+        "Section": "Balance Sheet",
+        "Metric": "Intangible assets, net",
+        "Units": "$000",
+        "FY 2025": 1548000,
+        "FY 2024": 2211000,
+        "FY 2023": -663000,
+        "YoY % (25/24)": -0.2998643147896879,
+        "Source / Notes": "Consolidated Balance Sheets."
+      },
+      {
+        "Section": "Balance Sheet",
+        "Metric": "Goodwill",
+        "Units": "$000",
+        "FY 2025": 11809000,
+        "FY 2024": 11129000,
+        "FY 2023": 680000,
+        "YoY % (25/24)": 0.06110162638152583,
+        "Source / Notes": "Consolidated Balance Sheets."
+      },
+      {
+        "Section": "Balance Sheet",
+        "Metric": "Deferred tax assets",
+        "Units": "$000",
+        "FY 2025": 141000,
+        "FY 2024": 696000,
+        "FY 2023": -555000,
+        "YoY % (25/24)": -0.7974137931034483,
+        "Source / Notes": "Consolidated Balance Sheets."
+      }
+    ]
+  },
+  "kpis": {
+    "rows": [
+      {
+        "Metric": "Total revenue growth",
+        "Units": "%",
+        "FY 2025": 0.3324295397788084,
+        "FY 2024": 0.3492827572927699,
+        "FY 2023": "n.a.",
+        "Notes / Formula": "FY25 / FY24 - 1",
+        "Source": "SpaceX S-1, \u00a73"
+      },
+      {
+        "Metric": "Space segment revenue",
+        "Units": 0,
+        "FY 2025": 4086000,
+        "FY 2024": 3796000,
+        "FY 2023": 3557000,
+        "Notes / Formula": "Customer launches + Launch & Development",
+        "Source": "SpaceX S-1, \u00a75"
+      },
+      {
+        "Metric": "Connectivity segment revenue",
+        "Units": 0,
+        "FY 2025": 11387000,
+        "FY 2024": 7599000,
+        "FY 2023": 3869000,
+        "Notes / Formula": "Consumer Starlink + Enterprise/Gov + Mobile",
+        "Source": "SpaceX S-1, \u00a75"
+      },
+      {
+        "Metric": "AI segment revenue",
+        "Units": 0,
+        "FY 2025": 3201000,
+        "FY 2024": 2620000,
+        "FY 2023": 2961000,
+        "Notes / Formula": "Advertising + AI Solutions & Infrastructure",
+        "Source": "SpaceX S-1, \u00a75"
+      },
+      {
+        "Metric": "Gross margin",
+        "Units": "%",
+        "FY 2025": 0.49389525543536467,
+        "FY 2024": 0.4294684266856939,
+        "FY 2023": 0.4117647058823529,
+        "Notes / Formula": "Gross profit / revenue",
+        "Source": "Annual_Financials"
+      },
+      {
+        "Metric": "Operating margin",
+        "Units": "%",
+        "FY 2025": -0.13864196208632323,
+        "FY 2024": 0.03325008919015341,
+        "FY 2023": -0.3374410320593049,
+        "Notes / Formula": "Operating income (loss) / revenue",
+        "Source": "Annual_Financials"
+      },
+      {
+        "Metric": "Net margin",
+        "Units": "%",
+        "FY 2025": -0.2643782799614437,
+        "FY 2024": 0.05643952907599001,
+        "FY 2023": -0.4455569461827284,
+        "Notes / Formula": "Net income (loss) / revenue",
+        "Source": "Annual_Financials"
+      },
+      {
+        "Metric": "Adjusted EBITDA",
+        "Units": 0,
+        "FY 2025": 6584000,
+        "FY 2024": 5350000,
+        "FY 2023": 3821000,
+        "Notes / Formula": "Non-GAAP EBITDA",
+        "Source": "SpaceX S-1, \u00a72-3"
+      },
+      {
+        "Metric": "Adjusted EBITDA margin",
+        "Units": "%",
+        "FY 2025": 0.35257577380314875,
+        "FY 2024": 0.3817338565822333,
+        "FY 2023": 0.3678636757485318,
+        "Notes / Formula": "Adj EBITDA / revenue",
+        "Source": "Annual_Financials"
+      },
+      {
+        "Metric": "R&D as % of revenue",
+        "Units": "%",
+        "FY 2025": 0.46283602870300955,
+        "FY 2024": 0.24716375312165537,
+        "FY 2023": 0.20265716761336286,
+        "Notes / Formula": "R&D / revenue",
+        "Source": "Annual_Financials"
+      },
+      {
+        "Metric": "SG&A as % of revenue",
+        "Units": "%",
+        "FY 2025": 0.1415872335868052,
+        "FY 2024": 0.1293613985016054,
+        "FY 2023": 0.16029652450178108,
+        "Notes / Formula": "SG&A / revenue",
+        "Source": "Annual_Financials"
+      },
+      {
+        "Metric": "Starlink subscribers (millions)",
+        "Units": "M",
+        "FY 2025": 8.9,
+        "FY 2024": 4.4,
+        "FY 2023": 2.3,
+        "Notes / Formula": "Period-end Starlink subscriber count",
+        "Source": "SpaceX S-1, \u00a77"
+      },
+      {
+        "Metric": "Starlink monthly ARPU",
+        "Units": "$",
+        "FY 2025": 81,
+        "FY 2024": 91,
+        "FY 2023": 99,
+        "Notes / Formula": "Consumer monthly ARPU",
+        "Source": "SpaceX S-1, \u00a77"
+      },
+      {
+        "Metric": "Starlink satellites in LEO",
+        "Units": "#",
+        "FY 2025": 9600,
+        "FY 2024": null,
+        "FY 2023": "Broadband + mobile satellites in low earth orbit",
+        "Notes / Formula": "Broadband + mobile satellites in LEO",
+        "Source": "SpaceX S-1, \u00a77"
+      },
+      {
+        "Metric": "Countries / markets served",
+        "Units": "#",
+        "FY 2025": 164,
+        "FY 2024": null,
+        "FY 2023": "Countries, territories, and markets",
+        "Notes / Formula": "Countries, territories, and markets",
+        "Source": "SpaceX S-1, \u00a77"
+      },
+      {
+        "Metric": "Mass to orbit (metric tons)",
+        "Units": "MT",
+        "FY 2025": 2213,
+        "FY 2024": 1699,
+        "FY 2023": 1210,
+        "Notes / Formula": "Total mass delivered to orbit",
+        "Source": "SpaceX S-1, \u00a76"
+      },
+      {
+        "Metric": "Total launches",
+        "Units": "#",
+        "FY 2025": 170,
+        "FY 2024": 138,
+        "FY 2023": 98,
+        "Notes / Formula": "Falcon + Starship launches",
+        "Source": "SpaceX S-1, \u00a76"
+      },
+      {
+        "Metric": "Customer Falcon launches",
+        "Units": "#",
+        "FY 2025": 43,
+        "FY 2024": 45,
+        "FY 2023": 33,
+        "Notes / Formula": "External customer launches",
+        "Source": "SpaceX S-1, \u00a76"
+      },
+      {
+        "Metric": "Internal Falcon launches",
+        "Units": "#",
+        "FY 2025": 122,
+        "FY 2024": 89,
+        "FY 2023": 63,
+        "Notes / Formula": "Starlink internal launches",
+        "Source": "SpaceX S-1, \u00a76"
+      },
+      {
+        "Metric": "AI compute capacity (GW)",
+        "Units": "GW",
+        "FY 2025": 0.8,
+        "FY 2024": 0.3,
+        "FY 2023": 0,
+        "Notes / Formula": "Nameplate compute draw",
+        "Source": "SpaceX S-1, \u00a78"
+      },
+      {
+        "Metric": "Grok/X monthly active users (M)",
+        "Units": "M",
+        "FY 2025": 520,
+        "FY 2024": 520,
+        "FY 2023": "Combined Grok + X MAUs",
+        "Notes / Formula": "Combined Grok + X MAUs",
+        "Source": "SpaceX S-1, \u00a78"
+      },
+      {
+        "Metric": "AI paid subscribers (M)",
+        "Units": "M",
+        "FY 2025": 6.3,
+        "FY 2024": null,
+        "FY 2023": "X Premium + SuperGrok subscribers",
+        "Notes / Formula": "X Premium + SuperGrok subscribers",
+        "Source": "SpaceX S-1, \u00a78"
+      },
+      {
+        "Metric": "Total capex",
+        "Units": 0,
+        "FY 2025": 20737000,
+        "FY 2024": 11163000,
+        "FY 2023": 4415000,
+        "Notes / Formula": "Across Space, Connectivity, AI",
+        "Source": "SpaceX S-1, \u00a79"
+      },
+      {
+        "Metric": "Space capex",
+        "Units": 0,
+        "FY 2025": 3832000,
+        "FY 2024": 2032000,
+        "FY 2023": 1497000,
+        "Notes / Formula": "Falcon, Starship, launch facilities",
+        "Source": "SpaceX S-1, \u00a79"
+      },
+      {
+        "Metric": "Connectivity capex",
+        "Units": 0,
+        "FY 2025": 4178000,
+        "FY 2024": 3498000,
+        "FY 2023": 2455000,
+        "Notes / Formula": "Starlink satellites + ground stations",
+        "Source": "SpaceX S-1, \u00a79"
+      },
+      {
+        "Metric": "AI capex",
+        "Units": 0,
+        "FY 2025": 12727000,
+        "FY 2024": 5633000,
+        "FY 2023": 463000,
+        "Notes / Formula": "GPUs, data centers, power",
+        "Source": "SpaceX S-1, \u00a79"
+      },
+      {
+        "Metric": "Operating cash flow",
+        "Units": 0,
+        "FY 2025": 6785000,
+        "FY 2024": 5776000,
+        "FY 2023": 4520000,
+        "Notes / Formula": "Net cash from operating activities",
+        "Source": "Annual_Financials"
+      }
+    ]
+  },
+  "checks": {
+    "rows": [
+      {
+        "Check": "Revenue tie (FY 2025)",
+        "Formula / Basis": "Products + Services revenue = Total revenue (D6)",
+        "Result": 0,
+        "Expected / Interpretation": "0",
+        "Status": "OK"
+      },
+      {
+        "Check": "Revenue tie (FY 2024)",
+        "Formula / Basis": "Products + Services revenue = Total revenue (E6)",
+        "Result": 0,
+        "Expected / Interpretation": "0",
+        "Status": "OK"
+      },
+      {
+        "Check": "Cost of revenue tie (FY 2025)",
+        "Formula / Basis": "Products + Services COGS = Total COGS (D9). NOTE: SpaceX doesn't disclose by line; D7/D8 left blank.",
+        "Result": 0,
+        "Expected / Interpretation": "0",
+        "Status": "OK"
+      },
+      {
+        "Check": "Cost of revenue tie (FY 2024)",
+        "Formula / Basis": "Products + Services COGS = Total COGS (E9). NOTE: SpaceX doesn't disclose by line; E7/E8 left blank.",
+        "Result": 0,
+        "Expected / Interpretation": "0",
+        "Status": "OK"
+      },
+      {
+        "Check": "Gross profit tie (FY 2025)",
+        "Formula / Basis": "Total revenue - Total COGS = Gross profit (D10)",
+        "Result": 0,
+        "Expected / Interpretation": "0",
+        "Status": "OK"
+      },
+      {
+        "Check": "Gross profit tie (FY 2024)",
+        "Formula / Basis": "Total revenue - Total COGS = Gross profit (E10)",
+        "Result": 0,
+        "Expected / Interpretation": "0",
+        "Status": "OK"
+      },
+      {
+        "Check": "OpEx tie (FY 2025)",
+        "Formula / Basis": "R&D + SG&A + Restructuring + Impairment vs sum-of-parts check",
+        "Result": 0,
+        "Expected / Interpretation": "0",
+        "Status": "OK"
+      },
+      {
+        "Check": "OpEx tie (FY 2024)",
+        "Formula / Basis": "R&D + SG&A + Restructuring + Impairment vs sum-of-parts check",
+        "Result": 0,
+        "Expected / Interpretation": "0",
+        "Status": "OK"
+      },
+      {
+        "Check": "Operating income tie (FY 2025)",
+        "Formula / Basis": "Gross profit - (R&D + SG&A + Restr + Impair) - Operating loss (D15) = 0",
+        "Result": 0,
+        "Expected / Interpretation": "0",
+        "Status": "OK"
+      },
+      {
+        "Check": "Operating income tie (FY 2024)",
+        "Formula / Basis": "Gross profit - (R&D + SG&A + Restr + Impair) - Operating income/loss (E15) = 0",
+        "Result": 0,
+        "Expected / Interpretation": "0",
+        "Status": "OK"
+      },
+      {
+        "Check": "Net income tie (FY 2025)",
+        "Formula / Basis": "Pretax (D19) - Tax (D20) - Net loss (D21) = 0",
+        "Result": 0,
+        "Expected / Interpretation": "0",
+        "Status": "OK"
+      },
+      {
+        "Check": "Net income tie (FY 2024)",
+        "Formula / Basis": "Pretax (E19) - Tax (E20) - Net income (E21) = 0",
+        "Result": 0,
+        "Expected / Interpretation": "0",
+        "Status": "OK"
+      },
+      {
+        "Check": "Basic shares subtotal exists",
+        "Formula / Basis": "Share_Count!C24 (basic post-IPO incl. greenshoe)",
+        "Result": 12520310769,
+        "Expected / Interpretation": "> 0 once cap table is populated",
+        "Status": "OK"
+      },
+      {
+        "Check": "Fully diluted subtotal exists",
+        "Formula / Basis": "Share_Count!C26 (fully diluted)",
+        "Result": 15739210769,
+        "Expected / Interpretation": "> 0 once cap table is populated",
+        "Status": "OK"
+      },
+      {
+        "Check": "Required unknown fields",
+        "Formula / Basis": "Count of cap-table rows flagged as required but not yet populated",
+        "Result": 2,
+        "Expected / Interpretation": "0 once final S-1 is populated",
+        "Status": "OK - prelim blanks"
+      },
+      {
+        "Check": "Balance sheet tie (Dec 31 2025)",
+        "Formula / Basis": "Total assets (D47) = Total liab + Pref + Equity (D59)",
+        "Result": 0,
+        "Expected / Interpretation": 0,
+        "Status": "OK"
+      },
+      {
+        "Check": "Balance sheet tie (Dec 31 2024)",
+        "Formula / Basis": "Total assets (E47) = Total liab + Pref + Equity (E59)",
+        "Result": 0,
+        "Expected / Interpretation": 0,
+        "Status": "OK"
+      },
+      {
+        "Check": "FY 2025 revenue ties to disclosed",
+        "Formula / Basis": "Annual_Financials!D6 = $18,674M ($000)",
+        "Result": 0,
+        "Expected / Interpretation": 0,
+        "Status": "OK"
+      },
+      {
+        "Check": "FY 2025 net loss ties to disclosed",
+        "Formula / Basis": "Annual_Financials!D21 = -$4,937M",
+        "Result": 0,
+        "Expected / Interpretation": 0,
+        "Status": "OK"
+      },
+      {
+        "Check": "FY 2025 Adj EBITDA ties to disclosed",
+        "Formula / Basis": "Annual_Financials!D27 = $6,584M",
+        "Result": 0,
+        "Expected / Interpretation": 0,
+        "Status": "OK"
+      },
+      {
+        "Check": "Pro forma share count ties to disclosed",
+        "Formula / Basis": "Share_Count!C24 = 12,520,310,769",
+        "Result": 0,
+        "Expected / Interpretation": 0,
+        "Status": "OK"
+      },
+      {
+        "Check": "FD shares tie to aggressive walk",
+        "Formula / Basis": "Share_Count!C26 = 15,739,210,769 (per markdown \u00a716)",
+        "Result": 0,
+        "Expected / Interpretation": 0,
+        "Status": "OK"
+      },
+      {
+        "Check": "IPO_Analysis FD shares (post-IPO + greenshoe + awards)",
+        "Formula / Basis": "IPO_Analysis!C32 should be ~14.02B (pro forma + IPO + options + RSUs + perf + EchoStar)",
+        "Result": 14765110769,
+        "Expected / Interpretation": "~14,017,610,769",
+        "Status": "OK"
+      },
+      {
+        "Check": "IPO midpoint price within range",
+        "Formula / Basis": "C13 should be midpoint of C12 (low) and C14 (high)",
+        "Result": 0,
+        "Expected / Interpretation": 0,
+        "Status": "OK"
+      },
+      {
+        "Check": "FD market cap in target range $1.75T - $1.90T",
+        "Formula / Basis": "IPO_Analysis!F35 at midpoint",
+        "Result": 1845.638846125,
+        "Expected / Interpretation": "$1.75T - $1.90T (post-$100B raise)",
+        "Status": "OK"
+      },
+      {
+        "Check": "FY 2025 op margin negative (loss year)",
+        "Formula / Basis": "KPIs!C9 should be < 0",
+        "Result": -0.13864196208632323,
+        "Expected / Interpretation": "< 0",
+        "Status": "OK"
+      },
+      {
+        "Check": "FY 2025 revenue growth >25%",
+        "Formula / Basis": "KPIs!C4 should be ~33%",
+        "Result": 0.3324295397788084,
+        "Expected / Interpretation": "~33%",
+        "Status": "OK"
+      },
+      {
+        "Check": "Segment Adj EBITDA sums to consolidated (FY 2025)",
+        "Formula / Basis": "IPO_Analysis!D88 (sum of segments) = Annual_Financials!D27 (consolidated)",
+        "Result": 0,
+        "Expected / Interpretation": 0,
+        "Status": "OK"
+      },
+      {
+        "Check": "Segment Adj EBITDA sums to consolidated (FY 2024)",
+        "Formula / Basis": "IPO_Analysis!C88 (sum of segments) = Annual_Financials!E27 (consolidated)",
+        "Result": 0,
+        "Expected / Interpretation": 0,
+        "Status": "OK"
+      }
+    ]
+  },
+  "burningQuestions": [
+    "What is the real fully diluted share count looking out a couple years?",
+    "What does normalized Starlink ARPU look like at scale?",
+    "What are AI and Cursor worth inside the SpaceX story?",
+    "What will incremental margins look like for AI partnerships over the next couple years?"
+  ],
+  "bullBear": {
+    "bull": [
+      "Starlink TAM",
+      "Rockets",
+      "AI scale"
+    ],
+    "bear": [
+      "high CAPEX",
+      "lower margins forever",
+      "valuation"
+    ]
+  }
+}

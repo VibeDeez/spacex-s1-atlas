@@ -1,0 +1,501 @@
+{
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1181412/000162828026036936/0001628280-26-036936-index.htm",
+  "generatedFrom": "SEC S-1 filing package only: main S-1, filing-fee exhibit, exhibits, and S-1 graphics OCR.",
+  "sourceCounts": {
+    "manifest_docs": 102,
+    "html_docs": 19,
+    "graphics": 82,
+    "sections": 22,
+    "risk_headings": 54,
+    "glossary_terms": 117,
+    "exhibits": 17
+  },
+  "facts": [
+    {
+      "k": "Filing status",
+      "v": "Preliminary Form S-1 registration statement filed May 20, 2026; the preliminary prospectus is subject to completion and share/price fields remain blank.",
+      "src": "main text lines 12, 92–101, 122–123"
+    },
+    {
+      "k": "Issuer / HQ",
+      "v": "Space Exploration Technologies Corp., Texas corporation; principal executive offices at 1 Rocket Road, Starbase, Texas 78521.",
+      "src": "main text lines 21–33"
+    },
+    {
+      "k": "Ticker requested",
+      "v": "Class A common stock has been applied for listing on Nasdaq and Nasdaq Texas under “SPCX.”",
+      "src": "main text lines 99–101; underwriting lines 17171–17173"
+    },
+    {
+      "k": "Voting design",
+      "v": "Class A has one vote per share, Class B has ten votes per share, and Class C has no voting rights; Class B holders elect 51% of authorized directors.",
+      "src": "capital stock lines 16435–16446, 16451–16454"
+    },
+    {
+      "k": "Controlled company",
+      "v": "The filing says the company will be a controlled company under Nasdaq/Nasdaq Texas rules and intends to rely on certain governance exemptions.",
+      "src": "cover lines 107–117; management lines 14864–14891"
+    },
+    {
+      "k": "Basis of presentation",
+      "v": "Financial statements are retrospectively recast for the xAI merger, X merger, and the five-for-one stock split effective May 4, 2026.",
+      "src": "main text lines 306–318"
+    },
+    {
+      "k": "Use of proceeds",
+      "v": "Net proceeds are planned for growth strategy: AI compute infrastructure, launch infrastructure and vehicles, satellite constellation scale/capacity, and general corporate purposes.",
+      "src": "use of proceeds lines 4697–4704"
+    },
+    {
+      "k": "Dividend policy",
+      "v": "No cash dividends are anticipated for the foreseeable future; future earnings are expected to be retained for growth.",
+      "src": "dividend lines 4724–4734"
+    },
+    {
+      "k": "Registered amount / fee",
+      "v": "Filing fee exhibit registers Class A common stock under Rule 457(o) with a $1.0B maximum aggregate offering price and $138,100 net fee due.",
+      "src": "EX-FILING FEES lines 71–91, 99–125"
+    }
+  ],
+  "segments": [
+    {
+      "name": "Space",
+      "one_liner": "Reusable rockets, spacecraft, launch services and mission services for internal and external payloads.",
+      "details": [
+        "Falcon 9, Falcon Heavy, Dragon and Starship are the principal launch vehicles/spacecraft described in the filing.",
+        "Space segment revenue reflects customer launches and customer activities; internal Starlink deployment launches are capitalized in Connectivity, not recognized as Space revenue.",
+        "Starship is framed as the key enabler for V3 satellites, satellite-to-mobile, orbital AI compute, lunar and interplanetary objectives."
+      ],
+      "src": "summary lines 1157–1209; MD&A lines 5367–5410"
+    },
+    {
+      "name": "Connectivity",
+      "one_liner": "Starlink broadband, enterprise, government/Starshield, and satellite-to-mobile services.",
+      "details": [
+        "As of March 31, 2026, about 9,600 Starlink broadband/mobile satellites served about 10.3M subscribers across 164 countries, territories and other markets.",
+        "V1 Mobile satellites provided satellite-to-mobile data, over-the-top voice and messaging services to about 7.4M monthly unique devices across about 30 countries.",
+        "V3 satellites are designed for one Tbps downlink capacity per satellite and are expected to be deployed using Starship in H2 2026."
+      ],
+      "src": "summary lines 986–996, 1238–1250; MD&A lines 5413–5481"
+    },
+    {
+      "name": "AI",
+      "one_liner": "Grok, X, AI compute infrastructure, consumer/enterprise AI products and planned orbital AI compute.",
+      "details": [
+        "xAI was acquired in early 2026 and is now described as an integral pillar of SpaceX.",
+        "COLOSSUS and COLOSSUS II collectively provide about 1.0 GW of compute power; the first clusters came online in 122 days and 91 days, respectively.",
+        "Integrated Grok/X platforms had over 1.3B supported accounts active in the LTM ended March 31, 2026, about 550M MAUs and about 117M MAUs using Grok AI features."
+      ],
+      "src": "summary lines 931–951, 998–1017; MD&A lines 5501–5596"
+    }
+  ],
+  "strategy": [
+    {
+      "title": "Repeatable model",
+      "items": [
+        "Leverage launch capabilities to enable massive scale",
+        "Identify/create trillion-dollar opportunities",
+        "Use first-principles engineering",
+        "Apply “The Algorithm”",
+        "Vertically integrate to the end customer",
+        "Drive cost down and throughput up",
+        "Generate cash flow and reinvest"
+      ],
+      "src": "summary lines 1336–1353"
+    },
+    {
+      "title": "Growth vectors",
+      "items": [
+        "Increase launch payload capacity",
+        "Establish lunar economy",
+        "Grow Starlink Broadband customers",
+        "Expand Starlink Mobile",
+        "Increase constellation capacity",
+        "Grow consumer AI monetization",
+        "Grow X monetization",
+        "Deepen enterprise/government AI adoption",
+        "Scale terrestrial power and compute",
+        "Deploy orbital AI compute at scale",
+        "Design/manufacture chips",
+        "Launch digital human augmentation"
+      ],
+      "src": "summary lines 1540–1570"
+    },
+    {
+      "title": "Future markets named",
+      "items": [
+        "Point-to-point terrestrial travel",
+        "Space tourism",
+        "In-orbit manufacturing",
+        "Passenger/cargo transport to the Moon and Mars",
+        "Energy production on the Moon and Mars",
+        "Manufacturing on the Moon and Mars",
+        "Asteroid mining"
+      ],
+      "src": "summary lines 1571–1585"
+    },
+    {
+      "title": "Market opportunity framing",
+      "items": [
+        "Quantifiable TAM stated as $28.5T: $370B Space, $1.6T Connectivity, $26.5T AI",
+        "AI TAM breakdown: $2.4T infrastructure, $760B consumer subscriptions, $600B digital advertising, $22.7T enterprise applications",
+        "China and Russia are excluded from global estimates for illustrative TAM sizing"
+      ],
+      "src": "summary lines 1588–1595"
+    }
+  ],
+  "governance": [
+    {
+      "name": "Elon Musk",
+      "role": "CEO, Chief Technical Officer, Chairman",
+      "age": 54,
+      "notes": "Founder; also Technoking/CEO/director roles at Tesla and founder/CEO roles at Neuralink and The Boring Company. Holds 85.1% combined voting power before the offering after reclassification/conversion/split.",
+      "src": "management lines 14659–14719; ownership lines 16207–16218"
+    },
+    {
+      "name": "Gwynne Shotwell",
+      "role": "President, COO, Director",
+      "age": 62,
+      "notes": "President/COO since 2008; director since March 2009.",
+      "src": "management lines 14664–14732"
+    },
+    {
+      "name": "Bret Johnsen",
+      "role": "Chief Financial Officer",
+      "age": 57,
+      "notes": "CFO since 2011; leads global finance organization.",
+      "src": "management lines 14669–14747"
+    },
+    {
+      "name": "Ira Ehrenpreis",
+      "role": "Director",
+      "age": 57,
+      "notes": "DBL Partners founder/managing member; independent director; expected compensation/nominating chair.",
+      "src": "management lines 14749–14760, 14983–14992"
+    },
+    {
+      "name": "Randy Glein",
+      "role": "Director",
+      "age": 60,
+      "notes": "DFJ Growth co-founder/managing partner; expected audit chair and audit committee financial expert.",
+      "src": "management lines 14761–14773, 14962–14968"
+    },
+    {
+      "name": "Antonio J. Gracias",
+      "role": "Director",
+      "age": 55,
+      "notes": "Valor CEO/CIO; board member since 2010; expected compensation/nominating member.",
+      "src": "management lines 14774–14799, 14983–14992"
+    },
+    {
+      "name": "Donald Harrison",
+      "role": "Director",
+      "age": 54,
+      "notes": "President, Global Partnerships and Corporate Development at Google; independent director determination considered Google business relationship.",
+      "src": "management lines 14800–14808, 14919–14930"
+    },
+    {
+      "name": "Steve Jurvetson",
+      "role": "Director",
+      "age": 59,
+      "notes": "Future Ventures co-founder; expected audit committee member.",
+      "src": "management lines 14809–14820, 14962–14968"
+    },
+    {
+      "name": "Luke Nosek",
+      "role": "Director",
+      "age": 50,
+      "notes": "Gigafund co-founder/managing partner; expected compensation/nominating member.",
+      "src": "management lines 14821–14833, 14983–14992"
+    }
+  ],
+  "related": [
+    {
+      "party": "Tesla",
+      "items": [
+        "Tesla owns 18,990,195 Class A shares (<1.0%) as of May 1, 2026 after the offering.",
+        "SpaceX obtained goods/services from Tesla of $11M in 2023, $4M in 2024, $144M in 2025, and $0.2M Jan–Feb 2026.",
+        "xAI obtained goods/services from Tesla of $191M in 2024, $506M in 2025, and $34M Jan–Feb 2026; xAI recognized revenue from Tesla of $2M in 2025 and $0.4M Jan–Feb 2026.",
+        "Tesla advertising on X totaled $0.5M in 2024, $4M in 2025, and $0 Jan–Feb 2026."
+      ],
+      "src": "related lines 15895–15980"
+    },
+    {
+      "party": "The Boring Company / Musk Industries / Musk security",
+      "items": [
+        "X lease payments to The Boring Company subsidiary: $0.1M in 2024, $1M in 2025, $0.1M Jan–Feb 2026; SpaceX incurred $1M in 2025 for tunnels in Bastrop, Texas.",
+        "xAI lease payments to Musk Industries LLC: $0.5M in 2024, $2M in 2025, $0.2M Jan–Feb 2026.",
+        "Security services company owned by Mr. Musk: SpaceX expenses of $2M in 2023, $3M in 2024, $4M in 2025, $1M Jan–Feb 2026."
+      ],
+      "src": "related lines 15980–16015"
+    },
+    {
+      "party": "Valor / Antonio J. Gracias",
+      "items": [
+        "xAI subsidiaries entered into three equipment lease/access agreements with Valor providing aggregate cash payments of $6.986B, $6.633B, and $6.587B over the lease lives; obligations guaranteed by SpaceX or subsidiaries.",
+        "Payments under these lease agreements: $885M in 2025 and $857M Jan–Feb 2026.",
+        "X received X API payments from Valor of $1M in 2024, $1M in 2025, and $0.1M Jan–Feb 2026."
+      ],
+      "src": "related lines 16016–16050"
+    },
+    {
+      "party": "Aircraft / registration rights",
+      "items": [
+        "SpaceX owns/operates three aircraft through Falcon Landing, LLC; one aircraft is maintained by Craft Aviation Services, an affiliate of Mr. Musk.",
+        "Use of personal aircraft and a co-owned Shotwell/Johnsen aircraft for SpaceX business are disclosed with annual expense amounts.",
+        "Existing investors affiliated with Elon Musk, Google, Valor and DFJ Growth have registration rights under an August 4, 2020 investors’ rights agreement."
+      ],
+      "src": "related lines 16053–16124"
+    }
+  ],
+  "compensation": [
+    {
+      "person": "Elon Musk",
+      "2025_total": "$54,080",
+      "notes": "Base salary unchanged since 2019; no annual long-term incentive in 2025. In Jan. 2026 the board approved 1B performance-based restricted Class B shares across 15 tranches requiring market-cap milestones and a permanent Mars colony with at least one million inhabitants."
+    },
+    {
+      "person": "Gwynne Shotwell",
+      "2025_total": "$85,806,897",
+      "notes": "Salary $1.08M; option awards $82.97M; stock awards $1.73M; other compensation $30,095. Received salary partly in RSUs and long-term/special option awards."
+    },
+    {
+      "person": "Bret Johnsen",
+      "2025_total": "$9,838,002",
+      "notes": "Salary $825k; option awards $9.01M. Johnsen 2024 performance options amended in Jan. 2026 to vest by adjusted EBITDA tranches; none earned for 2025 adjusted EBITDA."
+    }
+  ],
+  "offering": [
+    {
+      "label": "Class offered",
+      "value": "Class A common stock, par value $0.001 per share"
+    },
+    {
+      "label": "Offer size / price range",
+      "value": "Blank in preliminary prospectus"
+    },
+    {
+      "label": "Listing",
+      "value": "Nasdaq and Nasdaq Texas, symbol SPCX"
+    },
+    {
+      "label": "Over-allotment option",
+      "value": "30 days after prospectus date; number of additional shares blank"
+    },
+    {
+      "label": "Retail access",
+      "value": "Anticipated retail platforms include Charles Schwab, Fidelity, Robinhood, SoFi and E*TRADE by Morgan Stanley"
+    },
+    {
+      "label": "Lock-up",
+      "value": "Company 180 days; founder and certain significant investors 366 days for an aggregate amount blank; founder excluded from early release provisions"
+    },
+    {
+      "label": "Directed share program",
+      "value": "Up to a blank percent of offering reserved for employees and persons identified by management"
+    }
+  ],
+  "capital": {
+    "actual_mar_31_2026": [
+      {
+        "label": "Cash and cash equivalents",
+        "value": 15852
+      },
+      {
+        "label": "Total long-term debt",
+        "value": 29111
+      },
+      {
+        "label": "Redeemable convertible preferred stock",
+        "value": 7049
+      },
+      {
+        "label": "Total shareholders’ equity",
+        "value": 34533
+      },
+      {
+        "label": "Total capitalization",
+        "value": 70693
+      }
+    ],
+    "debt": [
+      {
+        "label": "SpaceX Credit Facility outstanding",
+        "value": 0,
+        "note": "No borrowings outstanding as of April 30, 2026; amended in May 2026 to $5.0B capacity."
+      },
+      {
+        "label": "SpaceX Bridge Loan",
+        "value": 20000,
+        "note": "Matures Sept. 2, 2027, with two three-month extensions at company option."
+      },
+      {
+        "label": "X 2027 and X 2030 Notes",
+        "value": 27,
+        "note": "Listed in capitalization table."
+      },
+      {
+        "label": "Other financings",
+        "value": 9105,
+        "note": "Includes AI infrastructure assets recorded as failed sale-leaseback transactions."
+      }
+    ],
+    "src": "capitalization lines 4740–4952; MD&A lines 10231–10333"
+  },
+  "sections": [
+    {
+      "key": "glossary",
+      "title": "GLOSSARY OF TERMS",
+      "start_line": 481,
+      "end_line": 896,
+      "chars": 25809
+    },
+    {
+      "key": "summary",
+      "title": "PROSPECTUS SUMMARY",
+      "start_line": 897,
+      "end_line": 2657,
+      "chars": 100723
+    },
+    {
+      "key": "risk",
+      "title": "RISK FACTORS",
+      "start_line": 2658,
+      "end_line": 4601,
+      "chars": 209766
+    },
+    {
+      "key": "forward",
+      "title": "CAUTIONARY STATEMENT REGARDING FORWARD-LOOKING STATEMENTS",
+      "start_line": 4602,
+      "end_line": 4696,
+      "chars": 7850
+    },
+    {
+      "key": "proceeds",
+      "title": "USE OF PROCEEDS",
+      "start_line": 4697,
+      "end_line": 4723,
+      "chars": 2886
+    },
+    {
+      "key": "dividend",
+      "title": "DIVIDEND POLICY",
+      "start_line": 4724,
+      "end_line": 4739,
+      "chars": 1478
+    },
+    {
+      "key": "capitalization",
+      "title": "CAPITALIZATION",
+      "start_line": 4740,
+      "end_line": 4953,
+      "chars": 6604
+    },
+    {
+      "key": "dilution",
+      "title": "DILUTION",
+      "start_line": 4954,
+      "end_line": 5055,
+      "chars": 5895
+    },
+    {
+      "key": "mda",
+      "title": "MANAGEMENT’S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERATIONS",
+      "start_line": 5056,
+      "end_line": 10843,
+      "chars": 222635
+    },
+    {
+      "key": "business",
+      "title": "BUSINESS",
+      "start_line": 10844,
+      "end_line": 14652,
+      "chars": 345954
+    },
+    {
+      "key": "management",
+      "title": "MANAGEMENT",
+      "start_line": 14653,
+      "end_line": 15022,
+      "chars": 30775
+    },
+    {
+      "key": "comp",
+      "title": "EXECUTIVE COMPENSATION",
+      "start_line": 15023,
+      "end_line": 15866,
+      "chars": 44714
+    },
+    {
+      "key": "related",
+      "title": "CERTAIN RELATIONSHIPS AND RELATED PERSON",
+      "start_line": 15867,
+      "end_line": 16146,
+      "chars": 16165
+    },
+    {
+      "key": "ownership",
+      "title": "SECURITY OWNERSHIP OF CERTAIN BENEFICIAL OWNERS AND MANAGEMENT",
+      "start_line": 16147,
+      "end_line": 16415,
+      "chars": 13077
+    },
+    {
+      "key": "capital_stock",
+      "title": "DESCRIPTION OF CAPITAL STOCK",
+      "start_line": 16416,
+      "end_line": 16787,
+      "chars": 36661
+    },
+    {
+      "key": "future_sale",
+      "title": "SHARES ELIGIBLE FOR FUTURE SALE",
+      "start_line": 16788,
+      "end_line": 16866,
+      "chars": 7794
+    },
+    {
+      "key": "tax",
+      "title": "MATERIAL U.S. FEDERAL INCOME TAX CONSIDERATIONS FOR NON-U.S. HOLDERS OF CLASS",
+      "start_line": 16867,
+      "end_line": 17034,
+      "chars": 16521
+    },
+    {
+      "key": "underwriting",
+      "title": "UNDERWRITING",
+      "start_line": 17035,
+      "end_line": 17717,
+      "chars": 61665
+    },
+    {
+      "key": "legal",
+      "title": "LEGAL MATTERS",
+      "start_line": 17718,
+      "end_line": 17721,
+      "chars": 338
+    },
+    {
+      "key": "experts",
+      "title": "EXPERTS",
+      "start_line": 17722,
+      "end_line": 17727,
+      "chars": 587
+    },
+    {
+      "key": "where",
+      "title": "WHERE YOU CAN FIND ADDITIONAL INFORMATION",
+      "start_line": 17728,
+      "end_line": 17761,
+      "chars": 2718
+    },
+    {
+      "key": "financial_index",
+      "title": "INDEX TO FINANCIAL STATEMENTS",
+      "start_line": 17762,
+      "end_line": 29736,
+      "chars": 450089
+    }
+  ]
+}

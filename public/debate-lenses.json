@@ -1,0 +1,288 @@
+{
+  "generatedFrom": "Debate lenses are prompt scaffolding only; evidence and numeric values below are sourced to the SpaceX S-1 filing package extracted locally.",
+  "scanCaveat": "Question prompts are not treated as evidence. Values, clauses and calculations shown here come from the S-1 payload and source packets.",
+  "lenses": [
+    {
+      "id": "valuation",
+      "label": "Valuation math",
+      "question": "Is the implied IPO valuation supportable against filed revenue, margins, capex and losses?",
+      "sampleQuestions": [
+        "Could a very high IPO valuation be supported by filed revenue, margins, capex and losses?",
+        "What revenue or net income would a user-entered valuation scenario require?",
+        "How should a preliminary filing with blank price/share-count fields constrain valuation math?"
+      ]
+    },
+    {
+      "id": "internal-economy",
+      "label": "Internal economy",
+      "question": "Are xAI, X, Tesla and other Musk-affiliated entities creating circular economics or conflicts?",
+      "sampleQuestions": [
+        "Do xAI, X, Tesla and other affiliated entities create related-party economics worth isolating?",
+        "Which counterparty relationships are disclosed in the filing?",
+        "Where do merger-recast financials change the baseline?"
+      ]
+    },
+    {
+      "id": "segment-tug",
+      "label": "Starlink vs AI capex",
+      "question": "Is Connectivity carrying the financial model while AI consumes capital?",
+      "sampleQuestions": [
+        "Is Connectivity carrying more of the revenue base while AI consumes more capital?",
+        "How do segment revenue, operating income and capex compare across periods?",
+        "What happens when Starlink, Space and AI are viewed side by side?"
+      ]
+    },
+    {
+      "id": "supply-mechanics",
+      "label": "Float and supply",
+      "question": "How much stock will trade, what is blank in the preliminary prospectus, and how much goes to retail?",
+      "sampleQuestions": [
+        "How much stock will trade once final prospectus blanks are filled?",
+        "Which share-count, pricing, underwriter option and directed-share fields are still blank?",
+        "What can and cannot be inferred before final offering terms?"
+      ]
+    },
+    {
+      "id": "control",
+      "label": "Control terms",
+      "question": "How much power do common shareholders actually have after the IPO?",
+      "sampleQuestions": [
+        "How much power do common shareholders have after the IPO?",
+        "What do the dual-class terms, Class B rights and controlled-company status imply?",
+        "Which shareholder-rights limits are explicitly disclosed?"
+      ]
+    },
+    {
+      "id": "treasury",
+      "label": "Treasury oddities",
+      "question": "What is sitting on the balance sheet beyond operating assets: cash, securities, debt, preferred stock and bitcoin?",
+      "sampleQuestions": [
+        "What sits on the balance sheet beyond operating assets?",
+        "How large are cash, marketable securities, liabilities, preferred stock and digital assets?",
+        "How are bitcoin units, fair value and unrealized marks disclosed?"
+      ]
+    },
+    {
+      "id": "holder-map",
+      "label": "Holder questions",
+      "question": "Different investors are asking different questions: private holders, day-one buyers, index owners and governance skeptics.",
+      "sampleQuestions": [
+        "What should different holder types inspect before making a decision?",
+        "How do private holders, day-one buyers, index-exposed holders and governance-focused holders differ?",
+        "Which filed sections matter most for each holder question?"
+      ]
+    },
+    {
+      "id": "risk-claims",
+      "label": "Risk claims",
+      "question": "Claims about satellites, regulation, AI, Musk/key-person risk and public-company rights should map to actual risk factors.",
+      "sampleQuestions": [
+        "Which filed risk factors correspond to common claims about satellites, regulation, AI and control?",
+        "How can risk-factor headings be searched without inventing severity or probability?",
+        "Where do key-person, shareholder-rights and capital-intensity risks appear in the filing?"
+      ]
+    }
+  ],
+  "filedFacts": {
+    "ipoBlanks": {
+      "title": "Preliminary IPO fields are blank",
+      "detail": "The preliminary prospectus states the company is offering a blank number of Class A shares, with a blank expected price range, blank per-share price fields, a blank underwriter option amount and a blank directed-share percentage.",
+      "source": "cover lines 92–149; capitalization lines 4750–4754"
+    },
+    "listing": {
+      "title": "Applied listing symbol",
+      "detail": "The company applied to list Class A common stock on Nasdaq and Nasdaq Texas under the symbol SPCX.",
+      "source": "cover lines 99–101"
+    },
+    "basis": {
+      "title": "Recast financial basis",
+      "detail": "Financial statements are retrospectively recast for the xAI merger, X merger and five-for-one stock split effective May 4, 2026.",
+      "source": "main text lines 306–318"
+    },
+    "voting": {
+      "title": "Dual-class voting",
+      "detail": "Class A has one vote per share, Class B has ten votes per share and Class C has no voting rights; Class B holders separately elect 51% of the board while any Class B shares remain outstanding.",
+      "source": "cover lines 102–106; capital stock lines 16433–16455"
+    },
+    "muskControl": {
+      "title": "Musk voting power before offering",
+      "detail": "Elon Musk is shown with 849,494,440 Class A shares, 5,569,053,075 Class B shares and 85.1% combined voting power before the offering in the beneficial ownership table.",
+      "source": "ownership lines 16207–16218"
+    },
+    "controlledCompany": {
+      "title": "Controlled company status",
+      "detail": "The filing says SpaceX will be a controlled company under Nasdaq/Nasdaq Texas rules after the offering and intends to rely on certain governance exemptions.",
+      "source": "cover lines 107–117; management lines 14864–14891"
+    },
+    "muskRemoval": {
+      "title": "Removal of Musk from leadership roles",
+      "detail": "Removal of Mr. Musk from the board and from CEO/Chairman leadership roles requires approval of holders of at least a majority of the voting power of outstanding Class B common stock voting separately as a class.",
+      "source": "capital stock lines 16439–16444 and 16469–16473"
+    },
+    "directedShare": {
+      "title": "Directed share program blank",
+      "detail": "At the company's request, underwriters reserved up to a blank percent of Class A shares for sale at the IPO price to blank recipients under the Directed Share Program language.",
+      "source": "cover lines 145–149; underwriting / Directed Share Program"
+    },
+    "digitalAssets": {
+      "title": "Bitcoin / digital assets",
+      "detail": "The filing identifies digital assets as bitcoin and shows 18,712 units with cost basis of $661 million and fair value of $1.637 billion at December 31, 2025; the 2024 table shows the same units and cost basis with $1.749 billion fair value.",
+      "source": "financial notes lines 19437–19443 and 20542–20603"
+    },
+    "digitalAssetLoss": {
+      "title": "Digital asset mark-to-market",
+      "detail": "The filing shows an unrealized gain/(loss), net on digital assets of $(112) million for 2025 and $955 million for 2024.",
+      "source": "financial notes lines 20580–20603"
+    },
+    "teslaRelated": {
+      "title": "Tesla related-party amounts",
+      "detail": "Tesla owned 18,990,195 Class A shares (<1.0%) as of May 1, 2026 after the offering; SpaceX obtained goods and services from Tesla of $11 million in 2023, $4 million in 2024, $144 million in 2025 and $0.2 million from Jan. 1 through Feb. 28, 2026.",
+      "source": "related-party lines 15895–15925"
+    },
+    "xaiTesla": {
+      "title": "xAI/Tesla related-party amounts",
+      "detail": "xAI obtained goods and services from Tesla of $191 million in 2024, $506 million in 2025 and $34 million from Jan. 1 through Feb. 28, 2026; xAI recognized revenue from Tesla of $2 million in 2025 and $0.4 million from Jan. 1 through Feb. 28, 2026.",
+      "source": "related-party lines 15927–15946"
+    },
+    "xMerger": {
+      "title": "xAI merger scope",
+      "detail": "On Feb. 2, 2026 SpaceX effected the xAI Merger, pursuant to which it acquired xAI, which includes X; related-party disclosures include certain ongoing xAI/X Holdings agreements entered into before the merger.",
+      "source": "related-party lines 15882–15887"
+    }
+  },
+  "treasury": [
+    {
+      "label": "Cash and cash equivalents",
+      "value": 15852,
+      "display": "$15.9B",
+      "asOf": "Mar. 31, 2026",
+      "source": "financials.balance[date=Mar 31 2026]"
+    },
+    {
+      "label": "Marketable securities",
+      "value": 7823,
+      "display": "$7.8B",
+      "asOf": "Mar. 31, 2026",
+      "source": "financials.balance[date=Mar 31 2026]"
+    },
+    {
+      "label": "Total liabilities",
+      "value": 60512,
+      "display": "$60.5B",
+      "asOf": "Mar. 31, 2026",
+      "source": "financials.balance[date=Mar 31 2026]"
+    },
+    {
+      "label": "Preferred stock",
+      "value": 7049,
+      "display": "$7.0B",
+      "asOf": "Mar. 31, 2026",
+      "source": "financials.balance[date=Mar 31 2026]"
+    },
+    {
+      "label": "Bitcoin units",
+      "value": 18712,
+      "display": "18,712",
+      "asOf": "Dec. 31, 2025",
+      "source": "financial notes lines 20542–20603"
+    },
+    {
+      "label": "Bitcoin fair value",
+      "value": 1637,
+      "display": "$1.6B",
+      "asOf": "Dec. 31, 2025",
+      "source": "financial notes lines 20542–20603"
+    }
+  ],
+  "holderPersonas": [
+    {
+      "persona": "Existing private holder",
+      "question": "What changes when private shares become public-market securities?",
+      "lookAt": [
+        "share class and conversion terms",
+        "offering / resale / lock-up language",
+        "beneficial ownership table",
+        "future sales section"
+      ],
+      "answerDiscipline": "The preliminary S-1 has blank price/offering fields; it can identify mechanics, not a personal sell/hold answer.",
+      "source": "cover lines 92–149; capital stock lines 16423–16517; future sales section"
+    },
+    {
+      "persona": "Day-one retail buyer",
+      "question": "What am I actually buying?",
+      "lookAt": [
+        "Class A one-vote common stock",
+        "controlled-company status",
+        "risk factors",
+        "dividend policy",
+        "use of proceeds"
+      ],
+      "answerDiscipline": "The filing says Class A has one vote per share and no cash dividends are anticipated for the foreseeable future.",
+      "source": "cover lines 97–117; dividend lines 4724–4734; risk factors"
+    },
+    {
+      "persona": "Index / ETF exposed holder",
+      "question": "Could I get exposure indirectly?",
+      "lookAt": [
+        "listing symbol",
+        "public float blanks",
+        "offering size blanks",
+        "corporate governance exemptions"
+      ],
+      "answerDiscipline": "The S-1 does not provide final float/price/share-count values needed for index-mechanics math.",
+      "source": "cover lines 99–149; offering summary"
+    },
+    {
+      "persona": "Governance-focused holder",
+      "question": "Can common shareholders influence control?",
+      "lookAt": [
+        "Class B board-election rights",
+        "Musk voting power",
+        "controlled-company exemptions",
+        "forum/arbitration and shareholder-proposal limits"
+      ],
+      "answerDiscipline": "The filing identifies concentrated voting control and shareholder-right limitations; this app maps exact clauses rather than scoring governance quality.",
+      "source": "ownership lines 16207–16218; capital stock lines 16433–16517; risk factors 49–54"
+    },
+    {
+      "persona": "Balance-sheet oddity hunter",
+      "question": "What non-obvious assets or claims sit outside the core story?",
+      "lookAt": [
+        "cash and marketable securities",
+        "digital assets / bitcoin",
+        "long-term debt",
+        "preferred stock",
+        "related-party transactions"
+      ],
+      "answerDiscipline": "Treasury figures are filed balances; any market interpretation remains a user scenario.",
+      "source": "financials.balance; financial notes lines 19437–19443 and 20542–20603; related-party section"
+    }
+  ],
+  "riskClaims": [
+    {
+      "id": "ai",
+      "label": "AI / Grok / xAI",
+      "pattern": "AI|Grok|X platform|data center|compute|chips|xAI"
+    },
+    {
+      "id": "starlink",
+      "label": "Starlink / satellites",
+      "pattern": "Starlink|satellite|Low-Earth|spectrum|mobile network|constellation"
+    },
+    {
+      "id": "regulatory",
+      "label": "Regulatory / geopolitical",
+      "pattern": "regulatory|licenses|FAA|FCC|spectrum|export control|sanctions|government|geopolitical"
+    },
+    {
+      "id": "capital",
+      "label": "Capital intensity / debt",
+      "pattern": "capital expenditures|financing|indebtedness|cash flow|net losses|profitability"
+    },
+    {
+      "id": "control",
+      "label": "Musk / control / shareholder rights",
+      "pattern": "Musk|controlled company|dual class|shareholders|Class B|conflicts of interest|forum|arbitration|proposal"
+    }
+  ]
+}

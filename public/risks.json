@@ -1,0 +1,220 @@
+{
+  "risks": [
+    {
+      "group": "Business",
+      "heading": "Any failure or delay in the development of Starship at scale or in achieving the required launch cadence, reusability and capabilities thereafter would delay or limit our ability to execute our growth strategy, including the deployment of next-generation satellites, global satellite-to-mobile connectivity, and orbital AI compute, which could materially adversely affect our business, financial condition, results of operations, and future prospects."
+    },
+    {
+      "group": "Business",
+      "heading": "Any delays or difficulties in obtaining, maintaining or renewing required regulatory approvals and licenses required for our space-related activities, including FAA launch and reentry licenses, would materially delay or disrupt our operations, harm our business, or limit our ability to execute our business strategy."
+    },
+    {
+      "group": "Business",
+      "heading": "Any delays or difficulties in obtaining, maintaining or renewing required communications licenses and spectrum authorizations for our satellite connectivity services, including international and FCC satellite spectrum licenses, could materially delay or disrupt our operations, harm our business, or limit our ability to execute our business strategy."
+    },
+    {
+      "group": "Business",
+      "heading": "Our AI products and X platform are subject to complex and evolving U.S. and foreign laws and regulations regarding privacy, cybersecurity, data use, data combination, data protection, content, AI, competition, youth protection, safety, consumer protection and notification, advertising, e-commerce, sanctions, export controls, and other matters. Many of these laws and regulations are subject to change and uncertain interpretation, and we could be required to make changes to our products and business practices, and be exposed to monetary penalties, increased cost of operations, declines in user growth or engagement, or loss of customers, or other harm to our AI products and X platform."
+    },
+    {
+      "group": "Business",
+      "heading": "Our Starlink and other satellite services are subject to complex and evolving U.S. and foreign laws and regulations, particularly relating to data privacy, cybersecurity, and telecommunications."
+    },
+    {
+      "group": "Business",
+      "heading": "Our business strategy depends on successfully designing, developing, and deploying our products and services, as well as related platforms, infrastructure, and other strategic initiatives, at an unprecedented scale, which presents significant execution, cost, and timing risks."
+    },
+    {
+      "group": "Business",
+      "heading": "We have experienced, and will likely continue to experience, launch delays and failures that could have a material adverse effect on our business, financial condition, results of operations, and future prospects."
+    },
+    {
+      "group": "Business",
+      "heading": "Our satellites, launch vehicles, and other space-related technologies operate, and in the case of orbital AI compute, will operate, in the harsh and unpredictable environment of space, exposing them to a wide and unique range of space-related risks that could cause them to malfunction or fail, and any such malfunction or failure could adversely affect our business, financial condition, results of operations, and future prospects."
+    },
+    {
+      "group": "Business",
+      "heading": "The continued proliferation of satellite constellations in Low-Earth Orbit, as well as the risk of collisions with space debris or other spacecraft, could limit or impair our launch flexibility and satellite deployment, which could adversely affect our business, financial condition, results of operations, and future prospects."
+    },
+    {
+      "group": "Business",
+      "heading": "Interruptions in the operation of critical satellite network, ground station, launch, manufacturing, or spacecraft or data center infrastructure could result in significant downtime, operational delays or loss of service, each of which could have a material adverse effect on our business, financial condition, results of operations, and future prospects."
+    },
+    {
+      "group": "Business",
+      "heading": "Adverse global macroeconomic and geopolitical conditions may negatively affect our business, financial condition, results of operations and future prospects."
+    },
+    {
+      "group": "Business",
+      "heading": "Manufacturing, testing and launching rockets, satellites, and spacecraft, including our efforts to reuse rockets and spacecraft, involve inherent risks that could result in human injury or death, property damage and environmental damage or other adverse environmental impacts due to accidents or equipment failures. Any such events could result in substantial losses, including reputational harm and legal liability, which could have a material adverse effect on our business."
+    },
+    {
+      "group": "Business",
+      "heading": "Although we are focused on the vertical integration of our businesses, we depend on third parties to manufacture and supply certain key components necessary for the provision of our launch, connectivity, and AI services, and any supply shortages or disruptions or failures in their performance could have a material adverse effect on our business, financial condition, results of operations, and future prospects."
+    },
+    {
+      "group": "Business",
+      "heading": "Our ability to scale our AI products relies on our terrestrial and orbital AI compute infrastructure, which depends on the availability of power, AI processors, and other critical components, telecommunications services, and any shortages or disruptions thereof would materially adversely affect our business, financial condition, results of operations, and future prospects."
+    },
+    {
+      "group": "Business",
+      "heading": "We face intense competition in the markets in which we operate, and while we have historically outperformed certain competitors in our Space and Connectivity segments, we may not continue to do so, which could adversely affect our business, financial condition, results of operations, and future prospects."
+    },
+    {
+      "group": "Business",
+      "heading": "We depend on our ability to recruit and retain employees who have advanced engineering and technical skills, and intense competition for such employees may increase costs and affect our ability to meet development and production timelines."
+    },
+    {
+      "group": "Business",
+      "heading": "From time to time, we are involved in litigation, investigations, and other regulatory proceedings which could be costly, time-consuming, and divert management attention, materially adversely affecting our business."
+    },
+    {
+      "group": "Business",
+      "heading": "Any significant disruption in, or unauthorized access to, our computer and data systems or those of third parties that we utilize in our operations could result in a loss or degradation of service, loss of trust in us and harm to our business."
+    },
+    {
+      "group": "Business",
+      "heading": "The development and maintenance of the technologies and infrastructure necessary to support our current and future operations will require significant capital expenditures, and if we are unable to generate sufficient cash flow from operations or obtain additional financing on acceptable terms, our business, financial condition, results of operations, and future prospects could be materially and adversely affected."
+    },
+    {
+      "group": "Business",
+      "heading": "Our substantial level of indebtedness could materially adversely affect our financial condition."
+    },
+    {
+      "group": "Business",
+      "heading": "Our future revenue and operating results depend upon our ability to develop new technologies and respond to changes in customer demands and industry standards in highly competitive markets, and if we are unable to do so, our business, financial condition, results of operations, and future prospects may be materially and adversely affected."
+    },
+    {
+      "group": "Business",
+      "heading": "The estimates of future market opportunity and forecasts of market growth, and our ability to capture such markets, included in this prospectus may prove to be inaccurate."
+    },
+    {
+      "group": "Business",
+      "heading": "Many of our initiatives, including those to develop orbital AI compute at scale, manufacture AI chips at scale, establish a lunar economy, develop human augmentation systems, and transport humans and cargo to the Moon and Mars, involve significant technical complexity, unproven technologies, or technologies that do not exist or may require significant advancement, and such initiatives may not achieve commercial viability."
+    },
+    {
+      "group": "Business",
+      "heading": "Several of our anticipated market opportunities, including certain AI, orbital, lunar, and interplanetary transportation and industrial activities, are still emerging and evolving or do not currently exist, and such markets may not develop as we expect, or at all."
+    },
+    {
+      "group": "Business",
+      "heading": "The global nature of our business poses risks with respect to unstable, malicious or arbitrary legal regimes and authorities."
+    },
+    {
+      "group": "Business",
+      "heading": "Our services are subject to risks related to supplying services to the U.S. government."
+    },
+    {
+      "group": "Business",
+      "heading": "We derive significant revenue from U.S. government contracts that are subject to competitive bidding, funding approvals and other government budgetary processes, which factors could adversely affect our business, financial condition, results of operations, and future prospects."
+    },
+    {
+      "group": "Business",
+      "heading": "Our ability to expand our Starlink consumer and enterprise connectivity services depends on our ability to increase market awareness and acceptance of connectivity through Starlink, and any failure to do so could materially and adversely affect our business, financial condition, results of operations and future prospects."
+    },
+    {
+      "group": "Business",
+      "heading": "The expansion of our satellite-to-mobile connectivity services depends substantially on our ability to secure and maintain partnerships with mobile network operators and on the adoption of necessary hardware and software modifications by device manufacturers, and any failure to do so could materially and adversely affect our business, financial condition, results of operations and future prospects."
+    },
+    {
+      "group": "Business",
+      "heading": "If the recommendations, forecasts, content, analyses or other output that our AI technologies, including Grok, assist in producing are or are alleged to be deficient, inaccurate, harmful, illegal, or used for an improper purpose, we could continue to be subjected to claims and investigations, and we could be subjected to legal liability and brand, reputational, or competitive harm."
+    },
+    {
+      "group": "Business",
+      "heading": "Environmental laws, regulations, litigation, liabilities and proceedings may adversely affect our operations, including our launch operations, manufacturing activities, fuel storage and handling operations, launch facilities and ground infrastructure, and data center operations and expansion plans."
+    },
+    {
+      "group": "Business",
+      "heading": "We may face substantial potential liability and operational disruptions if we violate the intellectual property rights or other rights of third parties, and if we fail to adequately protect, maintain, defend or enforce our intellectual property and other similar rights, we could lose an important competitive advantage, in each case which could have a material adverse effect on our business, financial condition, results of operations, customer trust and future prospects."
+    },
+    {
+      "group": "Business",
+      "heading": "Acquisitions, divestitures, or other strategic transactions we pursue may not achieve the anticipated benefits, synergies or strategic objectives."
+    },
+    {
+      "group": "Business",
+      "heading": "We have experienced, and will likely continue to experience, development and manufacturing delays and damage or destruction during pre-launch operations, any of which could have a material adverse effect on our business, financial condition, results of operations, and future prospects."
+    },
+    {
+      "group": "Business",
+      "heading": "Our ability to continue and expand launch and satellite operations depends upon our ability to obtain new and leverage existing U.S. export control and sanctions authorizations, and any significant changes to the geopolitical landscape or U.S. government regulatory approach to licensing could materially and adversely impact our international business operations by compromising existing licenses or limiting our ability to engage in commercial dealings in or involving geopolitically sensitive countries."
+    },
+    {
+      "group": "Business",
+      "heading": "Our use of open source technology could impose limitations on our ability to commercialize our space-based internet and mobile phone services, AI products, and X platform, or otherwise negatively affect our business."
+    },
+    {
+      "group": "Business",
+      "heading": "Payment, banking, and other financial service-related activities may subject us to additional regulatory requirements, regulatory actions, and other risks that could be costly and difficult to comply with or that could harm our business."
+    },
+    {
+      "group": "Business",
+      "heading": "Our efforts to support the creation of permanent installations on the Moon and Mars depend on the successful development and deployment of next-generation capabilities."
+    },
+    {
+      "group": "Business",
+      "heading": "Our AI segment is recently formed, is still being fully integrated and optimized, operates in a rapidly evolving industry and is subject to significant execution, competitive and operational risks."
+    },
+    {
+      "group": "Business",
+      "heading": "Our AI segment is capital intensive, has incurred significant operating losses, and operates in a nascent and rapidly evolving market in which the potential of AI remains uncertain."
+    },
+    {
+      "group": "Business",
+      "heading": "We have a history of net losses and may not achieve profitability in the future."
+    },
+    {
+      "group": "Business",
+      "heading": "The timing of our revenue and cost recognition may fluctuate due to factors outside of our control, which could cause our periodic results of operations to fluctuate and make our results difficult to predict."
+    },
+    {
+      "group": "Business",
+      "heading": "Failure to comply with requirements to design, implement, and maintain effective internal controls could have a material adverse effect on our business and stock price."
+    },
+    {
+      "group": "Business",
+      "heading": "Our insurance coverage strategy may not be adequate to protect us from all business risks."
+    },
+    {
+      "group": "Corporate Structure / Offering",
+      "heading": "Conflicts of interest could arise in the future between us, on the one hand, and Mr. Musk and entities owned by or affiliated with him, on the other hand, concerning among other things, business transactions, potential competitive activities or other business opportunities."
+    },
+    {
+      "group": "Corporate Structure / Offering",
+      "heading": "Certain of our directors and key employees may have conflicts of interest because they are also employees or directors of affiliates of Mr. Musk or other large shareholders. The resolution of these conflicts of interest may not be in our or your best interests."
+    },
+    {
+      "group": "Corporate Structure / Offering",
+      "heading": "We are highly dependent on the continued services of Mr. Musk, our Chief Executive Officer and Chief Technical Officer, and other key personnel, and the loss or reduced involvement of one or more of these individuals could adversely affect our ability to execute our business strategy."
+    },
+    {
+      "group": "Corporate Structure / Offering",
+      "heading": "A significant reduction by Mr. Musk or other existing shareholders of their ownership interest in us could adversely affect us."
+    },
+    {
+      "group": "Corporate Structure / Offering",
+      "heading": "Following the consummation of this offering, we will be a “controlled company” within the meaning of the Nasdaq and Nasdaq Texas listing rules and, as a result, will qualify for and rely on exemptions from certain corporate governance requirements."
+    },
+    {
+      "group": "Corporate Structure / Offering",
+      "heading": "Our ability to provide returns to shareholders will depend on appreciation in our share price, as we do not plan to pay dividends for the foreseeable future."
+    },
+    {
+      "group": "Corporate Structure / Offering",
+      "heading": "Upon completion of this offering, Mr. Musk will serve as our Chief Executive Officer, Chief Technical Officer, and Chairman of our board and control the election of our directors, and our dual class structure concentrates voting control with Mr. Musk and other holders of our Class B common stock. This will limit or preclude your ability to influence corporate matters and the election of our directors."
+    },
+    {
+      "group": "Corporate Structure / Offering",
+      "heading": "The TBOC and our charter include provisions that may limit shareholders’ ability to bring a cause of action against our directors or officers for certain acts or omissions in their capacity as directors or officers of the Company, including minimum share ownership for derivative proceedings and the presumption of the business judgment rule."
+    },
+    {
+      "group": "Corporate Structure / Offering",
+      "heading": "Our bylaws will impose minimum stock ownership and solicitation requirements on shareholders seeking to submit proposals for shareholder approval, which could limit the ability of our shareholders to bring matters before a meeting of shareholders."
+    },
+    {
+      "group": "Corporate Structure / Offering",
+      "heading": "Our bylaws place restrictions on the forum, venue and procedures for legal actions or proceedings initiated by our shareholders, including certain requirements for mandatory arbitration. These provisions could limit our shareholders’ ability to pursue certain claims and/or increase the cost of doing so and could also affect the procedures, rights, and remedies available to our shareholders in such legal actions or proceedings."
+    }
+  ]
+}
