@@ -155,6 +155,7 @@ async function staticChecks() {
   const robots = read('robots.txt')
   const sitemap = read('sitemap.xml')
   assert(robots.includes(`Sitemap: ${canonicalSiteUrl('/sitemap.xml')}`), 'robots.txt missing canonical sitemap URL')
+  assert(!robots.includes('\n\nSitemap:'), 'robots.txt keeps sitemap in a separate block that production edge may strip')
   assert(sitemap.includes(canonicalSiteUrl('/share/risk-radar/')), 'sitemap missing poster share route')
   assert(sitemap.includes('/share/packet/'), 'sitemap missing packet routes')
   assert((sitemap.match(/<url>/g) || []).length === atlas.length + 5, 'sitemap URL count drift')
