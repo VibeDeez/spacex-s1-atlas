@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { calculateKubinScenario, getScenarioDefaults } from './kubinScenario.js'
 import {
   ChevronRight,
   Clipboard,
@@ -3020,63 +3021,129 @@ function Sources({ data, sourceState, route }) {
 
 function ExternalModel({ data }) {
   const model = data.kubinModel
-  if (!model) return <Section dense eyebrow="External model" title="External model unavailable" aside="The attribution/model payload did not load." />
+  const [surface, setSurface] = useState('scenario')
+  const defaults = useMemo(() => model ? getScenarioDefaults(model) : null, [model])
+  const [inputs, setInputs] = useState({
+    offerPrice: 125,
+    primaryShares: 800000000,
+    greenshoePct: 0.15,
+    includeOptions: true,
+    includeRsus: true,
+    includePerformanceAwards: true,
+    includeEchostarShares: true,
+    proceedsTreatment: 'primary-plus-greenshoe',
+  })
+  useEffect(() => {
+    if (!defaults) return
+    setInputs((prev) => ({ ...prev, offerPrice: defaults.offerPrice, primaryShares: defaults.primaryShares, greenshoePct: defaults.greenshoePct }))
+  }, [defaults])
+  if (!model || !defaults) return <Section dense eyebrow="External model" title="External model unavailable" aside="The attribution/model payload did not load." />
+
+  const scenario = calculateKubinScenario(defaults, inputs)
   const fmtB = (v) => {
     const n = Number(v)
     if (!Number.isFinite(n)) return '—'
     return n >= 1000 ? `$${(n / 1000).toFixed(n >= 10000 ? 1 : 2)}T` : `$${n.toLocaleString()}B`
   }
+  const fmtMoneyM = (v) => Number.isFinite(Number(v)) ? `$${(Number(v) / 1000).toFixed(Number(v) >= 100000 ? 1 : 2)}B` : '—'
+  const fmtShares = (v) => Number.isFinite(Number(v)) ? `${(Number(v) / 1_000_000_000).toFixed(2)}B` : '—'
   const pct = (v) => Number.isFinite(Number(v)) ? `${(Number(v) * 100).toFixed(1)}%` : '—'
+  const multiple = (v) => Number.isFinite(Number(v)) ? `${Number(v).toFixed(1)}×` : '—'
+  const updateNumber = (key, parser = Number) => (event) => setInputs((prev) => ({ ...prev, [key]: parser(event.target.value) }))
   const tamRows = model.tam?.segments || []
   const kpiRows = (model.kpis?.rows || []).filter((row) => ['Total revenue growth', 'Gross margin', 'Operating margin', 'Net margin', 'Adjusted EBITDA'].includes(row.Metric)).slice(0, 8)
   const shareRows = (model.shareCount?.components || []).filter((row) => row['Known Shares'] || /offered|over-allotment|placeholder/i.test(row.Component || '')).slice(0, 9)
   const offering = model.offering || {}
   const checks = (model.checks?.rows || []).filter((row) => row.Status).slice(0, 8)
+  const rawSheetUrl = 'https://docs.google.com/spreadsheets/d/1VnnyM1h6-JS1yN3yFyflQ9gnw-C3fzU0/edit?usp=sharing&rm=minimal'
+  const chip = 'rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-normal'
+  const outputCards = [
+    ['Gross primary proceeds', fmtMoneyM(scenario.primaryProceedsM), 'User input × primary shares'],
+    ['Proceeds incl. greenshoe', fmtMoneyM(scenario.proceedsInclGreenshoeM), 'Primary plus selected over-allotment %'],
+    ['Basic post-offering shares', fmtShares(scenario.basicPostOfferingShares), 'Pre-IPO shares + primary IPO shares'],
+    ['Fully diluted shares', fmtShares(scenario.fullyDilutedShares), 'Basic incl. greenshoe + selected dilution toggles'],
+    ['Implied equity value', fmtMoneyM(scenario.equityValueM), 'Offer price × fully diluted shares'],
+    ['Implied enterprise value', fmtMoneyM(scenario.enterpriseValueM), 'Equity value + debt − cash/securities/proceeds treatment'],
+    ['Ownership sold / dilution', pct(scenario.ownershipSoldInclGreenshoe), 'Primary + greenshoe / post-offering shares incl. greenshoe'],
+    ['EV / FY2025 revenue', multiple(scenario.evRevenue2025), `${fmtMoneyM(scenario.revenue2025M)} FY2025 revenue denominator`],
+    ['EV / FY2025 Adj. EBITDA', multiple(scenario.evAdjustedEbitda2025), `${fmtMoneyM(scenario.adjustedEbitda2025M)} FY2025 Adj. EBITDA denominator`],
+  ]
   return (
-    <Section dense eyebrow="External open-source model" title="Jared Kubin’s SpaceX IPO model adds a valuation-scenario layer." aside="This tab is a credited external model layer. It is separate from the source-only S‑1 Atlas: assumptions here come from Jared’s open spreadsheet unless marked as S‑1/filed data.">
-      <div className="grid gap-3 xl:grid-cols-[minmax(0,1.05fr)_minmax(340px,.95fr)]">
-        <Panel pad="p-4 sm:p-5" className="border-cyan/16 bg-cyan/5">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div className="min-w-0">
-              <p className="font-mono text-[10px] uppercase tracking-normal text-cyan/78">Credited model layer</p>
-              <h2 className="mt-2 text-3xl font-[720] leading-tight tracking-normal text-spacex">OCCUPY MARS: SpaceX IPO first cut</h2>
-              <p className="mt-3 max-w-3xl text-sm leading-6 text-white/76">Model by <b className="text-white">Jared L. Kubin</b> <a className="text-cyan underline decoration-cyan/30 underline-offset-4" href="https://x.com/JaredKubin" target="_blank" rel="noreferrer">@JaredKubin on X</a>. He shared it as an open starting point for learning the business, stressing TAM, Starlink ARPU, launches, capex, margins, dilution, AI optionality and multiple selection.</p>
-              <p className="mt-3 rounded-lg border border-amber/20 bg-amber/10 p-3 text-xs leading-5 text-white/74">Attribution / caveat: this is Jared’s open model and assumptions, not a final answer and not investment advice. Jared explicitly caveated that there are likely mistakes. The S‑1 Atlas preserves its separate source-only filing layer.</p>
+    <Section dense eyebrow="External open-source model" title="Jared Kubin’s SpaceX IPO model adds a credited scenario layer." aside="This tab is an external model workbench. It separates filed S‑1 facts, Jared model assumptions, user inputs, and dashboard calculations; it is not a filing fact layer or an exact spreadsheet formula clone.">
+      <Panel pad="p-4 sm:p-5" className="border-cyan/16 bg-cyan/5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0">
+            <p className="font-mono text-[10px] uppercase tracking-normal text-cyan/78">Credited model layer</p>
+            <h2 className="mt-2 text-3xl font-[720] leading-tight tracking-normal text-spacex">OCCUPY MARS: SpaceX IPO first cut</h2>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-white/76">Model by <b className="text-white">Jared L. Kubin</b> <a className="text-cyan underline decoration-cyan/30 underline-offset-4" href="https://x.com/JaredKubin" target="_blank" rel="noreferrer">@JaredKubin on X</a>. The workbench below uses selected assumptions from Jared’s open model to stress test IPO mechanics, share count and EV bridge inputs.</p>
+            <div className="mt-3 flex flex-wrap gap-2 text-white/72">
+              <span className={`${chip} border-white/14 bg-white/[0.035]`}>Filed S‑1 fact</span>
+              <span className={`${chip} border-cyan/20 bg-cyan/10 text-cyan`}>Jared assumption</span>
+              <span className={`${chip} border-amber/24 bg-amber/10 text-amber`}>User input</span>
+              <span className={`${chip} border-white/14 bg-black/20`}>Dashboard calculation</span>
             </div>
-            <div className="flex shrink-0 flex-wrap gap-2">
-              <a href={model.source.originalUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-spacex px-3 text-xs font-[700] text-void hover:bg-white"><ExternalLink size={14} /> Google Sheet</a>
-              <a href={model.source.localXlsx} className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.035] px-3 text-xs font-[620] text-white/76 hover:bg-white/[0.06]"><Download size={14} /> Download XLSX</a>
+          </div>
+          <div className="flex shrink-0 flex-wrap gap-2">
+            <a href={model.source.originalUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-spacex px-3 text-xs font-[700] text-void hover:bg-white"><ExternalLink size={14} /> Google Sheet</a>
+            <a href={model.source.localXlsx} className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.035] px-3 text-xs font-[620] text-white/76 hover:bg-white/[0.06]"><Download size={14} /> Download XLSX</a>
+          </div>
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+          {[['scenario','Scenario Workbench'], ['sheet','Original Sheet']].map(([id, label]) => <button key={id} onClick={() => setSurface(id)} className={cn('min-h-11 rounded-lg border px-3 text-xs font-[720]', surface === id ? 'border-spacex/35 bg-white/[0.08] text-spacex' : 'border-white/10 bg-black/20 text-white/68')}>{label}</button>)}
+        </div>
+      </Panel>
+
+      {surface === 'scenario' ? (
+        <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,.92fr)_minmax(0,1.08fr)]">
+          <Panel pad="p-4" className="self-start">
+            <p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Scenario Workbench · v1 scope</p>
+            <h3 className="mt-1 text-xl font-[720] text-spacex">IPO mechanics, share count and EV bridge only.</h3>
+            <p className="mt-2 text-xs leading-5 text-white/60">This does not run the whole spreadsheet, value SpaceX, or reproduce every formula. It makes the visible IPO bridge auditable.</p>
+            <div className="mt-4 grid gap-4">
+              <label className="grid gap-1 text-sm text-white/74">Offer price / share <input className="min-h-11 rounded-lg border border-white/10 bg-black/35 px-3 font-mono text-spacex" type="number" value={inputs.offerPrice} onChange={updateNumber('offerPrice')} /></label>
+              <label className="grid gap-1 text-sm text-white/74">Primary shares offered <input className="min-h-11 rounded-lg border border-white/10 bg-black/35 px-3 font-mono text-spacex" type="number" step="1000000" value={inputs.primaryShares} onChange={updateNumber('primaryShares')} /></label>
+              <label className="grid gap-1 text-sm text-white/74">Greenshoe exercise % <input className="min-h-11 rounded-lg border border-white/10 bg-black/35 px-3 font-mono text-spacex" type="number" step="1" value={(inputs.greenshoePct * 100).toFixed(0)} onChange={(event) => setInputs((prev) => ({ ...prev, greenshoePct: Number(event.target.value) / 100 }))} /></label>
+              <label className="grid gap-1 text-sm text-white/74">Proceeds treatment <select className="min-h-11 rounded-lg border border-white/10 bg-black/35 px-3 text-white" value={inputs.proceedsTreatment} onChange={(event) => setInputs((prev) => ({ ...prev, proceedsTreatment: event.target.value }))}><option value="exclude">Exclude IPO proceeds from EV bridge</option><option value="primary">Include primary proceeds</option><option value="primary-plus-greenshoe">Include primary + greenshoe proceeds</option></select></label>
+              <div className="grid gap-2 rounded-xl border border-white/[0.08] bg-white/[0.025] p-3">
+                <p className="font-mono text-[10px] uppercase tracking-normal text-white/48">Dilution toggles</p>
+                {[['includeOptions', 'Outstanding options', defaults.options], ['includeRsus', 'RSUs outstanding', defaults.rsus], ['includePerformanceAwards', 'Performance / market-condition awards', defaults.performanceAwards], ['includeEchostarShares', 'EchoStar spectrum shares', defaults.echostarShares]].map(([key, label, value]) => <label key={key} className="flex items-start justify-between gap-3 rounded-lg border border-white/[0.06] bg-black/20 p-2 text-sm text-white/74"><span>{label}<br /><span className="font-mono text-[10px] text-white/46">{fmtShares(value)} source/model component</span></span><input type="checkbox" checked={inputs[key]} onChange={(event) => setInputs((prev) => ({ ...prev, [key]: event.target.checked }))} /></label>)}
+              </div>
             </div>
+          </Panel>
+          <div className="grid gap-3">
+            <Panel pad="p-3">
+              <p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Key outputs</p>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">{outputCards.map(([label, value, sub]) => <MetricPill key={label} label={label} value={value} sub={sub} />)}</div>
+            </Panel>
+            <Panel pad="p-4">
+              <details open>
+                <summary className="cursor-pointer text-sm font-[720] text-spacex">Formulas and caveats</summary>
+                <div className="mt-3 grid gap-2 text-xs leading-5 text-white/64">
+                  <p>Gross proceeds = offer price × primary shares. Greenshoe proceeds = primary proceeds × greenshoe %.</p>
+                  <p>Fully diluted shares = pre‑IPO shares + primary shares + greenshoe shares + selected option/RSU/performance/EchoStar components.</p>
+                  <p>Enterprise value = implied equity value + total debt − cash/equivalents − marketable securities − digital assets − selected IPO proceeds treatment.</p>
+                  <p>Multiples use FY2025 revenue and adjusted EBITDA from the extracted model KPI table, with dollar values treated as $000 in the workbook and converted to millions here.</p>
+                </div>
+              </details>
+            </Panel>
           </div>
-          <div className="mt-4 grid gap-2 sm:grid-cols-3">
-            <MetricPill label="Model raise assumption" value="$115B" sub="Jared caption: assumed, not announced" />
-            <MetricPill label="Quantified TAM" value={fmtB(model.tam?.companyRoundedTamB)} sub="Company rounded figure in model TAM tab" />
-            <MetricPill label="Shares offered model" value={Number(offering.totalSharesInclGreenshoe || 0).toLocaleString()} sub="Primary + 15% greenshoe assumption" />
-          </div>
+        </div>
+      ) : (
+        <Panel pad="p-3" className="mt-3 overflow-hidden">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Original Sheet fallback</p><h3 className="mt-1 text-xl font-[720] text-spacex">Raw Google Sheets interface, preserved as reference.</h3><p className="mt-1 text-sm leading-6 text-white/62">If the embed is blocked by Google or a mobile browser, use the fallback links.</p></div><div className="flex flex-wrap gap-2"><a href={rawSheetUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center rounded-lg bg-spacex px-3 text-xs font-[700] text-void">Open in Sheets</a><a href={model.source.localXlsx} className="inline-flex min-h-11 items-center rounded-lg border border-white/10 px-3 text-xs font-[650] text-white/72">Download XLSX</a></div></div>
+          <div className="mt-3 h-[72vh] min-h-[520px] overflow-hidden rounded-xl border border-white/[0.08] bg-white"><iframe title="Jared Kubin SpaceX IPO model" src={rawSheetUrl} className="h-full w-full" /></div>
         </Panel>
-        <Panel pad="p-4" className="border-white/[0.09]">
-          <p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Jared’s framing</p>
-          <div className="mt-3 grid gap-3">
-            <div className="rounded-lg border border-cyan/16 bg-cyan/7 p-3"><p className="text-sm font-[720] text-cyan">Bull case</p><p className="mt-1 text-sm leading-6 text-white/74">{model.bullBear.bull.join(' + ')}</p></div>
-            <div className="rounded-lg border border-red/16 bg-red/8 p-3"><p className="text-sm font-[720] text-red">Bear case</p><p className="mt-1 text-sm leading-6 text-white/74">{model.bullBear.bear.join(' + ')}</p></div>
-            <div className="rounded-lg border border-white/[0.08] bg-black/20 p-3"><p className="text-sm font-[720] text-spacex">Burning questions</p><ol className="mt-2 grid gap-2 text-sm leading-6 text-white/72">{model.burningQuestions.map((q, i) => <li key={q}>{i + 1}. {q}</li>)}</ol></div>
-          </div>
-        </Panel>
+      )}
+
+      <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,1.05fr)_minmax(340px,.95fr)]">
+        <Panel pad="p-4" className="border-white/[0.09]"><p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Jared’s framing</p><div className="mt-3 grid gap-3"><div className="rounded-lg border border-cyan/16 bg-cyan/7 p-3"><p className="text-sm font-[720] text-cyan">Bull case</p><p className="mt-1 text-sm leading-6 text-white/74">{model.bullBear.bull.join(' + ')}</p></div><div className="rounded-lg border border-red/16 bg-red/8 p-3"><p className="text-sm font-[720] text-red">Bear case</p><p className="mt-1 text-sm leading-6 text-white/74">{model.bullBear.bear.join(' + ')}</p></div><div className="rounded-lg border border-white/[0.08] bg-black/20 p-3"><p className="text-sm font-[720] text-spacex">Burning questions</p><ol className="mt-2 grid gap-2 text-sm leading-6 text-white/72">{model.burningQuestions.map((q, i) => <li key={q}>{i + 1}. {q}</li>)}</ol></div></div></Panel>
+        <Panel pad="p-4" className="border-white/[0.09]"><p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Workbook anchors</p><div className="mt-3 grid gap-2 sm:grid-cols-3"><MetricPill label="Model raise assumption" value="$115B" sub="Workbook midpoint incl. greenshoe; not primary raise" /><MetricPill label="Quantified TAM" value={fmtB(model.tam?.companyRoundedTamB)} sub="Company rounded figure in model TAM tab" /><MetricPill label="Shares offered model" value={Number(offering.totalSharesInclGreenshoe || 0).toLocaleString()} sub="Primary + 15% greenshoe assumption" /></div><p className="mt-3 rounded-lg border border-amber/20 bg-amber/10 p-3 text-xs leading-5 text-white/72">Attribution / caveat: this is Jared’s open model and assumptions, not a final answer and not investment advice. Jared explicitly caveated that there are likely mistakes.</p></Panel>
       </div>
 
       <div className="mt-3 grid gap-3 xl:grid-cols-2">
-        <Panel pad="p-0" className="overflow-hidden">
-          <div className="border-b border-white/[0.08] p-3"><p className="font-mono text-[10px] uppercase tracking-normal text-white/58">TAM tab</p><h3 className="mt-1 text-xl font-[700] text-spacex">TAM frames the dream before the model math.</h3></div>
-          <div className="grid gap-2 p-2 md:hidden">{tamRows.map((row) => <div key={row.Segment} className="rounded-lg border border-white/[0.07] bg-white/[0.024] p-3"><p className="font-[720] text-white/90">{row.Segment}</p><p className="mt-1 font-mono text-xl text-spacex">{fmtB(row['TAM ($B)'])}</p><p className="mt-1 text-xs leading-5 text-white/66">{pct(row['% of Quantified TAM'])} of quantified TAM · {row['Company Framing']}</p></div>)}</div>
-          <div className="hidden overflow-auto md:block"><table className="analyst-table min-w-[620px] w-full border-collapse text-left"><thead><tr>{['Segment','TAM','% TAM','Company framing'].map((h) => <th key={h} className="border-b border-white/[0.08] px-3 py-2.5 font-[650] uppercase">{h}</th>)}</tr></thead><tbody className="divide-y divide-white/[0.06]">{tamRows.map((row) => <tr key={row.Segment}><td className="px-3 py-3 font-[700] text-white/88">{row.Segment}</td><td className="px-3 py-3 font-mono text-spacex">{fmtB(row['TAM ($B)'])}</td><td className="px-3 py-3 font-mono text-white/78">{pct(row['% of Quantified TAM'])}</td><td className="px-3 py-3 text-sm leading-5 text-white/72">{row['Company Framing']}</td></tr>)}</tbody></table></div>
-        </Panel>
-        <Panel pad="p-0" className="overflow-hidden">
-          <div className="border-b border-white/[0.08] p-3"><p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Model KPI bridge</p><h3 className="mt-1 text-xl font-[700] text-spacex">A quick bridge from S‑1 financials into model questions.</h3></div>
-          <div className="grid gap-2 p-2 md:hidden">{kpiRows.map((row) => <div key={row.Metric} className="rounded-lg border border-white/[0.07] bg-white/[0.024] p-3"><p className="text-sm font-[700] text-white/88">{row.Metric}</p><p className="mt-1 font-mono text-sm text-spacex">FY25 {row['FY 2025'] > 1 ? money(row['FY 2025'] / 1000) : pct(row['FY 2025'])}</p><p className="mt-1 text-xs leading-5 text-white/64">{row['Notes / Formula']}</p></div>)}</div>
-          <div className="hidden overflow-auto md:block"><table className="analyst-table min-w-[680px] w-full border-collapse text-left"><thead><tr>{['Metric','FY 2025','FY 2024','FY 2023','Formula / source'].map((h) => <th key={h} className="border-b border-white/[0.08] px-3 py-2.5 font-[650] uppercase">{h}</th>)}</tr></thead><tbody className="divide-y divide-white/[0.06]">{kpiRows.map((row) => <tr key={row.Metric}><td className="px-3 py-3 font-[700] text-white/88">{row.Metric}</td><td className="px-3 py-3 font-mono text-spacex">{row['FY 2025'] > 1 ? money(row['FY 2025'] / 1000) : pct(row['FY 2025'])}</td><td className="px-3 py-3 font-mono text-white/76">{row['FY 2024'] > 1 ? money(row['FY 2024'] / 1000) : pct(row['FY 2024'])}</td><td className="px-3 py-3 font-mono text-white/64">{row['FY 2023'] > 1 ? money(row['FY 2023'] / 1000) : pct(row['FY 2023'])}</td><td className="px-3 py-3 text-xs leading-5 text-white/64">{row['Notes / Formula']} · {row.Source}</td></tr>)}</tbody></table></div>
-        </Panel>
+        <Panel pad="p-0" className="overflow-hidden"><div className="border-b border-white/[0.08] p-3"><p className="font-mono text-[10px] uppercase tracking-normal text-white/58">TAM tab</p><h3 className="mt-1 text-xl font-[700] text-spacex">TAM frames the dream before the model math.</h3></div><div className="grid gap-2 p-2 md:hidden">{tamRows.map((row) => <div key={row.Segment} className="rounded-lg border border-white/[0.07] bg-white/[0.024] p-3"><p className="font-[720] text-white/90">{row.Segment}</p><p className="mt-1 font-mono text-xl text-spacex">{fmtB(row['TAM ($B)'])}</p><p className="mt-1 text-xs leading-5 text-white/66">{pct(row['% of Quantified TAM'])} of quantified TAM · {row['Company Framing']}</p></div>)}</div><div className="hidden overflow-auto md:block"><table className="analyst-table min-w-[620px] w-full border-collapse text-left"><thead><tr>{['Segment','TAM','% TAM','Company framing'].map((h) => <th key={h} className="border-b border-white/[0.08] px-3 py-2.5 font-[650] uppercase">{h}</th>)}</tr></thead><tbody className="divide-y divide-white/[0.06]">{tamRows.map((row) => <tr key={row.Segment}><td className="px-3 py-3 font-[700] text-white/88">{row.Segment}</td><td className="px-3 py-3 font-mono text-spacex">{fmtB(row['TAM ($B)'])}</td><td className="px-3 py-3 font-mono text-white/78">{pct(row['% of Quantified TAM'])}</td><td className="px-3 py-3 text-sm leading-5 text-white/72">{row['Company Framing']}</td></tr>)}</tbody></table></div></Panel>
+        <Panel pad="p-0" className="overflow-hidden"><div className="border-b border-white/[0.08] p-3"><p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Model KPI bridge</p><h3 className="mt-1 text-xl font-[700] text-spacex">A quick bridge from S‑1 financials into model questions.</h3></div><div className="grid gap-2 p-2 md:hidden">{kpiRows.map((row) => <div key={row.Metric} className="rounded-lg border border-white/[0.07] bg-white/[0.024] p-3"><p className="text-sm font-[700] text-white/88">{row.Metric}</p><p className="mt-1 font-mono text-sm text-spacex">FY25 {row['FY 2025'] > 1 ? money(row['FY 2025'] / 1000) : pct(row['FY 2025'])}</p><p className="mt-1 text-xs leading-5 text-white/64">{row['Notes / Formula']}</p></div>)}</div><div className="hidden overflow-auto md:block"><table className="analyst-table min-w-[680px] w-full border-collapse text-left"><thead><tr>{['Metric','FY 2025','FY 2024','FY 2023','Formula / source'].map((h) => <th key={h} className="border-b border-white/[0.08] px-3 py-2.5 font-[650] uppercase">{h}</th>)}</tr></thead><tbody className="divide-y divide-white/[0.06]">{kpiRows.map((row) => <tr key={row.Metric}><td className="px-3 py-3 font-[700] text-white/88">{row.Metric}</td><td className="px-3 py-3 font-mono text-spacex">{row['FY 2025'] > 1 ? money(row['FY 2025'] / 1000) : pct(row['FY 2025'])}</td><td className="px-3 py-3 font-mono text-white/76">{row['FY 2024'] > 1 ? money(row['FY 2024'] / 1000) : pct(row['FY 2024'])}</td><td className="px-3 py-3 font-mono text-white/64">{row['FY 2023'] > 1 ? money(row['FY 2023'] / 1000) : pct(row['FY 2023'])}</td><td className="px-3 py-3 text-xs leading-5 text-white/64">{row['Notes / Formula']} · {row.Source}</td></tr>)}</tbody></table></div></Panel>
       </div>
-
       <div className="mt-3 grid gap-3 xl:grid-cols-2">
         <Panel pad="p-4"><p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Share-count problem</p><h3 className="mt-1 text-xl font-[700] text-spacex">The model foregrounds fully diluted share count risk.</h3><div className="mt-3 grid gap-2">{shareRows.map((row) => <div key={`${row.Category}-${row.Component}`} className="rounded-lg border border-white/[0.065] bg-black/18 p-3"><p className="text-sm font-[700] text-white/86">{row.Component}</p><p className="mt-1 font-mono text-sm text-white/72">{row['Known Shares'] ? Number(row['Known Shares']).toLocaleString() : 'Pricing input / not disclosed yet'} · {row.Status}</p><p className="mt-1 text-xs leading-5 text-white/56">{row['Source / Notes']}</p></div>)}</div></Panel>
         <Panel pad="p-4"><p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Validation checks</p><h3 className="mt-1 text-xl font-[700] text-spacex">Model includes explicit tie-outs and caveats.</h3><div className="mt-3 grid gap-2">{checks.map((row) => <div key={row.Check} className="flex items-start justify-between gap-3 rounded-lg border border-white/[0.065] bg-black/18 p-3"><div><p className="text-sm font-[700] text-white/86">{row.Check}</p><p className="mt-1 text-xs leading-5 text-white/58">{trimText(row['Formula / Basis'], 130)}</p></div><span className="rounded-md border border-cyan/18 bg-cyan/10 px-2 py-1 font-mono text-[10px] text-cyan">{row.Status}</span></div>)}</div></Panel>

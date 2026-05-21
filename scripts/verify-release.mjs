@@ -84,7 +84,7 @@ async function staticChecks() {
   const css = cssAssets.map(read).join('\n')
   assert(css.includes('mobile-tab-grid'), 'mobile grid nav CSS missing')
 
-  for (const rel of ['summary.json', 'financials.json', 'risks.json', 'atlas-index.json', 'debate-lenses.json', 'source-main.json', 'source-exhibits.json', 'ocr.json', 'social/spacex-s1-atlas-card.png']) {
+  for (const rel of ['summary.json', 'financials.json', 'risks.json', 'atlas-index.json', 'debate-lenses.json', 'jared-kubin-model.json', 'jared-kubin-spacex-ipo-model.xlsx', 'source-main.json', 'source-exhibits.json', 'ocr.json', 'social/spacex-s1-atlas-card.png']) {
     assert(existsSync(path.join(dist, rel)), `missing ${rel}`)
   }
   assert(!existsSync(path.join(dist, 'buzz-lenses.json')), 'retired buzz-lenses.json is still present')
@@ -183,6 +183,7 @@ async function browserChecks(origin, { routeAssets = false } = {}) {
       ['#/financials', 'Financial filing workbench'],
       ['#/risks', 'Risk Radar'],
       ['#/governance', 'Control, management'],
+      ['#/model', 'Scenario Workbench'],
       ['#/atlas?q=Starlink', 'Disclosure Atlas'],
       ['#/poster/risk-radar', 'Poster mode'],
     ]
