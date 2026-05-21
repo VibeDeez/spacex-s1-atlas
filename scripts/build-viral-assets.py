@@ -10,7 +10,9 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC = ROOT / 'public'
-DATA = ROOT.parent / 'processed' / 'dashboard_data.json'
+DATA = ROOT / 'processed' / 'dashboard_data.json'
+if not DATA.exists():
+    DATA = ROOT.parent / 'processed' / 'dashboard_data.json'
 SOCIAL = PUBLIC / 'social'
 SHARE = PUBLIC / 'share'
 SOCIAL.mkdir(parents=True, exist_ok=True)
