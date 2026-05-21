@@ -199,7 +199,10 @@ async function installDistRoutes(page) {
 }
 
 async function assertA11y(page, routeLabel) {
-  await page.waitForTimeout(250)
+  await page.waitForFunction(() => {
+    const main = document.querySelector('main')
+    return !main || Number(getComputedStyle(main).opacity) >= 0.995
+  }, null, { timeout: 5000 })
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa'])
     .analyze()
@@ -217,6 +220,17 @@ async function assertA11y(page, routeLabel) {
     violations.length === 0,
     `axe violations on ${routeLabel}: ${details}`,
   )
+}
+
+async function waitForSettledMain(page, markers, timeout = 30000) {
+  const requiredMarkers = (Array.isArray(markers) ? markers : [markers])
+    .map((marker) => String(marker).toLowerCase())
+  await page.waitForFunction((required) => {
+    const main = document.querySelector('main')
+    if (!main || Number(getComputedStyle(main).opacity) < 0.995) return false
+    const text = main.innerText.toLowerCase()
+    return required.every((marker) => text.includes(marker))
+  }, requiredMarkers, { timeout })
 }
 
 async function browserChecks(origin, { routeAssets = false } = {}) {
@@ -248,7 +262,7 @@ async function browserChecks(origin, { routeAssets = false } = {}) {
       if (/\/(source-main|source-exhibits|ocr)\.json$/.test(url)) sourceFetches.push(url)
     })
     const routes = [
-      ['#/flight-deck', 'SpaceX S‑1 Atlas'],
+      ['#/flight-deck', 'Executive Memo'],
       ['#/debate?lens=valuation', 'Question lenses'],
       ['#/debate?lens=treasury', 'Treasury Oddities'],
       ['#/segments', 'Space, Connectivity, AI'],
@@ -262,7 +276,7 @@ async function browserChecks(origin, { routeAssets = false } = {}) {
     const a11yRoutes = new Set(['#/flight-deck', '#/financials', '#/risks', '#/atlas?q=Starlink', '#/poster/risk-radar'])
     for (const [hash, marker] of routes) {
       await page.goto(`${origin}/${hash}`, { waitUntil: 'networkidle', timeout: 60000 })
-      await page.waitForFunction((m) => document.body.innerText.toLowerCase().includes(String(m).toLowerCase()), marker, { timeout: 30000 })
+      await waitForSettledMain(page, marker)
       const text = await page.locator('body').innerText()
       assert(!/Reddit|buzz|IPO Flight Deck|Copy X caption|mission-control/.test(text), `retired public text on ${hash}`)
       if (a11yRoutes.has(hash)) await assertA11y(page, hash)
@@ -270,7 +284,7 @@ async function browserChecks(origin, { routeAssets = false } = {}) {
     assert(sourceFetches.length === 0, `source payload fetched before Source route: ${sourceFetches.join(', ')}`)
 
     await page.goto(`${origin}/#/sources?q=Starship`, { waitUntil: 'networkidle', timeout: 60000 })
-    await page.waitForFunction(() => document.body.innerText.toLowerCase().includes('source') && document.body.innerText.toLowerCase().includes('visible chars'), null, { timeout: 30000 })
+    await waitForSettledMain(page, ['source', 'visible chars'])
     await assertA11y(page, '#/sources?q=Starship')
     assert(sourceFetches.length === 3, `expected 3 source payload fetches after Source route, saw ${sourceFetches.length}`)
 
