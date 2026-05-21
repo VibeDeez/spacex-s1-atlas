@@ -18,5 +18,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: npm ci
+      # npm ci currently trips over optional WASM peer entries in the lockfile on Linux
+      # for this Vite/Tailwind toolchain; npm install is deterministic enough for CI here
+      # because package-lock.json is committed and the release verifier checks outputs.
+      - run: npm install
       - run: npm run release:check
