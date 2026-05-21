@@ -213,9 +213,15 @@ function useMediaQuery(query) {
   return matches
 }
 
+function publicAsset(path) {
+  const rel = String(path || '').replace(/^\/+/, '')
+  return `${import.meta.env.BASE_URL || '/'}${rel}`
+}
+
 async function loadJson(path) {
-  const res = await fetch(path)
-  if (!res.ok) throw new Error(`Failed to load ${path}: ${res.status}`)
+  const url = publicAsset(path)
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`Failed to load ${url}: ${res.status}`)
   return res.json()
 }
 
@@ -3056,6 +3062,7 @@ function ExternalModel({ data }) {
   const offering = model.offering || {}
   const checks = (model.checks?.rows || []).filter((row) => row.Status).slice(0, 8)
   const rawSheetUrl = 'https://docs.google.com/spreadsheets/d/1VnnyM1h6-JS1yN3yFyflQ9gnw-C3fzU0/edit?usp=sharing&rm=minimal'
+  const xlsxUrl = publicAsset(model.source.localXlsx)
   const chip = 'rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-normal'
   const outputCards = [
     ['Gross primary proceeds', fmtMoneyM(scenario.primaryProceedsM), 'User input × primary shares'],
@@ -3085,7 +3092,7 @@ function ExternalModel({ data }) {
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
             <a href={model.source.originalUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-spacex px-3 text-xs font-[700] text-void hover:bg-white"><ExternalLink size={14} /> Google Sheet</a>
-            <a href={model.source.localXlsx} className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.035] px-3 text-xs font-[620] text-white/76 hover:bg-white/[0.06]"><Download size={14} /> Download XLSX</a>
+            <a href={xlsxUrl} className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.035] px-3 text-xs font-[620] text-white/76 hover:bg-white/[0.06]"><Download size={14} /> Download XLSX</a>
           </div>
         </div>
         <div className="mt-4 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
@@ -3130,7 +3137,7 @@ function ExternalModel({ data }) {
         </div>
       ) : (
         <Panel pad="p-3" className="mt-3 overflow-hidden">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Original Sheet fallback</p><h3 className="mt-1 text-xl font-[720] text-spacex">Raw Google Sheets interface, preserved as reference.</h3><p className="mt-1 text-sm leading-6 text-white/62">If the embed is blocked by Google or a mobile browser, use the fallback links.</p></div><div className="flex flex-wrap gap-2"><a href={rawSheetUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center rounded-lg bg-spacex px-3 text-xs font-[700] text-void">Open in Sheets</a><a href={model.source.localXlsx} className="inline-flex min-h-11 items-center rounded-lg border border-white/10 px-3 text-xs font-[650] text-white/72">Download XLSX</a></div></div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Original Sheet fallback</p><h3 className="mt-1 text-xl font-[720] text-spacex">Raw Google Sheets interface, preserved as reference.</h3><p className="mt-1 text-sm leading-6 text-white/62">If the embed is blocked by Google or a mobile browser, use the fallback links.</p></div><div className="flex flex-wrap gap-2"><a href={rawSheetUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center rounded-lg bg-spacex px-3 text-xs font-[700] text-void">Open in Sheets</a><a href={xlsxUrl} className="inline-flex min-h-11 items-center rounded-lg border border-white/10 px-3 text-xs font-[650] text-white/72">Download XLSX</a></div></div>
           <div className="mt-3 h-[72vh] min-h-[520px] overflow-hidden rounded-xl border border-white/[0.08] bg-white"><iframe title="Jared Kubin SpaceX IPO model" src={rawSheetUrl} className="h-full w-full" /></div>
         </Panel>
       )}

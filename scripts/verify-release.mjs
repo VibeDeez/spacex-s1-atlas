@@ -76,8 +76,8 @@ function startStaticServer() {
 async function staticChecks() {
   assert(existsSync(path.join(dist, 'index.html')), 'missing dist/index.html')
   const index = read('index.html')
-  const jsAssets = [...index.matchAll(/src="\/?(assets\/[^"<>]+\.js)"/g)].map((m) => m[1])
-  const cssAssets = [...index.matchAll(/href="\/?(assets\/[^"<>]+\.css)"/g)].map((m) => m[1])
+  const jsAssets = [...index.matchAll(/src="(?:\.\/|\/)?(assets\/[^"<>]+\.js)"/g)].map((m) => m[1])
+  const cssAssets = [...index.matchAll(/href="(?:\.\/|\/)?(assets\/[^"<>]+\.css)"/g)].map((m) => m[1])
   assert(jsAssets.length === 1, `expected one JS asset, found ${jsAssets.length}`)
   assert(cssAssets.length === 1, `expected one CSS asset, found ${cssAssets.length}`)
   const js = jsAssets.map(read).join('\n')
@@ -231,8 +231,8 @@ async function browserChecks(origin, { routeAssets = false } = {}) {
 
 async function browserlessRouteChecks(launchError) {
   const index = read('index.html')
-  const jsAssets = [...index.matchAll(/src="\/?(assets\/[^"<>]+\.js)"/g)].map((m) => m[1])
-  const cssAssets = [...index.matchAll(/href="\/?(assets\/[^"<>]+\.css)"/g)].map((m) => m[1])
+  const jsAssets = [...index.matchAll(/src="(?:\.\/|\/)?(assets\/[^"<>]+\.js)"/g)].map((m) => m[1])
+  const cssAssets = [...index.matchAll(/href="(?:\.\/|\/)?(assets\/[^"<>]+\.css)"/g)].map((m) => m[1])
   const js = jsAssets.map(read).join('\n').toLowerCase()
   const css = cssAssets.map(read).join('\n')
   const requiredMarkers = [
