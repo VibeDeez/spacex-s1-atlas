@@ -8,8 +8,13 @@
     "generate:assets": "python3 scripts/build-viral-assets.py",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1",
+    "validate:data": "node scripts/validate-public-data.mjs",
     "verify:release": "node scripts/verify-release.mjs",
-    "release:check": "npm run generate:assets && npm run build && npm run verify:release"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "check": "npm run lint && npm run test && npm run generate:assets && npm run validate:data && npm run build && npm run verify:release",
+    "release:check": "npm run check"
   },
   "dependencies": {
     "framer-motion": "12.39.0",
@@ -18,12 +23,20 @@
     "react-dom": "19.2.6"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
+    "@eslint/js": "^9.39.4",
     "@tailwindcss/postcss": "4.3.0",
     "@vitejs/plugin-react": "6.0.2",
     "autoprefixer": "10.5.0",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.6.0",
     "playwright": "^1.60.0",
     "postcss": "8.5.15",
     "tailwindcss": "4.3.0",
-    "vite": "8.0.13"
+    "vite": "8.0.13",
+    "vitest": "^4.1.7",
+    "zod": "^4.4.3"
   }
 }

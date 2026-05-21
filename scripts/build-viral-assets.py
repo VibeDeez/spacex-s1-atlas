@@ -16,8 +16,12 @@ if not DATA.exists():
 SOCIAL = PUBLIC / 'social'
 SHARE = PUBLIC / 'share'
 SOCIAL.mkdir(parents=True, exist_ok=True)
-IMAGE_BASE_URL = os.environ.get('SHARE_IMAGE_BASE_URL', '').rstrip('/')
-CARD_IMAGE_URL = f'{IMAGE_BASE_URL}/social/spacex-s1-atlas-card.png' if IMAGE_BASE_URL else '/social/spacex-s1-atlas-card.png'
+SITE_TITLE = 'SpaceX S-1 Atlas'
+SITE_DESCRIPTION = "A source-cited map of SpaceX's S-1: business stack, financials, risks, exhibits, OCR, and source packets."
+CANONICAL_URL = os.environ.get('PUBLIC_BASE_URL', 'https://silent-aurora-p5v5.here.now').rstrip('/')
+IMAGE_BASE_URL = os.environ.get('SHARE_IMAGE_BASE_URL', CANONICAL_URL).rstrip('/')
+SOCIAL_IMAGE_PATH = '/social/spacex-s1-atlas-card.png'
+CARD_IMAGE_URL = f'{IMAGE_BASE_URL}{SOCIAL_IMAGE_PATH}'
 
 def slugify(value: str) -> str:
     value = re.sub(r'[\u2010-\u2015]', '-', str(value).lower())
@@ -112,7 +116,7 @@ def write_json(path, value):
     path.write_text(json.dumps(value, indent=2, ensure_ascii=False), encoding='utf-8')
 
 
-def write_share_page(path: Path, *, title: str, description: str, target_hash: str, image_url: str = CARD_IMAGE_URL, eyebrow: str = 'SpaceX S‑1 Atlas'):
+def write_share_page(path: Path, *, title: str, description: str, target_hash: str, page_url: str, image_url: str = CARD_IMAGE_URL, eyebrow: str = 'SpaceX S‑1 Atlas'):
     path.mkdir(parents=True, exist_ok=True)
     html = f'''<!doctype html>
 <html lang="en">
@@ -125,13 +129,16 @@ def write_share_page(path: Path, *, title: str, description: str, target_hash: s
     <meta property="og:type" content="website" />
     <meta property="og:title" content="{escape(title)}" />
     <meta property="og:description" content="{escape(description)}" />
+    <meta property="og:url" content="{escape(page_url)}" />
     <meta property="og:image" content="{escape(image_url)}" />
+    <meta property="og:image:secure_url" content="{escape(image_url)}" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="{escape(title)}" />
     <meta name="twitter:description" content="{escape(description)}" />
     <meta name="twitter:image" content="{escape(image_url)}" />
+    <link rel="canonical" href="{escape(page_url)}" />
     <style>
       html,body{{margin:0;min-height:100svh;background:#050506;color:#f7f8f8;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}}
       main{{min-height:100svh;display:grid;place-items:center;padding:max(20px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));background:radial-gradient(circle at 50% 112%,rgba(183,216,255,.20),transparent 38%),linear-gradient(180deg,#050506,#07080a 52%,#030304);}}
@@ -144,7 +151,7 @@ def write_share_page(path: Path, *, title: str, description: str, target_hash: s
     <script>window.setTimeout(() => window.location.replace('/#/{target_hash.lstrip('/')}'), 250)</script>
   </head>
   <body>
-    <main><section><div class="eyebrow">{escape(eyebrow)}</div><h1>{escape(title)}</h1><p>{escape(description)}</p><a href="/#/{escape(target_hash.lstrip('/'))}">Open interactive atlas</a></section></main>
+    <main><section><div class="eyebrow">{escape(eyebrow)}</div><h1>{escape(title)}</h1><p>{escape(description)}</p><p>This source-cited filing map is not investment advice and is not affiliated with SpaceX. External model assumptions are separate from filed facts.</p><a href="/#/{escape(target_hash.lstrip('/'))}">Open interactive atlas</a></section></main>
   </body>
 </html>
 '''
@@ -162,12 +169,40 @@ def write_share_pages(data, atlas):
         'governance-control': ('SpaceX S‑1 Atlas · Governance', 'Management, related-party disclosures, and offering mechanics from the filing.'),
     }
     for variant, (title, desc) in posters.items():
-        write_share_page(SHARE / variant, title=title, description=desc, target_hash=f'/poster/{variant}', eyebrow='S‑1 Filing Map')
+        write_share_page(SHARE / variant, title=title, description=desc, target_hash=f'/poster/{variant}', page_url=f'{CANONICAL_URL}/share/{variant}/', eyebrow='S‑1 Filing Map')
     packet_root = SHARE / 'packet'
     for packet in atlas:
         title = f"SpaceX S‑1 packet · {trim(packet['title'], 86)}"
         desc = f"{packet['type'].title()} packet from the source-cited atlas. {trim(packet.get('detail'), 150)} SRC · {trim(packet.get('source'), 80)}"
-        write_share_page(packet_root / packet['id'], title=title, description=desc, target_hash=packet['hash'], eyebrow=packet.get('type', 'packet'))
+        write_share_page(packet_root / packet['id'], title=title, description=desc, target_hash=packet['hash'], page_url=f"{CANONICAL_URL}{packet['sharePath']}", eyebrow=packet.get('type', 'packet'))
+
+
+def write_robots_txt():
+    (PUBLIC / 'robots.txt').write_text(
+        f'User-agent: *\nAllow: /\n\nSitemap: {CANONICAL_URL}/sitemap.xml\n',
+        encoding='utf-8',
+    )
+
+
+def write_sitemap(atlas):
+    urls = ['/']
+    urls.extend([
+        '/share/business-stack/',
+        '/share/financial-telemetry/',
+        '/share/risk-radar/',
+        '/share/governance-control/',
+    ])
+    urls.extend(packet['sharePath'] for packet in atlas)
+    body = '\n'.join(
+        f'  <url><loc>{escape(CANONICAL_URL + path)}</loc></url>'
+        for path in urls
+    )
+    xml = f'''<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{body}
+</urlset>
+'''
+    (PUBLIC / 'sitemap.xml').write_text(xml, encoding='utf-8')
 
 def draw_social_card(data):
     W, H = 1200, 630
@@ -317,6 +352,8 @@ def main():
     write_json(PUBLIC / 'ocr.json', {'ocr': source.get('ocr',''), 'items': data.get('ocrItems', [])})
     out = draw_social_card(data)
     write_share_pages(data, atlas)
+    write_robots_txt()
+    write_sitemap(atlas)
     print(json.dumps({
         'summary': (PUBLIC / 'summary.json').stat().st_size,
         'atlas': (PUBLIC / 'atlas-index.json').stat().st_size,
@@ -330,6 +367,8 @@ def main():
         'packets': len(atlas),
         'share_pages': len(list(SHARE.rglob('index.html'))),
         'card_image_url': CARD_IMAGE_URL,
+        'canonical_url': CANONICAL_URL,
+        'sitemap': str(PUBLIC / 'sitemap.xml'),
     }, indent=2))
 
 if __name__ == '__main__':

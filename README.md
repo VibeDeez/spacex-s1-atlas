@@ -31,17 +31,20 @@ This repository is not affiliated with SpaceX, the SEC, Jared L. Kubin, X/Twitte
 ## Development
 
 ```bash
-npm install
-npm run release:check
+npm ci
+npm run check
 npm run preview -- --port 4182
 ```
 
 Common scripts:
 
 - `npm run generate:assets` — regenerate atlas/share/social artifacts from source payloads
+- `npm run validate:data` — validate public JSON contracts and cross-file atlas invariants
+- `npm run test` — run pure-logic and scenario math tests
+- `npm run lint` — run ESLint and React Hooks checks
 - `npm run build` — production Vite build
 - `npm run verify:release` — release sanity checks
-- `npm run release:check` — full local release check
+- `npm run check` / `npm run release:check` — full local release check
 
 ## Project structure
 
@@ -59,4 +62,4 @@ The current public build was published separately to here.now. GitHub is the sou
 
 ## Disclaimer
 
-This is a research and filing-review artifact, not investment advice or a recommendation to buy or sell securities. External model assumptions are presented for education and scenario analysis only.
+This is a research and filing-review artifact: a source-cited filing map of the SEC S-1 package, not investment advice or a recommendation to buy or sell securities. This repository and dashboard are not affiliated with SpaceX, the SEC, Jared L. Kubin, X/Twitter, or here.now. External model assumptions are separate from filed facts and are presented for education and scenario analysis only.
