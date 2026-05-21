@@ -179,7 +179,7 @@ def write_share_pages(data, atlas):
 
 def write_robots_txt():
     (PUBLIC / 'robots.txt').write_text(
-        f'User-agent: *\nAllow: /\n\nSitemap: {CANONICAL_URL}/sitemap.xml\n',
+        f'User-agent: *\nAllow: /\nSitemap: {CANONICAL_URL}/sitemap.xml\n',
         encoding='utf-8',
     )
 
