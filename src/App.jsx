@@ -608,7 +608,7 @@ function ThesisAntiThesisPanel({ data }) {
     },
   ]
   const Column = ({ title, rows, tone }) => (
-    <div className="rounded-lg border border-white/[0.08] bg-black/18 p-3">
+    <div className="rounded-lg border border-white/[0.08] bg-[#050607]/92 p-3">
       <p className={cn('font-mono text-[10px] uppercase tracking-normal', tone === 'cyan' ? 'text-cyan/72' : 'text-amber/78')}>{title}</p>
       <div className="mt-3 divide-y divide-white/[0.065]">
         {rows.map((row) => (
@@ -653,7 +653,7 @@ function SegmentQualityMatrix({ data, onPacket }) {
             const capexIntensity = margin(row.capex, row.revenue)
             const opNote = opMarginExplainer(row, opMargin)
             return (
-              <button key={row.segment} onClick={() => packet ? onPacket?.(packet) : setHash('/financials')} className="rounded-lg border border-white/[0.075] bg-white/[0.026] p-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60">
+              <button key={row.segment} onClick={() => packet ? onPacket?.(packet) : setHash('/financials')} className="rounded-lg border border-white/[0.075] bg-[#050607]/92 p-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-lg font-[720]" style={{ color: SEGMENT_COLORS[row.segment] }}>{row.segment}</p>
@@ -760,7 +760,7 @@ function ValueCreationBridge({ data }) {
     <Section dense eyebrow="Value creation / capital intensity bridge" title="Revenue growth is not yet translating cleanly to operating income.">
       <div className="grid gap-3 lg:grid-cols-4">
         {rows.map((row) => (
-          <Panel key={row.title} pad="p-3" className={cn(row.tone === 'red' && 'border-red/18 bg-red/10', row.tone === 'amber' && 'border-amber/18 bg-amber/10', row.tone === 'cyan' && 'border-cyan/18 bg-cyan/10')}>
+          <Panel key={row.title} pad="p-3" className={cn(row.tone === 'red' && 'border-red/18', row.tone === 'amber' && 'border-amber/18', row.tone === 'cyan' && 'border-cyan/18')}>
             <p className="font-mono text-[9px] uppercase tracking-normal text-white/58">Filed / derived bridge</p>
             <p className={cn('mt-1 text-2xl font-[720] tracking-normal', row.tone === 'red' ? 'text-red' : row.tone === 'amber' ? 'text-amber' : 'text-cyan')}>{row.metric}</p>
             <h3 className="mt-2 text-base font-[700] leading-6 text-white/88">{row.title}</h3>
@@ -1010,7 +1010,7 @@ function OverviewHero({ data }) {
   return (
     <section className="mx-auto max-w-[1760px] px-safe py-4 md:py-6">
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.06fr)_minmax(420px,.94fr)]">
-        <Panel pad="p-5 sm:p-7" className="relative overflow-hidden border-spacex/18 bg-[radial-gradient(circle_at_12%_0%,rgba(183,216,255,.15),transparent_34%),linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.014)_52%,rgba(0,0,0,.22))]">
+        <Panel pad="p-5 sm:p-7" className="relative overflow-hidden border-spacex/18">
           <div className="absolute right-[-8rem] top-[-10rem] h-[24rem] w-[24rem] rounded-full border border-white/[0.06]" />
           <div className="relative">
             <p className="font-mono text-[11px] font-semibold uppercase tracking-normal text-cyan/78">Preliminary S‑1 briefing</p>
@@ -1058,7 +1058,7 @@ function WhatChangedStrip({ data }) {
     { label: 'Q1 net loss', value: money((q12026?.net_income ?? 0) - (q12025?.net_income ?? 0)), note: `${money(q12025?.net_income)} → ${money(q12026?.net_income)}` },
   ]
   return (
-    <Panel pad="p-4" className="overflow-hidden border-spacex/14 bg-[linear-gradient(135deg,rgba(183,216,255,.07),rgba(255,255,255,.018)_42%,rgba(0,0,0,.18))]">
+    <Panel pad="p-4" className="overflow-hidden border-spacex/14">
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-normal text-white/66">Financial deltas</p>
