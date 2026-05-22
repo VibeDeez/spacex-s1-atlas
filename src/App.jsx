@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { calculateKubinScenario, getScenarioDefaults } from './kubinScenario.js'
 import { loadAtlasData, loadSourcePayload } from './data/loadAtlasData.js'
@@ -130,8 +130,28 @@ function Shell({ children }) {
 
 function Header({ route }) {
   const [moreOpen, setMoreOpen] = useState(false)
+  const moreRef = useRef(null)
   useEffect(() => { setMoreOpen(false) }, [route.view])
-  const secondaryActive = !MOBILE_PRIMARY_NAV.has(route.view) && !['packet', 'poster'].includes(route.view)
+  useEffect(() => {
+    if (!moreOpen) return undefined
+    const onPointerDown = (event) => {
+      if (!moreRef.current?.contains(event.target)) setMoreOpen(false)
+    }
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') setMoreOpen(false)
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [moreOpen])
+  const secondaryActive = !MOBILE_PRIMARY_NAV.has(route.view)
+  const go = (hash) => {
+    setMoreOpen(false)
+    setHash(hash)
+  }
   return (
     <header className="sticky top-0 z-50 border-b border-white/[0.075] bg-void/94 pt-safe backdrop-blur-md sm:backdrop-blur-2xl">
       <div className="mx-auto flex max-w-[1760px] items-center gap-2 px-safe py-2 sm:gap-3">
@@ -144,7 +164,7 @@ function Header({ route }) {
         </button>
         <nav className="nav-shell mobile-tab-grid no-scrollbar grid flex-1 grid-flow-col auto-cols-max items-center gap-1 overflow-x-auto rounded-2xl border border-white/[0.08] bg-black/20 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,.04)] sm:flex sm:min-w-0">
           {NAV.map((tab) => {
-            const active = route.view === tab.id || (route.view === 'packet' && tab.id === 'atlas') || (route.view === 'poster' && tab.id === 'flight-deck')
+            const active = route.view === tab.id || (route.view === 'packet' && tab.id === 'atlas')
             return (
               <button key={tab.id} onClick={() => setHash(tab.hash)} className={cn('nav-tab relative min-h-10 shrink-0 snap-start rounded-xl px-3 text-[12px] font-[620] transition focus-ring sm:text-[13px]', !MOBILE_PRIMARY_NAV.has(tab.id) && 'max-sm:hidden', active ? 'is-active text-spacex' : 'text-white/62 hover:bg-white/[0.055] hover:text-white/82')}>
                 {active && <motion.span layoutId="tab-bg" className="absolute inset-0 rounded-xl border border-white/12 bg-white/[0.075] shadow-[0_8px_24px_rgba(0,0,0,.20)]" />}
@@ -153,7 +173,7 @@ function Header({ route }) {
               </button>
             )
           })}
-          <div className="relative sm:hidden">
+          <div ref={moreRef} className="relative sm:hidden">
             <button
               onClick={() => setMoreOpen((open) => !open)}
               className={cn('nav-tab relative min-h-10 rounded-xl px-3 text-[12px] font-[620] focus-ring', secondaryActive || moreOpen ? 'is-active border-white/12 bg-white/[0.075] text-spacex' : 'text-white/62 hover:bg-white/[0.055] hover:text-white/82')}
@@ -166,13 +186,14 @@ function Header({ route }) {
             {moreOpen && (
               <div className="card-surface absolute right-0 top-[calc(100%+.55rem)] z-50 grid w-56 gap-1 rounded-2xl border p-2 shadow-[0_18px_60px_rgba(0,0,0,.45)]">
                 {NAV.filter((tab) => !MOBILE_PRIMARY_NAV.has(tab.id)).map((tab) => (
-                  <button key={tab.id} onClick={() => setHash(tab.hash)} className={cn('flex min-h-11 items-center justify-between rounded-xl px-3 text-left text-xs font-[620] focus-ring', route.view === tab.id ? 'bg-white/[0.08] text-spacex' : 'text-white/66 hover:bg-white/[0.05]')}>
+                  <button key={tab.id} onClick={() => go(tab.hash)} className={cn('flex min-h-11 items-center justify-between rounded-xl px-3 text-left text-xs font-[620] focus-ring', route.view === tab.id || (route.view === 'packet' && tab.id === 'atlas') ? 'bg-white/[0.08] text-spacex' : 'text-white/66 hover:bg-white/[0.05]')}>
                     <span>{tab.label}</span>
-                    {route.view === tab.id && <span className="h-1.5 w-1.5 rounded-full bg-spacex" />}
+                    {(route.view === tab.id || (route.view === 'packet' && tab.id === 'atlas')) && <span className="h-1.5 w-1.5 rounded-full bg-spacex" />}
                   </button>
                 ))}
-                <button onClick={() => setHash('/poster/business-stack')} className="flex min-h-11 items-center gap-2 rounded-xl px-3 text-left text-xs font-[620] text-white/66 hover:bg-white/[0.05] focus-ring">
-                  <Sparkles size={13} /> Poster
+                <button onClick={() => go('/poster/business-stack')} className={cn('flex min-h-11 items-center justify-between gap-2 rounded-xl px-3 text-left text-xs font-[620] focus-ring', route.view === 'poster' ? 'bg-white/[0.08] text-spacex' : 'text-white/66 hover:bg-white/[0.05]')}>
+                  <span className="inline-flex items-center gap-2"><Sparkles size={13} /> Poster</span>
+                  {route.view === 'poster' && <span className="h-1.5 w-1.5 rounded-full bg-spacex" />}
                 </button>
               </div>
             )}
