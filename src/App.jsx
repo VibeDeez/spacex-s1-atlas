@@ -2865,7 +2865,12 @@ function App() {
         </motion.main>
       </AnimatePresence>
       <footer className="mx-auto max-w-[1760px] border-t border-white/[0.06] px-safe py-6 text-[11px] leading-5 text-white/58">
-        Source discipline: this source-cited filing map uses the SEC S‑1 package — main S‑1, filing-fee exhibit, filed exhibits and OCR from S‑1 graphics. It is not investment advice and is not affiliated with SpaceX or the SEC. External model assumptions are separate from filed facts. <a className="text-white/65 underline decoration-white/20 underline-offset-4" href={data.sourceUrl}>SEC source filing</a>.
+        <p>
+          Source discipline: this source-cited filing map uses the SEC S‑1 package — main S‑1, filing-fee exhibit, filed exhibits and OCR from S‑1 graphics. It is not investment advice and is not affiliated with SpaceX or the SEC. External model assumptions are separate from filed facts. <a className="text-white/65 underline decoration-white/20 underline-offset-4" href={data.sourceUrl}>SEC source filing</a>.
+        </p>
+        <p className="mt-3">
+          Want to improve the atlas? <a className="font-semibold text-spacex underline decoration-spacex/35 underline-offset-4" href="https://github.com/VibeDeez/spacex-s1-atlas" target="_blank" rel="noreferrer">Contribute on GitHub</a>.
+        </p>
       </footer>
     </Shell>
   )
