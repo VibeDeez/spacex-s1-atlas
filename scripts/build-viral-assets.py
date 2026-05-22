@@ -18,7 +18,7 @@ SHARE = PUBLIC / 'share'
 SOCIAL.mkdir(parents=True, exist_ok=True)
 SITE_TITLE = 'SpaceX S-1 Atlas'
 SITE_DESCRIPTION = "A source-cited map of SpaceX's S-1: business stack, financials, risks, exhibits, OCR, and source packets."
-CANONICAL_URL = os.environ.get('PUBLIC_BASE_URL', 'https://silent-aurora-p5v5.here.now').rstrip('/')
+CANONICAL_URL = os.environ.get('PUBLIC_BASE_URL', 'https://henry.here.now/spacex-s1-atlas').rstrip('/')
 IMAGE_BASE_URL = os.environ.get('SHARE_IMAGE_BASE_URL', CANONICAL_URL).rstrip('/')
 SOCIAL_IMAGE_PATH = '/social/spacex-s1-atlas-card.png'
 CARD_IMAGE_URL = f'{IMAGE_BASE_URL}{SOCIAL_IMAGE_PATH}'

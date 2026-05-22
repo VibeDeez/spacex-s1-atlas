@@ -93,7 +93,7 @@ async function staticChecks() {
   assert(index.includes(`${canonicalSiteUrl('/')}`), 'root canonical URL missing or stale')
   assert(index.includes(SITE.socialImagePath), 'root social image path missing or stale')
   assert(index.includes(canonicalSiteUrl(SITE.socialImagePath)), 'root absolute social image URL missing or stale')
-  assert(!index.includes('henry.here.now'), 'stale root metadata host present')
+  assert(!index.includes('silent-aurora-p5v5.here.now'), 'stale root metadata host present')
   assert(!index.includes('spacex-s1-elon-rocket-og.png'), 'stale OG image filename present')
 
   for (const rel of ['summary.json', 'financials.json', 'risks.json', 'atlas-index.json', 'debate-lenses.json', 'jared-kubin-model.json', 'jared-kubin-spacex-ipo-model.xlsx', 'source-main.json', 'source-exhibits.json', 'ocr.json', 'social/spacex-s1-atlas-card.png', 'robots.txt', 'sitemap.xml']) {
@@ -172,7 +172,7 @@ async function staticChecks() {
   for (const token of forbiddenSvgTokens) {
     assert(!svg.toLowerCase().includes(token.toLowerCase()), `unsafe SVG token present: ${token}`)
   }
-  const staleDomains = ['henry.here.now', 'jade-serenity-vhqv.here.now', 'brave-fennel-ghck.here.now', 'sentient-ravine-9vxe.here.now', 'mossy-petal-6adt.here.now', 'stellar-nirvana-tvwp.here.now']
+  const staleDomains = ['silent-aurora-p5v5.here.now', 'jade-serenity-vhqv.here.now', 'brave-fennel-ghck.here.now', 'sentient-ravine-9vxe.here.now', 'mossy-petal-6adt.here.now', 'stellar-nirvana-tvwp.here.now']
   const distNonSource = [index, js, css, read('debate-lenses.json')].join('\n')
   const stale = staleDomains.filter((term) => distNonSource.includes(term))
   assert(stale.length === 0, `stale domains present: ${stale.join(', ')}`)

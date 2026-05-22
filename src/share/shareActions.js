@@ -1,6 +1,7 @@
+const CANONICAL_APP_URL = 'https://henry.here.now/spacex-s1-atlas/'
+
 export function appOrigin() {
-  if (typeof window === 'undefined') return '/'
-  return new URL('.', window.location.href).href
+  return CANONICAL_APP_URL
 }
 
 export function packetUrl(packet) {

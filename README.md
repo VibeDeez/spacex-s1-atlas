@@ -2,7 +2,7 @@
 
 A source-cited React/Vite dashboard for reviewing SpaceX's preliminary S-1 package. The app turns the filing, exhibits, OCR'd graphics, financial tables, risk factors, governance disclosures, and source packets into a mobile-friendly investor memo and evidence atlas.
 
-Live dashboard: https://silent-aurora-p5v5.here.now/
+Live dashboard: https://henry.here.now/spacex-s1-atlas/
 
 ## What it includes
 
