@@ -185,7 +185,7 @@ function Header({ route }) {
 }
 
 function Panel({ children, className = '', pad = 'p-4' }) {
-  return <div className={cn('rounded-lg border border-white/[0.085] bg-[#0A0D10]/88 shadow-[inset_0_1px_0_rgba(255,255,255,.045)]', pad, className)}>{children}</div>
+  return <div className={cn('card-surface rounded-lg border', pad, className)}>{children}</div>
 }
 
 function Section({ eyebrow, title, aside, children, dense = false }) {
@@ -205,7 +205,7 @@ function Section({ eyebrow, title, aside, children, dense = false }) {
 
 function Source({ children }) {
   return (
-    <p className="source-line mt-2 max-w-full rounded-md border border-white/[0.08] bg-white/[0.026] px-2 py-1 font-mono text-[11px] leading-4 text-white/72">
+    <p className="source-line card-surface-soft mt-2 max-w-full rounded-md border px-2 py-1 font-mono text-[11px] leading-4 text-white/72">
       <span className="font-semibold uppercase tracking-normal text-cyan/80">SRC</span>
       <span className="text-white/62"> · </span>
       <span className="break-words">{children}</span>
@@ -216,7 +216,7 @@ function Source({ children }) {
 function SourceChip({ children, label = 'Source' }) {
   if (!children) return null
   return (
-    <span title={String(children)} className="source-chip mt-2 inline-flex max-w-full items-center gap-1 rounded-md border border-white/[0.08] bg-white/[0.024] px-2 py-1 font-mono text-[10px] uppercase tracking-normal text-white/62">
+    <span title={String(children)} className="source-chip card-surface-soft mt-2 inline-flex max-w-full items-center gap-1 rounded-md border px-2 py-1 font-mono text-[10px] uppercase tracking-normal text-white/62">
       <span className="text-cyan/76">{label}</span> <span className="text-white/58">·</span> <span className="min-w-0 truncate normal-case tracking-normal text-white/70">{trimText(children, 74)}</span>
     </span>
   )
@@ -224,7 +224,7 @@ function SourceChip({ children, label = 'Source' }) {
 
 function MetricPill({ label, value, sub }) {
   return (
-    <div className="min-h-[96px] rounded-lg border border-white/[0.09] bg-white/[0.035] p-3 sm:p-3.5">
+    <div className="card-surface-soft min-h-[96px] rounded-lg border p-3 sm:p-3.5">
       <p className="font-mono text-[10px] uppercase tracking-normal text-white/68">{label}</p>
       <p className="mt-1.5 text-2xl font-[700] tracking-normal text-spacex sm:text-3xl">{value}</p>
       {sub && <p className="mt-1.5 text-xs leading-5 text-white/74">{sub}</p>}
@@ -234,7 +234,7 @@ function MetricPill({ label, value, sub }) {
 
 function DataTable({ columns, rows, mobileCard, className = '', maxHeight = 'max-h-[620px]', empty, ariaLabel = 'Disclosure data table' }) {
   return (
-    <div className={cn('data-table-shell overflow-hidden rounded-lg border border-white/[0.085] bg-black/22', className)}>
+    <div className={cn('card-surface-soft data-table-shell overflow-hidden rounded-lg border', className)}>
       {mobileCard && (
         <div className="grid gap-2 p-2 md:hidden">
           {rows.map((row, idx) => <div key={row.id ?? idx}>{mobileCard(row, idx)}</div>)}
@@ -420,7 +420,7 @@ function BriefingReadout({ data }) {
     },
   ]
   return (
-    <Panel pad="p-4 sm:p-5" className="h-full border-white/[0.13] bg-[#0A0D12]/95">
+    <Panel pad="p-4 sm:p-5" className="card-surface-elevated h-full">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-normal text-cyan/78">Critical readout</p>
@@ -526,7 +526,7 @@ function ExecutiveMemo({ data }) {
   ]
   return (
     <section className="mx-auto max-w-[1760px] px-safe py-3 md:py-4">
-      <Panel pad="p-4 sm:p-5" className="memo-panel overflow-hidden border-spacex/14">
+      <Panel pad="p-4 sm:p-5" className="card-surface-elevated memo-panel overflow-hidden">
         <div className="grid gap-4 xl:grid-cols-[minmax(0,.9fr)_minmax(500px,1.1fr)]">
           <div className="min-w-0">
             <p className="font-mono text-[10px] uppercase tracking-normal text-cyan/76">SpaceX S-1 Atlas · Executive memo</p>
@@ -538,7 +538,7 @@ function ExecutiveMemo({ data }) {
               <button onClick={() => setHash('/atlas')} className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/12 bg-white/[0.03] px-4 text-sm font-[620] text-white/72 hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60"><Search size={15} /> Open source atlas</button>
             </div>
           </div>
-          <div className="overflow-hidden rounded-lg border border-white/[0.08] bg-black/16">
+          <div className="card-surface-soft overflow-hidden rounded-lg border">
             {proofPoints.map((point) => (
               <button key={point.label} onClick={() => setHash(point.label === 'Control and blanks' ? '/governance' : point.label === 'Segment split' ? '/segments' : '/financials')} className="grid w-full gap-2 border-b border-white/[0.055] p-3 text-left transition last:border-b-0 hover:bg-white/[0.035] focus-visible:outline focus-visible:outline-2 focus-visible:outline-spacex/60 sm:grid-cols-[8.5rem_minmax(0,1fr)]">
                 <span>

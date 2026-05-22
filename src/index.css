@@ -4,7 +4,7 @@
 :root {
   color-scheme: dark;
   font-feature-settings: "cv01", "ss03";
-  background: #0c2038;
+  background: #071426;
 }
 
 * { box-sizing: border-box; }
@@ -17,7 +17,7 @@ body {
   margin: 0;
   min-height: 100svh;
   max-width: 100%;
-  background: #0c2038;
+  background: #071426;
   color: #f7f8f8;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   text-rendering: geometricPrecision;
@@ -38,8 +38,8 @@ p, h1, h2, h3, h4, h5, h6, li, dd, dt, td, th, button, a, span {
 .starfield {
   overflow: hidden;
   background:
-    radial-gradient(circle at 50% 55%, rgba(107, 166, 230, .30), transparent 34rem),
-    linear-gradient(180deg,#153b65 0%,#0f2a48 46%,#0b1d32 100%);
+    radial-gradient(circle at 50% 48%, rgba(70, 128, 205, .22), transparent 34rem),
+    linear-gradient(180deg,#0b2442 0%,#081a30 48%,#06101f 100%);
 }
 
 .starfield::before,
@@ -52,7 +52,7 @@ p, h1, h2, h3, h4, h5, h6, li, dd, dt, td, th, button, a, span {
 }
 
 .starfield::before {
-  opacity: .42;
+  opacity: .72;
   background:
     radial-gradient(circle at 7% 12%, rgba(255,255,255,.95) 0 1.35px, transparent 2px),
     radial-gradient(circle at 14% 34%, rgba(255,255,255,.58) 0 1px, transparent 1.7px),
@@ -73,7 +73,7 @@ p, h1, h2, h3, h4, h5, h6, li, dd, dt, td, th, button, a, span {
 }
 
 .starfield::after {
-  opacity: .28;
+  opacity: .58;
   background:
     radial-gradient(circle at 18% 22%, rgba(255,255,255,.96) 0 1px, transparent 1.7px),
     radial-gradient(circle at 43% 13%, rgba(255,255,255,.84) 0 1.2px, transparent 1.9px),
@@ -87,15 +87,32 @@ p, h1, h2, h3, h4, h5, h6, li, dd, dt, td, th, button, a, span {
 }
 
 @keyframes twinkle-soft {
-  0%, 100% { opacity: .34; filter: brightness(.92); }
-  45% { opacity: .56; filter: brightness(1.22); }
-  70% { opacity: .40; filter: brightness(1.02); }
+  0%, 100% { opacity: .58; filter: brightness(1.05); }
+  45% { opacity: .88; filter: brightness(1.45); }
+  70% { opacity: .66; filter: brightness(1.18); }
 }
 
 @keyframes twinkle-bright {
-  0%, 100% { opacity: .18; transform: scale(1); }
-  35% { opacity: .44; transform: scale(1.005); }
-  60% { opacity: .24; transform: scale(1); }
+  0%, 100% { opacity: .34; transform: scale(1); }
+  35% { opacity: .78; transform: scale(1.006); }
+  60% { opacity: .48; transform: scale(1); }
+}
+
+.card-surface {
+  background: linear-gradient(180deg, rgba(8, 13, 20, .96), rgba(6, 10, 16, .92));
+  border-color: rgba(255,255,255,.095);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.045), 0 18px 60px rgba(0,0,0,.22);
+}
+
+.card-surface-soft {
+  background: linear-gradient(180deg, rgba(10, 17, 26, .90), rgba(7, 12, 18, .84));
+  border-color: rgba(255,255,255,.085);
+}
+
+.card-surface-elevated {
+  background: linear-gradient(145deg, rgba(10, 18, 28, .97), rgba(6, 10, 16, .94));
+  border-color: rgba(183,216,255,.16);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.055), 0 24px 90px rgba(0,0,0,.30);
 }
 
 .mission-grid {
