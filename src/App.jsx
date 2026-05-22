@@ -36,7 +36,7 @@ const NAV = [
   { id: 'flight-deck', hash: '/flight-deck', label: 'Overview' },
   { id: 'debate', hash: '/debate', label: 'Debate Map', mobileLabel: 'Debate' },
   { id: 'segments', hash: '/segments', label: 'Segments' },
-  { id: 'financials', hash: '/financials', label: 'Financials', mobileLabel: 'Fin.' },
+  { id: 'financials', hash: '/financials', label: 'Financials', mobileLabel: 'Financials' },
   { id: 'risks', hash: '/risks', label: 'Risk Radar' },
   { id: 'governance', hash: '/governance', label: 'Governance' },
   { id: 'model', hash: '/model', label: 'External Model' },
@@ -44,7 +44,7 @@ const NAV = [
   { id: 'sources', hash: '/sources', label: 'Source' },
 ]
 
-const MOBILE_PRIMARY_NAV = new Set(['flight-deck', 'debate', 'financials', 'atlas'])
+const MOBILE_PRIMARY_NAV = new Set(['flight-deck', 'debate', 'financials'])
 
 const EXECUTIVE_CONCLUSION = 'A Connectivity-led operating model is funding a capital-intensive Space/AI expansion under concentrated control.'
 
@@ -142,40 +142,42 @@ function Header({ route }) {
             <p className="font-mono text-[10px] uppercase tracking-normal text-white/60">source-cited filing map</p>
           </div>
         </button>
-        <nav className="mobile-tab-grid no-scrollbar flex flex-1 snap-x gap-1 overflow-x-auto px-1 [mask-image:linear-gradient(90deg,transparent,black_8px,black_calc(100%-24px),transparent)]">
+        <nav className="nav-shell mobile-tab-grid no-scrollbar grid flex-1 grid-flow-col auto-cols-max items-center gap-1 overflow-x-auto rounded-2xl border border-white/[0.08] bg-black/20 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,.04)] sm:flex sm:min-w-0">
           {NAV.map((tab) => {
             const active = route.view === tab.id || (route.view === 'packet' && tab.id === 'atlas') || (route.view === 'poster' && tab.id === 'flight-deck')
             return (
-              <button key={tab.id} onClick={() => setHash(tab.hash)} className={cn('relative min-h-11 shrink-0 snap-start rounded-lg px-3 text-[12px] font-[560] transition hover:bg-white/[0.04] focus-ring sm:text-[13px]', !MOBILE_PRIMARY_NAV.has(tab.id) && 'max-sm:hidden', active ? 'text-spacex' : 'text-white/66')}>
-                {active && <motion.span layoutId="tab-bg" className="absolute inset-0 rounded-lg border border-white/10 bg-white/[0.055]" />}
+              <button key={tab.id} onClick={() => setHash(tab.hash)} className={cn('nav-tab relative min-h-10 shrink-0 snap-start rounded-xl px-3 text-[12px] font-[620] transition focus-ring sm:text-[13px]', !MOBILE_PRIMARY_NAV.has(tab.id) && 'max-sm:hidden', active ? 'is-active text-spacex' : 'text-white/62 hover:bg-white/[0.055] hover:text-white/82')}>
+                {active && <motion.span layoutId="tab-bg" className="absolute inset-0 rounded-xl border border-white/12 bg-white/[0.075] shadow-[0_8px_24px_rgba(0,0,0,.20)]" />}
                 <span className="relative z-10 whitespace-nowrap sm:hidden">{tab.mobileLabel || tab.label}</span>
                 <span className="relative z-10 hidden whitespace-nowrap sm:inline">{tab.label}</span>
               </button>
             )
           })}
-        </nav>
-        <div className="relative sm:hidden">
-          <button
-            onClick={() => setMoreOpen((open) => !open)}
-            className={cn('min-h-11 rounded-lg border px-3 text-[12px] font-[560] focus-ring', secondaryActive || moreOpen ? 'border-spacex/30 bg-white/[0.07] text-spacex' : 'border-white/10 bg-white/[0.035] text-white/70')}
-            aria-expanded={moreOpen}
-            aria-label="More dashboard routes"
-          >
-            More
-          </button>
-          {moreOpen && (
-            <div className="card-surface absolute right-0 top-[calc(100%+.45rem)] z-50 grid w-48 gap-1 rounded-xl border p-2 shadow-[0_18px_60px_rgba(0,0,0,.45)]">
-              {NAV.filter((tab) => !MOBILE_PRIMARY_NAV.has(tab.id)).map((tab) => (
-                <button key={tab.id} onClick={() => setHash(tab.hash)} className={cn('min-h-10 rounded-lg px-3 text-left text-xs font-[560] focus-ring', route.view === tab.id ? 'bg-white/[0.07] text-spacex' : 'text-white/66 hover:bg-white/[0.045]')}>
-                  {tab.label}
+          <div className="relative sm:hidden">
+            <button
+              onClick={() => setMoreOpen((open) => !open)}
+              className={cn('nav-tab relative min-h-10 rounded-xl px-3 text-[12px] font-[620] focus-ring', secondaryActive || moreOpen ? 'is-active border-white/12 bg-white/[0.075] text-spacex' : 'text-white/62 hover:bg-white/[0.055] hover:text-white/82')}
+              aria-expanded={moreOpen}
+              aria-label="More dashboard routes"
+            >
+              <span className="relative z-10">More</span>
+              {secondaryActive && <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-spacex" />}
+            </button>
+            {moreOpen && (
+              <div className="card-surface absolute right-0 top-[calc(100%+.55rem)] z-50 grid w-56 gap-1 rounded-2xl border p-2 shadow-[0_18px_60px_rgba(0,0,0,.45)]">
+                {NAV.filter((tab) => !MOBILE_PRIMARY_NAV.has(tab.id)).map((tab) => (
+                  <button key={tab.id} onClick={() => setHash(tab.hash)} className={cn('flex min-h-11 items-center justify-between rounded-xl px-3 text-left text-xs font-[620] focus-ring', route.view === tab.id ? 'bg-white/[0.08] text-spacex' : 'text-white/66 hover:bg-white/[0.05]')}>
+                    <span>{tab.label}</span>
+                    {route.view === tab.id && <span className="h-1.5 w-1.5 rounded-full bg-spacex" />}
+                  </button>
+                ))}
+                <button onClick={() => setHash('/poster/business-stack')} className="flex min-h-11 items-center gap-2 rounded-xl px-3 text-left text-xs font-[620] text-white/66 hover:bg-white/[0.05] focus-ring">
+                  <Sparkles size={13} /> Poster
                 </button>
-              ))}
-              <button onClick={() => setHash('/poster/business-stack')} className="min-h-10 rounded-lg px-3 text-left text-xs font-[560] text-white/66 hover:bg-white/[0.045] focus-ring">
-                Poster
-              </button>
-            </div>
-          )}
-        </div>
+              </div>
+            )}
+          </div>
+        </nav>
         <button onClick={() => setHash('/poster/business-stack')} className="hidden min-h-11 shrink-0 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.035] px-3 text-[12px] font-[560] text-white/78 hover:bg-white/[0.06] focus-ring sm:inline-flex sm:text-[13px]">
           <Sparkles size={14} /> Poster
         </button>

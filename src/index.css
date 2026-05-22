@@ -217,22 +217,23 @@ button { touch-action: manipulation; }
     white-space: nowrap;
   }
   .mobile-tab-grid {
-    display: grid !important;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     overflow: visible !important;
-    mask-image: none !important;
-    -webkit-mask-image: none !important;
-    gap: 0.25rem;
   }
-  .mobile-tab-grid > button {
-    min-height: 2.5rem;
+  .mobile-tab-grid > .nav-tab,
+  .mobile-tab-grid > .relative > .nav-tab {
+    min-height: 2.4rem;
     min-width: 0;
-    padding-left: 0.15rem;
-    padding-right: 0.15rem;
-    font-size: 10px;
+    width: 100%;
+    padding-left: 0.35rem;
+    padding-right: 0.35rem;
+    font-size: 10.5px;
     line-height: 1;
   }
-  .mobile-tab-grid > button span {
+  .mobile-tab-grid > .relative {
+    min-width: 0;
+  }
+  .mobile-tab-grid .nav-tab span:not(.absolute) {
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
