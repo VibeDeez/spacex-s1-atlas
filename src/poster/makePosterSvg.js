@@ -8,14 +8,7 @@ export function escapeXml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[ch]))
 }
 
-export function makePosterSvg({ variant, data, packet }) {
-  const titles = {
-    'business-stack': ['Business Stack', 'Space · Connectivity · AI'],
-    'financial-telemetry': ['Financials', 'Revenue, segment results, cash and Starlink metrics'],
-    'risk-radar': ['Risk Radar', 'Actual S‑1 risk factors made navigable'],
-    'governance-control': ['Governance', 'Management, related parties and offering mechanics'],
-  }
-  const [title, subtitle] = titles[variant] || titles['business-stack']
+export function makePosterSvg({ variant, data }) {
   if (variant === 'financial-telemetry') {
     const y2024 = periodRow(data.financials.consolidated, '2024')
     const y2025 = periodRow(data.financials.consolidated, '2025')
@@ -101,8 +94,8 @@ export function makePosterSvg({ variant, data, packet }) {
   </svg>`
 }
 
-export async function exportPoster({ variant, data, packet, share = false }) {
-  const svg = makePosterSvg({ variant, data, packet })
+export async function exportPoster({ variant, data, packet: _packet, share = false }) {
+  const svg = makePosterSvg({ variant, data })
   const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' })
   const url = URL.createObjectURL(blob)
   const img = new Image()

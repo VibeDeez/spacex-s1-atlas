@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { calculateKubinScenario, getScenarioDefaults } from './kubinScenario.js'
 import { loadAtlasData, loadSourcePayload } from './data/loadAtlasData.js'
@@ -96,7 +96,7 @@ function useSourcePayload(active) {
   const [source, setSource] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const load = async () => {
+  const load = useCallback(async () => {
     if (source || loading) return source
     setLoading(true)
     try {
@@ -109,10 +109,10 @@ function useSourcePayload(active) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [source, loading])
   useEffect(() => {
     if (active === 'sources') load()
-  }, [active])
+  }, [active, load])
   return { source, loading, error, load }
 }
 
@@ -802,7 +802,6 @@ function QuestionTree({ data }) {
   const lens = (id) => lenses.find((item) => item.id === id)
   const starshipRisk = riskPacketFor(data, /Starship at scale/i)
   const aiRisk = riskPacketFor(data, /AI segment is capital intensive/i)
-  const controlRisk = riskPacketFor(data, /dual class structure concentrates voting control/i)
   const q1Rows = segmentRowsFor(data, 'Q1 2026')
   const totalCapex = segmentTotal(data, 'Q1 2026', 'capex')
   const aiQ1 = q1Rows.find((row) => row.segment === 'AI')
@@ -1024,7 +1023,7 @@ function EvidenceDrilldown({ data, packet, onPacket }) {
   )
 }
 
-function OverviewHero({ data }) {
+function _OverviewHero({ data }) {
   const filingStatus = factFor(data, 'Filing status')
   const ticker = factFor(data, 'Ticker requested')
   const y2025 = periodRow(data.financials.consolidated, '2025')
@@ -1068,7 +1067,7 @@ function OverviewHero({ data }) {
   )
 }
 
-function WhatChangedStrip({ data }) {
+function _WhatChangedStrip({ data }) {
   const rows = data.financials.consolidated
   const y2024 = rowFor(rows, 'period', '2024')
   const y2025 = rowFor(rows, 'period', '2025')
@@ -1103,7 +1102,7 @@ function WhatChangedStrip({ data }) {
   )
 }
 
-function SegmentEconomics({ data, onPacket }) {
+function _SegmentEconomics({ data, onPacket }) {
   const q1Segments = data.financials.segments.filter((row) => row.period === 'Q1 2026')
   const q1Revenue = q1Segments.reduce((sum, row) => sum + Number(row.revenue || 0), 0)
   const q1Capex = q1Segments.reduce((sum, row) => sum + Number(row.capex || 0), 0)
@@ -1152,7 +1151,7 @@ function SegmentEconomics({ data, onPacket }) {
   )
 }
 
-function FilingTensions({ data }) {
+function _FilingTensions({ data }) {
   const starshipRisk = riskPacketFor(data, /Starship at scale/i)
   const tamRisk = riskPacketFor(data, /future market opportunity/i)
   const aiRisk = riskPacketFor(data, /AI segment is capital intensive/i)
@@ -1399,7 +1398,7 @@ function MobileOrbitStackCompact({ segments }) {
   )
 }
 
-function MobileFlightDeck({ data, packet, onPacket }) {
+function _MobileFlightDeck({ data, packet, _onPacket }) {
   const q1 = data.financials.consolidated.find((x) => x.period === 'Q1 2026')
   const q1Prev = data.financials.consolidated.find((x) => x.period === 'Q1 2025')
   const y2025 = data.financials.consolidated.find((x) => x.period === '2025')
@@ -2313,7 +2312,7 @@ function CompactPacketPreview({ packet }) {
   )
 }
 
-function FinancialMetricInspector({ metric, data, compact = false, onClose }) {
+function FinancialMetricInspector({ metric, compact = false, onClose }) {
   return (
     <Panel pad="p-3" className={cn(compact ? 'max-h-[78svh] overflow-auto' : 'sticky top-[72px] self-start xl:max-h-[calc(100svh-96px)] xl:overflow-auto')}>
       <div className="flex items-start justify-between gap-3">
@@ -2342,13 +2341,13 @@ function FinancialMetricInspector({ metric, data, compact = false, onClose }) {
   )
 }
 
-function FinancialInspectorSheet({ open, metric, data, onClose }) {
+function FinancialInspectorSheet({ open, metric, onClose }) {
   return (
     <AnimatePresence>
       {open && (
         <motion.div className="fixed inset-0 z-[70] flex items-end bg-black/55 p-2 backdrop-blur-sm xl:hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
           <motion.div className="w-full" initial={{ y: 48 }} animate={{ y: 0 }} exit={{ y: 48 }} transition={{ duration: 0.18 }}>
-            <FinancialMetricInspector metric={metric} data={data} compact onClose={onClose} />
+            <FinancialMetricInspector metric={metric} compact onClose={onClose} />
           </motion.div>
         </motion.div>
       )}
@@ -2465,10 +2464,10 @@ function Financials({ data }) {
           </Panel>
         </div>
         <div className="hidden xl:block">
-          <FinancialMetricInspector metric={selectedMetric} data={data} />
+          <FinancialMetricInspector metric={selectedMetric} />
         </div>
       </div>
-      <FinancialInspectorSheet open={inspectorOpen} metric={selectedMetric} data={data} onClose={() => setInspectorOpen(false)} />
+      <FinancialInspectorSheet open={inspectorOpen} metric={selectedMetric} onClose={() => setInspectorOpen(false)} />
     </Section>
   )
 }
@@ -2570,12 +2569,12 @@ function SourceTextReader({ current, snippetInfo, query }) {
   )
 }
 
-function Sources({ data, sourceState, route }) {
+function Sources({ sourceState, route }) {
   const { source, loading, error, load } = sourceState
   const isMobile = useMediaQuery('(max-width: 640px)')
   const [selected, setSelected] = useState(0)
   const [query, setQuery] = useState(route.params.q || '')
-  useEffect(() => { load() }, [])
+  useEffect(() => { load() }, [load])
   useEffect(() => { setQuery(route.params.q || '') }, [route.params.q])
   const sourceItems = useMemo(() => {
     if (!source) return []
@@ -2853,7 +2852,7 @@ function App() {
     risks: <Risks data={data} route={route} />,
     governance: <Governance data={data} />,
     model: <ExternalModel data={data} />,
-    sources: <Sources data={data} sourceState={sourceState} route={route} />,
+    sources: <Sources sourceState={sourceState} route={route} />,
     packet: <PacketPage data={data} route={route} />,
     poster: <PosterMode data={data} route={route} />,
   }[route.view]
