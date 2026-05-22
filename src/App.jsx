@@ -2686,6 +2686,25 @@ function ExternalModel({ data }) {
     ['EV / FY2025 revenue', multiple(scenario.evRevenue2025), `${fmtMoneyM(scenario.revenue2025M)} FY2025 revenue denominator`],
     ['EV / FY2025 Adj. EBITDA', multiple(scenario.evAdjustedEbitda2025), `${fmtMoneyM(scenario.adjustedEbitda2025M)} FY2025 Adj. EBITDA denominator`],
   ]
+  const indexMechanics = [
+    ['NDX fast-entry path', 'Potential day-15 inclusion with roughly 5% float; initial forced buyer base is QQQ, QQQM, NDX-tracking mutual funds and related passive exposure.'],
+    ['S&P 500 rule-change watch', 'Jared flags Bloomberg-reported rule discussions as the larger swing factor because S&P-linked AUM would force both passive and benchmarked active managers to take a view.'],
+    ['Reflexive float loop', 'If passive demand lifts the stock through performance triggers, more float can unlock, low-float weight can rise, and the next rebalance can require a larger passive bid.'],
+  ]
+  const lockupTimeline = [
+    ['Jun 5–10', 'S&P 500 fast-entry rule-change window Jared is watching; speculative timing, not filed guidance.'],
+    ['Jun 12', 'Assumed IPO pricing date for this calendar; every date shifts with final prospectus and actual earnings dates.'],
+    ['Jul 6/7', 'Earliest NDX 100 fast-entry window; roughly 5% float and first potential passive bid.'],
+    ['Aug 5-ish', 'Q2 unlock: 20% of Early Release Eligible Shares, plus another 10% if stock closes at least 30% above IPO for 5 of 10 trading days ending on Q2 earnings date. Float could move from 5% toward 13–20%.'],
+    ['Aug 21', 'T+70: additional 7% unlock.'],
+    ['Sep 10', 'T+90: additional 7% unlock.'],
+    ['Sep 25', 'T+105: additional 7% unlock.'],
+    ['Oct 12 impact', 'T+120: additional 7%. If the Q2 trigger hit, the 3× float cap can max here and full NDX weight can be reached; otherwise the cap may bind at Q3.'],
+    ['Oct 26 impact', 'T+135: additional 7%.'],
+    ['Early Nov', 'Q3 unlock: additional 28% on the second full trading day after Q3 earnings, assuming roughly Oct. 31 earnings.'],
+    ['Dec 9', 'T+180: remainder of Early Release Eligible Shares released.'],
+    ['Jun 13, 2027', 'T+366: founder shares unlock; significant-investor block treatment depends on final S‑1 amendment because the current placeholder is blank.'],
+  ]
   return (
     <Section dense eyebrow="External open-source model" title="Jared Kubin’s SpaceX IPO model adds a credited scenario layer." aside="This tab is an external model workbench. It separates filed S‑1 facts, Jared model assumptions, user inputs, and dashboard calculations; it is not a filing fact layer or an exact spreadsheet formula clone.">
       <Panel pad="p-4 sm:p-5" className="border-cyan/16 bg-cyan/5">
@@ -2757,6 +2776,43 @@ function ExternalModel({ data }) {
         <Panel pad="p-4" className="border-white/[0.09]"><p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Jared’s framing</p><div className="mt-3 grid gap-3"><div className="rounded-lg border border-cyan/16 bg-cyan/7 p-3"><p className="text-sm font-[720] text-cyan">Bull case</p><p className="mt-1 text-sm leading-6 text-white/74">{model.bullBear.bull.join(' + ')}</p></div><div className="rounded-lg border border-red/16 bg-red/8 p-3"><p className="text-sm font-[720] text-red">Bear case</p><p className="mt-1 text-sm leading-6 text-white/74">{model.bullBear.bear.join(' + ')}</p></div><div className="rounded-lg border border-white/[0.08] bg-black/20 p-3"><p className="text-sm font-[720] text-spacex">Burning questions</p><ol className="mt-2 grid gap-2 text-sm leading-6 text-white/72">{model.burningQuestions.map((q, i) => <li key={q}>{i + 1}. {q}</li>)}</ol></div></div></Panel>
         <Panel pad="p-4" className="border-white/[0.09]"><p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Workbook anchors</p><div className="mt-3 grid gap-2 sm:grid-cols-3"><MetricPill label="Model raise assumption" value="$115B" sub="Workbook midpoint incl. greenshoe; not primary raise" /><MetricPill label="Quantified TAM" value={fmtB(model.tam?.companyRoundedTamB)} sub="Company rounded figure in model TAM tab" /><MetricPill label="Shares offered model" value={Number(offering.totalSharesInclGreenshoe || 0).toLocaleString()} sub="Primary + 15% greenshoe assumption" /></div><p className="mt-3 rounded-lg border border-amber/20 bg-amber/10 p-3 text-xs leading-5 text-white/72">Attribution / caveat: this is Jared’s open model and assumptions, not a final answer and not investment advice. Jared explicitly caveated that there are likely mistakes.</p></Panel>
       </div>
+
+      <Panel pad="p-4" className="mt-3 border-amber/18 bg-amber/5">
+        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-normal text-amber/80">Jared follow-up · lock-up / index mechanics</p>
+            <h3 className="mt-1 text-2xl font-[720] leading-tight text-spacex">Mechanical demand is the new watch item.</h3>
+          </div>
+          <p className="max-w-2xl text-xs leading-5 text-white/62">This is a scenario calendar from Jared’s follow-up post, not a filed schedule. It assumes a Jun. 12 IPO pricing date and depends on final prospectus terms, actual earnings dates, index-provider decisions, and price-trigger tests.</p>
+        </div>
+        <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,.8fr)_minmax(0,1.2fr)]">
+          <div className="grid gap-2">
+            {indexMechanics.map(([label, detail]) => (
+              <div key={label} className="rounded-xl border border-white/[0.075] bg-black/20 p-3">
+                <p className="text-sm font-[720] text-amber">{label}</p>
+                <p className="mt-1 text-sm leading-6 text-white/72">{detail}</p>
+              </div>
+            ))}
+            <div className="rounded-xl border border-cyan/16 bg-cyan/7 p-3">
+              <p className="font-mono text-[10px] uppercase tracking-normal text-cyan/80">Punchline</p>
+              <p className="mt-1 text-sm leading-6 text-white/74">Multiple reweighting windows can force passive buyers to scale exposure as float expands. Q2 earnings is the swing date; an S&P 500 fast-entry rule change is the larger market-wide variable.</p>
+            </div>
+          </div>
+          <div className="overflow-hidden rounded-xl border border-white/[0.075] bg-black/20">
+            <div className="border-b border-white/[0.075] p-3">
+              <p className="font-mono text-[10px] uppercase tracking-normal text-white/58">SPCX lock-up timeline · assumed calendar</p>
+            </div>
+            <div className="grid divide-y divide-white/[0.065]">
+              {lockupTimeline.map(([date, detail]) => (
+                <div key={date} className="grid gap-1 p-3 sm:grid-cols-[112px_1fr] sm:gap-4">
+                  <p className="font-mono text-[11px] font-[720] uppercase tracking-normal text-spacex">{date}</p>
+                  <p className="text-sm leading-6 text-white/72">{detail}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Panel>
 
       <div className="mt-3 grid gap-3 xl:grid-cols-2">
         <Panel pad="p-0" className="overflow-hidden"><div className="border-b border-white/[0.08] p-3"><p className="font-mono text-[10px] uppercase tracking-normal text-white/58">TAM tab</p><h3 className="mt-1 text-xl font-[700] text-spacex">TAM frames the dream before the model math.</h3></div><div className="grid gap-2 p-2 md:hidden">{tamRows.map((row) => <div key={row.Segment} className="rounded-lg border border-white/[0.07] bg-white/[0.024] p-3"><p className="font-[720] text-white/90">{row.Segment}</p><p className="mt-1 font-mono text-xl text-spacex">{fmtB(row['TAM ($B)'])}</p><p className="mt-1 text-xs leading-5 text-white/66">{pct(row['% of Quantified TAM'])} of quantified TAM · {row['Company Framing']}</p></div>)}</div><div className="hidden overflow-auto md:block"><table className="analyst-table min-w-[620px] w-full border-collapse text-left"><thead><tr>{['Segment','TAM','% TAM','Company framing'].map((h) => <th key={h} className="border-b border-white/[0.08] px-3 py-2.5 font-[650] uppercase">{h}</th>)}</tr></thead><tbody className="divide-y divide-white/[0.06]">{tamRows.map((row) => <tr key={row.Segment}><td className="px-3 py-3 font-[700] text-white/88">{row.Segment}</td><td className="px-3 py-3 font-mono text-spacex">{fmtB(row['TAM ($B)'])}</td><td className="px-3 py-3 font-mono text-white/78">{pct(row['% of Quantified TAM'])}</td><td className="px-3 py-3 text-sm leading-5 text-white/72">{row['Company Framing']}</td></tr>)}</tbody></table></div></Panel>
