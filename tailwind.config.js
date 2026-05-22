@@ -8,7 +8,7 @@ export default {
         mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       colors: {
-        void: '#050506',
+        void: '#0C2038',
         ink: '#F7F8F8',
         muted: '#8A8F98',
         panel: '#0D0E10',

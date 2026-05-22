@@ -119,7 +119,7 @@ function useSourcePayload(active) {
 function Shell({ children }) {
   return (
     <div className="relative min-h-svh overflow-x-hidden bg-void text-ink">
-      <div className="pointer-events-none fixed inset-0 z-0 opacity-55">
+      <div className="pointer-events-none fixed inset-0 z-0 opacity-100">
         <div className="absolute inset-0 starfield" />
         <div className="absolute inset-0 mission-grid bg-mission-grid opacity-[0.045]" />
       </div>
