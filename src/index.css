@@ -36,6 +36,22 @@ p, h1, h2, h3, h4, h5, h6, li, dd, dt, td, th, button, a, span {
 ::selection { background: rgba(240,240,250,.22); color: #f0f0fa; }
 
 .starfield {
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 55%, rgba(107, 166, 230, .30), transparent 34rem),
+    linear-gradient(180deg,#153b65 0%,#0f2a48 46%,#0b1d32 100%);
+}
+
+.starfield::before,
+.starfield::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-repeat: repeat;
+  will-change: opacity, filter;
+}
+
+.starfield::before {
   opacity: .42;
   background:
     radial-gradient(circle at 7% 12%, rgba(255,255,255,.95) 0 1.35px, transparent 2px),
@@ -52,9 +68,34 @@ p, h1, h2, h3, h4, h5, h6, li, dd, dt, td, th, button, a, span {
     radial-gradient(circle at 12% 76%, rgba(255,255,255,.52) 0 1px, transparent 1.7px),
     radial-gradient(circle at 33% 83%, rgba(255,255,255,.42) 0 1px, transparent 1.7px),
     radial-gradient(circle at 63% 73%, rgba(255,255,255,.50) 0 1px, transparent 1.7px),
-    radial-gradient(circle at 81% 86%, rgba(183,216,255,.58) 0 1.15px, transparent 1.8px),
-    radial-gradient(circle at 50% 55%, rgba(107, 166, 230, .30), transparent 34rem),
-    linear-gradient(180deg,#153b65 0%,#0f2a48 46%,#0b1d32 100%);
+    radial-gradient(circle at 81% 86%, rgba(183,216,255,.58) 0 1.15px, transparent 1.8px);
+  animation: twinkle-soft 5.8s ease-in-out infinite;
+}
+
+.starfield::after {
+  opacity: .28;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(255,255,255,.96) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 43% 13%, rgba(255,255,255,.84) 0 1.2px, transparent 1.9px),
+    radial-gradient(circle at 71% 28%, rgba(183,216,255,.90) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 89% 43%, rgba(255,255,255,.72) 0 1.1px, transparent 1.8px),
+    radial-gradient(circle at 24% 64%, rgba(183,216,255,.76) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 54% 78%, rgba(255,255,255,.62) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 78% 68%, rgba(255,255,255,.88) 0 1.25px, transparent 1.9px);
+  filter: drop-shadow(0 0 4px rgba(255,255,255,.28));
+  animation: twinkle-bright 4.4s ease-in-out infinite reverse;
+}
+
+@keyframes twinkle-soft {
+  0%, 100% { opacity: .34; filter: brightness(.92); }
+  45% { opacity: .56; filter: brightness(1.22); }
+  70% { opacity: .40; filter: brightness(1.02); }
+}
+
+@keyframes twinkle-bright {
+  0%, 100% { opacity: .18; transform: scale(1); }
+  35% { opacity: .44; transform: scale(1.005); }
+  60% { opacity: .24; transform: scale(1); }
 }
 
 .mission-grid {
