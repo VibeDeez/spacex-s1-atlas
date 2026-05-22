@@ -208,7 +208,7 @@ function Header({ route }) {
 }
 
 function Panel({ children, className = '', pad = 'p-4' }) {
-  return <div className={cn('card-surface rounded-lg border', pad, className)}>{children}</div>
+  return <div className={cn('card-surface min-w-0 rounded-lg border', pad, className)}>{children}</div>
 }
 
 function Section({ eyebrow, title, aside, children, dense = false }) {
@@ -1579,7 +1579,7 @@ function MetricButton({ metric, onInspect, tone = 'default', children }) {
         ? 'border-amber/20 bg-amber/10 hover:border-amber/34'
         : 'border-white/[0.075] bg-white/[0.025] hover:border-white/16 hover:bg-white/[0.045]'
   return (
-    <button onClick={() => onInspect?.(metric)} className={cn('min-h-24 rounded-xl border p-3 text-left transition focus-ring', toneClass)}>
+    <button onClick={() => onInspect?.(metric)} className={cn('min-h-24 min-w-0 rounded-xl border p-3 text-left transition focus-ring', toneClass)}>
       {children}
     </button>
   )
@@ -1971,7 +1971,7 @@ function DivergingBar({ value, max }) {
   const n = Number(value) || 0
   const width = max ? Math.min(50, Math.abs(n) / max * 50) : 0
   return (
-    <div className="relative h-3 rounded-full bg-white/[0.055]">
+    <div className="relative min-w-0 h-3 rounded-full bg-white/[0.055]">
       <div className="absolute left-1/2 top-[-2px] h-5 w-px bg-white/18" />
       <div
         className={cn('absolute top-0 h-3 rounded-full', n < 0 ? 'right-1/2 bg-red/75' : 'left-1/2 bg-cyan/75')}
@@ -2064,11 +2064,11 @@ function ConsolidatedTrendStrip({ data, onInspect }) {
         {metrics.map((metric) => {
           const metricMaxAbs = Math.max(...rows.map((row) => Math.abs(Number(row[metric.key] || 0))), 1)
           return (
-          <div key={metric.key} className="rounded-xl border border-white/[0.065] bg-black/22 p-3">
+          <div key={metric.key} className="min-w-0 rounded-xl border border-white/[0.065] bg-black/22 p-3">
             <p className="font-mono text-[9px] uppercase tracking-normal text-white/62">{metric.label}</p>
             <div className="mt-3 grid gap-2">
               {rows.map((row) => (
-                <button key={`${metric.key}-${row.period}`} onClick={() => onInspect(inspectPayload({ title: `${metric.label} · ${row.period}`, value: hasNumber(row[metric.key]) ? money(row[metric.key]) : '—', formula: metric.key === 'adjusted_ebitda' ? 'Adjusted EBITDA, as filed where disclosed; not back-filled for missing periods' : 'Filed consolidated line item', source: row.source || `financials.consolidated[period="${row.period}"]`, inputs: [`${row.period}: ${hasNumber(row[metric.key]) ? money(row[metric.key]) : 'not disclosed in payload'}`], packet: financialPacket(data, `Consolidated · ${row.period}`), status: hasNumber(row[metric.key]) ? 'filed' : 'derived' }))} className="grid grid-cols-[4.4rem_1fr_4.6rem] items-center gap-2 rounded-lg px-1 py-1 text-left hover:bg-white/[0.035] focus-ring">
+                <button key={`${metric.key}-${row.period}`} onClick={() => onInspect(inspectPayload({ title: `${metric.label} · ${row.period}`, value: hasNumber(row[metric.key]) ? money(row[metric.key]) : '—', formula: metric.key === 'adjusted_ebitda' ? 'Adjusted EBITDA, as filed where disclosed; not back-filled for missing periods' : 'Filed consolidated line item', source: row.source || `financials.consolidated[period="${row.period}"]`, inputs: [`${row.period}: ${hasNumber(row[metric.key]) ? money(row[metric.key]) : 'not disclosed in payload'}`], packet: financialPacket(data, `Consolidated · ${row.period}`), status: hasNumber(row[metric.key]) ? 'filed' : 'derived' }))} className="grid min-w-0 grid-cols-[3.55rem_minmax(0,1fr)_4.1rem] items-center gap-1.5 rounded-lg px-1 py-1 text-left hover:bg-white/[0.035] focus-ring sm:grid-cols-[4.4rem_minmax(0,1fr)_4.6rem] sm:gap-2">
                   <span className="font-mono text-[10px] text-white/62">{row.period}</span>
                   <DivergingBar value={row[metric.key]} max={metricMaxAbs} />
                   <span className={cn('text-right font-mono text-[11px]', Number(row[metric.key]) < 0 ? 'text-red' : 'text-white/70')}>{hasNumber(row[metric.key]) ? money(row[metric.key]) : '—'}</span>
