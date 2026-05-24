@@ -1646,69 +1646,96 @@ function formatTufteValue(value, unit = 'number') {
   return number(n)
 }
 
-function TufteSparkline({ points, unit = 'money', color = '#B7D8FF', height = 156, label }) {
-  const rows = (points || []).filter((p) => hasNumber(p.value))
-  const width = 520
-  const left = 66
-  const right = 72
-  const top = 24
-  const bottom = 36
+function cleanChartRows(points) {
+  return (points || []).filter((p) => hasNumber(p.value))
+}
+
+function chartSummary(points, unit = 'number') {
+  const rows = cleanChartRows(points)
+  const first = rows[0]
+  const last = rows[rows.length - 1]
+  if (!first || !last) return { first, last, deltaLabel: '—', pctLabel: '', direction: 'flat' }
+  const delta = Number(last.value) - Number(first.value)
+  const values = rows.map((row) => Number(row.value))
+  const minValue = Math.min(...values)
+  const maxValue = Math.max(...values)
+  const direction = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat'
+  const absLabel = unit === 'pct' ? `${Math.abs(delta).toFixed(1)} pts` : formatTufteValue(Math.abs(delta), unit)
+  const deltaLabel = direction === 'flat' ? 'no change' : `${direction === 'up' ? '+' : '−'}${absLabel}`
+  const pct = Number(first.value) !== 0 ? (delta / Math.abs(Number(first.value))) * 100 : null
+  const rangeLabel = minValue === maxValue ? formatTufteValue(minValue, unit) : `${formatTufteValue(minValue, unit)} to ${formatTufteValue(maxValue, unit)}`
+  return { first, last, deltaLabel, pctLabel: hasNumber(pct) ? formatPct(pct, 0) : '', rangeLabel, direction }
+}
+
+function chartDomain(values, unit = 'number') {
+  const rawMin = values.length ? Math.min(...values) : 0
+  const rawMax = values.length ? Math.max(...values) : 1
+  let min = rawMin
+  let max = rawMax
+  if (unit === 'money' || unit === 'pct' || rawMin < 0 || rawMax > 0) {
+    min = Math.min(rawMin, 0)
+    max = Math.max(rawMax, 0)
+  }
+  const span = Math.max(max - min, Math.abs(max), Math.abs(min), 1)
+  const pad = span * 0.08
+  return { min: min < 0 ? min - pad : 0, max: max > 0 ? max + pad : 0 }
+}
+
+function TufteSparkline({ points, unit = 'money', color = '#B7D8FF', height = 190, label }) {
+  const rows = cleanChartRows(points)
+  const width = 640
+  const left = 24
+  const right = 24
+  const top = 18
+  const bottom = 18
   const plotW = width - left - right
   const plotH = height - top - bottom
   const values = rows.map((p) => Number(p.value))
-  const min = values.length ? Math.min(...values) : 0
-  const max = values.length ? Math.max(...values) : 1
-  const span = max === min ? Math.max(Math.abs(max), 1) : max - min
+  const domain = chartDomain(values, unit)
+  const span = Math.max(domain.max - domain.min, 1)
   const x = (index) => left + (rows.length <= 1 ? plotW / 2 : (index / (rows.length - 1)) * plotW)
-  const y = (value) => top + (max === min ? plotH / 2 : ((max - Number(value)) / span) * plotH)
+  const y = (value) => top + ((domain.max - Number(value)) / span) * plotH
   const path = rows.map((p, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(2)} ${y(p.value).toFixed(2)}`).join(' ')
-  const first = rows[0]
-  const last = rows[rows.length - 1]
+  const zeroY = y(0)
   return (
     <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={label} className="w-full overflow-visible">
-      <line x1={left} x2={left} y1={y(max)} y2={y(min)} stroke="rgba(255,255,255,.30)" strokeWidth="1" />
-      <line x1={left} x2={width - right} y1={y(min)} y2={y(min)} stroke="rgba(255,255,255,.30)" strokeWidth="1" />
-      {path && <path d={path} fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />}
-      {rows.map((p, i) => <circle key={`${p.period}-${p.value}`} cx={x(i)} cy={y(p.value)} r="4" fill={color} opacity={i === rows.length - 1 ? 1 : 0.72} />)}
-      {first && <text x={x(0)} y={height - 9} fill="rgba(255,255,255,.56)" fontSize="12" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace" textAnchor="middle">{first.period}</text>}
-      {last && <text x={x(rows.length - 1)} y={height - 9} fill="rgba(255,255,255,.56)" fontSize="12" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace" textAnchor="middle">{last.period}</text>}
-      {first && <text x={Math.max(4, x(0) - 7)} y={Math.max(14, y(first.value) - 9)} fill="rgba(255,255,255,.66)" fontSize="12" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace" textAnchor="end">{formatTufteValue(first.value, unit)}</text>}
-      {last && <text x={Math.min(width - 2, x(rows.length - 1) + 10)} y={Math.max(14, y(last.value) - 9)} fill={color} fontSize="13" fontWeight="700" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace">{formatTufteValue(last.value, unit)}</text>}
+      <line x1={left} x2={width - right} y1={zeroY} y2={zeroY} stroke="rgba(255,255,255,.16)" strokeWidth="1" />
+      <line x1={left} x2={left} y1={top} y2={top + plotH} stroke="rgba(255,255,255,.12)" strokeWidth="1" />
+      <line x1={left} x2={width - right} y1={top + plotH} y2={top + plotH} stroke="rgba(255,255,255,.10)" strokeWidth="1" />
+      {path && <path d={path} fill="none" stroke={color} strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />}
+      {rows.map((p, i) => (
+        <circle key={`${p.period}-${p.value}`} cx={x(i)} cy={y(p.value)} r={i === rows.length - 1 ? 6.2 : 4.8} fill="#06101f" stroke={color} strokeWidth={i === rows.length - 1 ? 3.2 : 2.4} />
+      ))}
     </svg>
   )
 }
 
 function TufteDotPlot({ rows, unit = 'tam', log = false }) {
   const clean = rows.filter((row) => hasNumber(row.value))
-  const width = 900
-  const rowH = 64
-  const left = 160
-  const right = 190
-  const top = 24
-  const height = top * 2 + rowH * clean.length
   const scaled = clean.map((row) => log ? Math.log10(Math.max(1, Number(row.value))) : Number(row.value))
   const min = Math.min(...scaled)
   const max = Math.max(...scaled)
-  const x = (value) => {
-    const s = log ? Math.log10(Math.max(1, Number(value))) : Number(value)
-    return left + ((s - min) / Math.max(max - min, 1)) * (width - left - right)
+  const widthFor = (value) => {
+    const scaledValue = log ? Math.log10(Math.max(1, Number(value))) : Number(value)
+    return 18 + ((scaledValue - min) / Math.max(max - min, 1)) * 82
   }
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Market opportunity dot plot" className="w-full overflow-visible">
-      {clean.map((row, i) => {
-        const y = top + rowH * i + rowH / 2
-        const cx = x(row.value)
-        return (
-          <g key={row.label}>
-            <text x="0" y={y + 4} fill="rgba(255,255,255,.78)" fontSize="16" fontWeight="700">{row.label}</text>
-            <line x1={left} x2={width - right} y1={y} y2={y} stroke="rgba(255,255,255,.08)" strokeWidth="1" />
-            <circle cx={cx} cy={y} r="7" fill={row.color || '#B7D8FF'} />
-            <text x={cx + 16} y={y + 5} fill={row.color || '#B7D8FF'} fontSize="15" fontWeight="700" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace">{formatTufteValue(row.value, unit)}</text>
-            {row.detail && <text x={width - right + 10} y={y + 5} fill="rgba(255,255,255,.54)" fontSize="13">{row.detail}</text>}
-          </g>
-        )
-      })}
-    </svg>
+    <div className="grid gap-3">
+      {clean.map((row) => (
+        <div key={row.label} className="rounded-2xl border border-white/[0.08] bg-[#07111f]/86 p-4">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-lg font-[760] leading-tight text-white/92">{row.label}</p>
+              {row.detail && <p className="mt-1 text-xs leading-5 text-white/58">{row.detail} of quantified TAM</p>}
+            </div>
+            <p className="shrink-0 font-mono text-xl font-[780]" style={{ color: row.color || '#B7D8FF' }}>{formatTufteValue(row.value, unit)}</p>
+          </div>
+          <div className="mt-4 h-3 rounded-full bg-white/[0.07]">
+            <div className="h-full rounded-full" style={{ width: `${widthFor(row.value)}%`, background: row.color || '#B7D8FF', opacity: 0.9 }} />
+          </div>
+        </div>
+      ))}
+    </div>
   )
 }
 
@@ -1719,12 +1746,14 @@ function TufteBars({ rows, unit = 'money' }) {
       {rows.map((row) => {
         const width = Math.max(2, Math.abs(Number(row.value) || 0) / max * 100)
         return (
-          <div key={row.label} className="grid gap-1 sm:grid-cols-[186px_1fr_98px] sm:items-center">
-            <p className="text-sm font-[680] text-white/80">{row.label}</p>
-            <div className="h-3 rounded-full bg-white/[0.055]">
-              <div className="h-full rounded-full" style={{ width: `${width}%`, background: row.color || '#B7D8FF', opacity: 0.86 }} />
+          <div key={row.label} className="rounded-2xl border border-white/[0.08] bg-[#07111f]/86 p-4">
+            <div className="mb-3 flex items-baseline justify-between gap-4">
+              <p className="text-sm font-[720] text-white/82">{row.label}</p>
+              <p className="font-mono text-lg font-[760] text-spacex">{formatTufteValue(row.value, unit)}</p>
             </div>
-            <p className="font-mono text-xs text-spacex sm:text-right">{formatTufteValue(row.value, unit)}</p>
+            <div className="h-3 rounded-full bg-white/[0.07]">
+              <div className="h-full rounded-full" style={{ width: `${width}%`, background: row.color || '#B7D8FF', opacity: 0.9 }} />
+            </div>
           </div>
         )
       })}
@@ -1733,14 +1762,32 @@ function TufteBars({ rows, unit = 'money' }) {
 }
 
 function FilingChartCard({ chart }) {
+  const summary = chartSummary(chart.points, chart.unit)
+  const trendClass = summary.direction === 'down' ? 'text-red' : summary.direction === 'up' ? 'text-cyan' : 'text-white/58'
   return (
-    <div className="rounded-xl border border-white/[0.075] bg-black/22 p-4 sm:p-5">
-      <p className="font-mono text-[10px] uppercase tracking-normal text-white/56">{chart.kicker}</p>
-      <h4 className="mt-1 text-lg font-[720] leading-tight text-spacex">{chart.title}</h4>
-      {chart.note && <p className="mt-2 text-xs leading-5 text-white/60">{chart.note}</p>}
-      <div className="mt-4"><TufteSparkline label={chart.title} points={chart.points} unit={chart.unit} color={chart.color || '#B7D8FF'} height={chart.height || 150} /></div>
-      <p className="mt-2 font-mono text-[10px] leading-4 text-white/48">SRC · {chart.source}</p>
-    </div>
+    <article className="min-w-0 overflow-hidden rounded-2xl border border-white/[0.095] bg-[linear-gradient(180deg,rgba(8,17,31,.96),rgba(3,8,15,.96))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,.045)] sm:p-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <p className="font-mono text-[10px] uppercase tracking-normal text-white/60">{chart.kicker}</p>
+          <h4 className="mt-1 text-xl font-[760] leading-tight text-white/92">{chart.title}</h4>
+          {chart.note && <p className="mt-2 max-w-xl text-xs leading-5 text-white/64">{chart.note}</p>}
+        </div>
+        <div className="shrink-0 rounded-xl border border-white/[0.08] bg-black/20 px-3 py-2 sm:text-right">
+          <p className="font-mono text-[10px] uppercase tracking-normal text-white/54">{summary.last?.period || 'latest'}</p>
+          <p className="mt-1 font-mono text-2xl font-[780] text-spacex">{formatTufteValue(summary.last?.value, chart.unit)}</p>
+          <p className={cn('mt-0.5 font-mono text-[11px]', trendClass)}>{summary.deltaLabel}{summary.pctLabel ? ` · ${summary.pctLabel}` : ''}</p>
+        </div>
+      </div>
+      <div className="mt-5 rounded-2xl border border-white/[0.075] bg-[#050b14] px-3 pb-2 pt-3">
+        <TufteSparkline label={chart.title} points={chart.points} unit={chart.unit} color={chart.color || '#B7D8FF'} height={chart.height || 230} />
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px] text-white/60">
+        {summary.first && <span>{summary.first.period}: {formatTufteValue(summary.first.value, chart.unit)}</span>}
+        {summary.last && <span>{summary.last.period}: {formatTufteValue(summary.last.value, chart.unit)}</span>}
+        {summary.rangeLabel && <span>range: {summary.rangeLabel}</span>}
+      </div>
+      <p className="mt-3 font-mono text-[10px] leading-4 text-white/54">SRC · {chart.source}</p>
+    </article>
   )
 }
 
@@ -1772,7 +1819,8 @@ function TufteReadouts({ data }) {
   const segmentCards = segments.map((segment) => {
     const rows = data.financials.segments.filter((row) => row.segment === segment && annualPeriods.includes(row.period)).sort((a, b) => annualPeriods.indexOf(a.period) - annualPeriods.indexOf(b.period))
     const latest = rows[rows.length - 1]
-    return { segment, rows, latest }
+    const revenuePoints = rows.map((row) => ({ period: row.period, value: row.revenue }))
+    return { segment, rows, latest, revenuePoints, summary: chartSummary(revenuePoints, 'money') }
   })
   const tamRows = (data.kubinModel?.tam?.segments || []).map((row) => ({
     label: row.Segment,
@@ -1825,25 +1873,38 @@ function TufteReadouts({ data }) {
     { kicker: 'Derived from segment table', title: 'Connectivity operating margin', unit: 'pct', color: SEGMENT_COLORS.Connectivity, source: segmentSource, points: segmentSeries(data, 'Connectivity', annualPeriods, 'op_income', (value, row) => pctOf(value, row.revenue)) },
     { kicker: 'Derived from segment table', title: 'AI capex / revenue', unit: 'pct', color: SEGMENT_COLORS.AI, source: segmentSource, points: segmentSeries(data, 'AI', annualPeriods, 'capex', (value, row) => pctOf(value, row.revenue)) },
   ]
+  const additionalChartGroups = [
+    ['Income statement', 'Annual and Q1 revenue / earnings views.', additionalCharts.filter((chart) => chart.kicker.includes('Income statement') || chart.kicker.includes('Quarter'))],
+    ['Cash flow', 'Operating, investing and financing cash-flow lines.', additionalCharts.filter((chart) => chart.kicker.includes('Cash flow'))],
+    ['Balance sheet', 'Liquidity, asset base, liabilities and equity structure.', additionalCharts.filter((chart) => chart.kicker.includes('Balance sheet'))],
+    ['Segment economics', 'Capex and derived intensity views by business line.', additionalCharts.filter((chart) => chart.kicker.includes('Segment economics') || chart.kicker.includes('Derived'))],
+  ]
   return (
     <Section dense eyebrow="Source-backed chartbook" title="SpaceX S‑1 chartbook" aside="Public-facing visual readouts from the preliminary S‑1. Filed historical numbers, calculated ratios, and credited external model assumptions are labeled separately.">
-      <div className="grid gap-3 xl:grid-cols-[minmax(0,1.18fr)_minmax(320px,.82fr)]">
+      <div className="grid gap-3 2xl:grid-cols-[minmax(0,1fr)_380px]">
         <Panel pad="p-5 sm:p-6" className="border-cyan/16 bg-cyan/5">
           <p className="font-mono text-[10px] uppercase tracking-normal text-cyan/80">Segment economics · filed annual data</p>
           <h3 className="mt-1 text-3xl font-[720] leading-tight text-spacex">Connectivity carries the profit; AI carries the capital intensity.</h3>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-white/70">The same 2023–2025 frame is used across Space, Connectivity and AI. The side labels pair each revenue trend with 2025 adjusted EBITDA and capex so the operating model is visible without a legend.</p>
-          <div className="mt-5 grid gap-4 lg:grid-cols-3">
-            {segmentCards.map(({ segment, rows, latest }) => (
-              <div key={segment} className="rounded-xl border border-white/[0.08] bg-black/24 p-4">
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-white/70">The same 2023–2025 frame is used across Space, Connectivity and AI. Each card leads with the latest revenue and change, then shows the trend with labels kept outside the plot.</p>
+          <div className="mt-5 grid gap-4 xl:grid-cols-3">
+            {segmentCards.map(({ segment, latest, revenuePoints, summary }) => (
+              <div key={segment} className="min-w-0 rounded-2xl border border-white/[0.09] bg-[linear-gradient(180deg,rgba(8,17,31,.94),rgba(3,8,15,.94))] p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-lg font-[740] text-white/90">{segment}</p>
-                    <p className="mt-1 font-mono text-[10px] uppercase tracking-normal text-white/52">Revenue, $M</p>
+                    <p className="text-xl font-[760] text-white/92">{segment}</p>
+                    <p className="mt-1 font-mono text-[10px] uppercase tracking-normal text-white/56">Revenue, 2023–2025</p>
                   </div>
-                  <span className="h-3 w-3 rounded-full" style={{ background: SEGMENT_COLORS[segment] || '#B7D8FF' }} />
+                  <span className="h-3.5 w-3.5 rounded-full" style={{ background: SEGMENT_COLORS[segment] || '#B7D8FF' }} />
                 </div>
-                <div className="mt-4"><TufteSparkline label={`${segment} revenue, 2023 to 2025`} points={rows.map((row) => ({ period: row.period, value: row.revenue }))} unit="money" color={SEGMENT_COLORS[segment] || '#B7D8FF'} height={168} /></div>
-                <div className="mt-4 grid gap-2 text-sm leading-5 text-white/70">
+                <div className="mt-4 rounded-2xl border border-white/[0.07] bg-[#050b14] px-3 py-2"><TufteSparkline label={`${segment} revenue, 2023 to 2025`} points={revenuePoints} unit="money" color={SEGMENT_COLORS[segment] || '#B7D8FF'} height={172} /></div>
+                <div className="mt-4 rounded-xl border border-white/[0.07] bg-black/18 p-3">
+                  <p className="font-mono text-[10px] uppercase tracking-normal text-white/54">2025 revenue</p>
+                  <div className="mt-1 flex items-end justify-between gap-3">
+                    <b className="font-mono text-2xl text-spacex">{formatTufteValue(summary.last?.value, 'money')}</b>
+                    <span className={cn('font-mono text-xs', summary.direction === 'down' ? 'text-red' : 'text-cyan')}>{summary.deltaLabel}{summary.pctLabel ? ` · ${summary.pctLabel}` : ''}</span>
+                  </div>
+                </div>
+                <div className="mt-4 grid gap-2 text-sm leading-5 text-white/72">
                   <div className="flex items-center justify-between gap-3"><span>2025 Adj. EBITDA</span><b className={cn('font-mono', Number(latest?.adj_ebitda) < 0 ? 'text-red' : 'text-cyan')}>{money(latest?.adj_ebitda)}</b></div>
                   <div className="flex items-center justify-between gap-3"><span>2025 capex</span><b className="font-mono text-amber">{money(latest?.capex)}</b></div>
                 </div>
@@ -1897,13 +1958,21 @@ function TufteReadouts({ data }) {
           <p className="max-w-2xl text-xs leading-5 text-white/60">The paired Starlink readout matters: subscriber scale is rising fast, but ARPU moves the other way.</p>
         </div>
         <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {operatingPanels.map((panel) => (
-            <div key={panel.title} className="rounded-xl border border-white/[0.075] bg-black/20 p-4">
-              <p className="text-base font-[720] text-white/86">{panel.title}</p>
-              <div className="mt-3"><TufteSparkline label={`${panel.title}, 2023 to 2025`} points={panel.points} unit={panel.unit} color="#B7D8FF" height={132} /></div>
-              <p className="mt-2 font-mono text-[10px] leading-4 text-white/50">SRC · {panel.source}</p>
-            </div>
-          ))}
+          {operatingPanels.map((panel) => {
+            const summary = chartSummary(panel.points, panel.unit)
+            return (
+              <div key={panel.title} className="min-w-0 rounded-2xl border border-white/[0.085] bg-[linear-gradient(180deg,rgba(8,17,31,.92),rgba(3,8,15,.92))] p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-base font-[740] text-white/88">{panel.title}</p>
+                  <p className="font-mono text-lg font-[760] text-spacex">{formatTufteValue(summary.last?.value, panel.unit)}</p>
+                </div>
+                <p className={cn('mt-1 font-mono text-[11px]', summary.direction === 'down' ? 'text-red' : 'text-cyan')}>{summary.deltaLabel}{summary.pctLabel ? ` · ${summary.pctLabel}` : ''}</p>
+                <div className="mt-3 rounded-2xl border border-white/[0.07] bg-[#050b14] px-3 py-2"><TufteSparkline label={`${panel.title}, 2023 to 2025`} points={panel.points} unit={panel.unit} color="#B7D8FF" height={146} /></div>
+                <p className="mt-2 font-mono text-[10px] leading-4 text-white/58">Range: {summary.rangeLabel}</p>
+                <p className="mt-3 font-mono text-[10px] leading-4 text-white/54">SRC · {panel.source}</p>
+              </div>
+            )
+          })}
         </div>
       </Panel>
 
@@ -1915,8 +1984,25 @@ function TufteReadouts({ data }) {
           </div>
           <p className="max-w-2xl text-xs leading-5 text-white/60">These charts add income statement, cash-flow, balance-sheet, segment capex and derived-ratio views from the filed tables. Derived charts are labeled as derived.</p>
         </div>
-        <div className="mt-5 grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
-          {additionalCharts.map((chart) => <FilingChartCard key={`${chart.kicker}-${chart.title}`} chart={chart} />)}
+        <div className="mt-5 grid gap-5">
+          {additionalChartGroups.map(([groupTitle, groupNote, charts]) => (
+            <section key={groupTitle} className="min-w-0 rounded-2xl border border-white/[0.075] bg-black/18 p-3 sm:p-4">
+              <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <h4 className="text-lg font-[760] text-white/90">{groupTitle}</h4>
+                  <p className="mt-1 text-xs leading-5 text-white/58">{groupNote}</p>
+                </div>
+                <p className="font-mono text-[10px] uppercase tracking-normal text-white/50">{charts.length} charts</p>
+              </div>
+              <div className="grid gap-4 xl:grid-cols-2">
+                {charts.map((chart, index) => (
+                  <div key={`${chart.kicker}-${chart.title}`} className={cn(charts.length % 2 === 1 && index === charts.length - 1 && 'xl:col-span-2')}>
+                    <FilingChartCard chart={chart} />
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))}
         </div>
       </Panel>
     </Section>
