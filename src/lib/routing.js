@@ -14,7 +14,8 @@ export function parseHash(hash = (typeof window !== 'undefined' ? window.locatio
   const params = Object.fromEntries(new URLSearchParams(queryRaw).entries())
   if (parts[0] === 'poster') return { view: 'poster', poster: parts[1] || 'business-stack', params, path }
   if (parts[0] === 'packet') return { view: 'packet', packetType: parts[1], packetId: parts.slice(2).join('/'), params, path }
-  const view = ['flight-deck', 'debate', 'atlas', 'segments', 'financials', 'tufte', 'risks', 'governance', 'model', 'sources'].includes(parts[0]) ? parts[0] : 'flight-deck'
+  if (parts[0] === 'tufte') return { view: 'chartbook', params, path: '/chartbook' }
+  const view = ['flight-deck', 'debate', 'atlas', 'segments', 'financials', 'chartbook', 'risks', 'governance', 'model', 'sources'].includes(parts[0]) ? parts[0] : 'flight-deck'
   return { view, params, path: `/${view}` }
 }
 
