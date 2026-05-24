@@ -37,6 +37,7 @@ const NAV = [
   { id: 'debate', hash: '/debate', label: 'Debate Map', mobileLabel: 'Debate' },
   { id: 'segments', hash: '/segments', label: 'Segments' },
   { id: 'financials', hash: '/financials', label: 'Financials', mobileLabel: 'Financials' },
+  { id: 'tufte', hash: '/tufte', label: 'Tufte Readouts', mobileLabel: 'Tufte' },
   { id: 'risks', hash: '/risks', label: 'Risk Radar' },
   { id: 'governance', hash: '/governance', label: 'Governance' },
   { id: 'model', hash: '/model', label: 'External Model' },
@@ -44,7 +45,7 @@ const NAV = [
   { id: 'sources', hash: '/sources', label: 'Source' },
 ]
 
-const MOBILE_PRIMARY_NAV = new Set(['flight-deck', 'debate', 'financials'])
+const MOBILE_PRIMARY_NAV = new Set(['flight-deck', 'debate', 'financials', 'tufte'])
 
 const EXECUTIVE_CONCLUSION = 'A Connectivity-led operating model is funding a capital-intensive Space/AI expansion under concentrated control.'
 
@@ -1632,6 +1633,219 @@ function EvidenceCard({ title, detail, source, packet, query }) {
   )
 }
 
+function formatTufteValue(value, unit = 'number') {
+  if (!hasNumber(value)) return '—'
+  const n = Number(value)
+  if (unit === 'money') return money(n)
+  if (unit === 'tam') return n >= 1000 ? `$${(n / 1000).toFixed(n >= 10000 ? 1 : 2)}T` : `$${number(n)}B`
+  if (unit === 'millions') return `${n.toFixed(n >= 10 ? 1 : 2)}M`
+  if (unit === 'arpu') return `$${n.toFixed(0)}`
+  if (unit === 'tons') return `${number(n)}t`
+  if (unit === 'gw') return `${n.toFixed(1)} GW`
+  if (unit === 'pct') return formatPlainPct(n, 1)
+  return number(n)
+}
+
+function TufteSparkline({ points, unit = 'money', color = '#B7D8FF', height = 106, label }) {
+  const rows = (points || []).filter((p) => hasNumber(p.value))
+  const width = 360
+  const left = 44
+  const right = 34
+  const top = 18
+  const bottom = 28
+  const plotW = width - left - right
+  const plotH = height - top - bottom
+  const values = rows.map((p) => Number(p.value))
+  const min = values.length ? Math.min(...values) : 0
+  const max = values.length ? Math.max(...values) : 1
+  const span = max === min ? Math.max(Math.abs(max), 1) : max - min
+  const x = (index) => left + (rows.length <= 1 ? plotW / 2 : (index / (rows.length - 1)) * plotW)
+  const y = (value) => top + (max === min ? plotH / 2 : ((max - Number(value)) / span) * plotH)
+  const path = rows.map((p, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(2)} ${y(p.value).toFixed(2)}`).join(' ')
+  const first = rows[0]
+  const last = rows[rows.length - 1]
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={label} className="w-full overflow-visible">
+      <line x1={left} x2={left} y1={y(max)} y2={y(min)} stroke="rgba(255,255,255,.30)" strokeWidth="1" />
+      <line x1={left} x2={width - right} y1={y(min)} y2={y(min)} stroke="rgba(255,255,255,.30)" strokeWidth="1" />
+      {path && <path d={path} fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />}
+      {rows.map((p, i) => <circle key={`${p.period}-${p.value}`} cx={x(i)} cy={y(p.value)} r="2.8" fill={color} opacity={i === rows.length - 1 ? 1 : 0.72} />)}
+      {first && <text x={x(0)} y={height - 7} fill="rgba(255,255,255,.56)" fontSize="10" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace" textAnchor="middle">{first.period}</text>}
+      {last && <text x={x(rows.length - 1)} y={height - 7} fill="rgba(255,255,255,.56)" fontSize="10" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace" textAnchor="middle">{last.period}</text>}
+      {first && <text x={Math.max(4, x(0) - 5)} y={Math.max(12, y(first.value) - 7)} fill="rgba(255,255,255,.66)" fontSize="10" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace" textAnchor="end">{formatTufteValue(first.value, unit)}</text>}
+      {last && <text x={Math.min(width - 2, x(rows.length - 1) + 7)} y={Math.max(12, y(last.value) - 7)} fill={color} fontSize="11" fontWeight="700" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace">{formatTufteValue(last.value, unit)}</text>}
+    </svg>
+  )
+}
+
+function TufteDotPlot({ rows, unit = 'tam', log = false }) {
+  const clean = rows.filter((row) => hasNumber(row.value))
+  const width = 760
+  const rowH = 48
+  const left = 136
+  const right = 154
+  const top = 18
+  const height = top * 2 + rowH * clean.length
+  const scaled = clean.map((row) => log ? Math.log10(Math.max(1, Number(row.value))) : Number(row.value))
+  const min = Math.min(...scaled)
+  const max = Math.max(...scaled)
+  const x = (value) => {
+    const s = log ? Math.log10(Math.max(1, Number(value))) : Number(value)
+    return left + ((s - min) / Math.max(max - min, 1)) * (width - left - right)
+  }
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Tufte dot plot" className="w-full overflow-visible">
+      {clean.map((row, i) => {
+        const y = top + rowH * i + rowH / 2
+        const cx = x(row.value)
+        return (
+          <g key={row.label}>
+            <text x="0" y={y + 4} fill="rgba(255,255,255,.78)" fontSize="13" fontWeight="700">{row.label}</text>
+            <line x1={left} x2={width - right} y1={y} y2={y} stroke="rgba(255,255,255,.08)" strokeWidth="1" />
+            <circle cx={cx} cy={y} r="5" fill={row.color || '#B7D8FF'} />
+            <text x={cx + 12} y={y + 4} fill={row.color || '#B7D8FF'} fontSize="12" fontWeight="700" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace">{formatTufteValue(row.value, unit)}</text>
+            {row.detail && <text x={width - right + 8} y={y + 4} fill="rgba(255,255,255,.54)" fontSize="11">{row.detail}</text>}
+          </g>
+        )
+      })}
+    </svg>
+  )
+}
+
+function TufteBars({ rows, unit = 'money' }) {
+  const max = Math.max(...rows.map((row) => Math.abs(Number(row.value) || 0)), 1)
+  return (
+    <div className="grid gap-3">
+      {rows.map((row) => {
+        const width = Math.max(2, Math.abs(Number(row.value) || 0) / max * 100)
+        return (
+          <div key={row.label} className="grid gap-1 sm:grid-cols-[168px_1fr_86px] sm:items-center">
+            <p className="text-sm font-[680] text-white/80">{row.label}</p>
+            <div className="h-2 rounded-full bg-white/[0.055]">
+              <div className="h-full rounded-full" style={{ width: `${width}%`, background: row.color || '#B7D8FF', opacity: 0.86 }} />
+            </div>
+            <p className="font-mono text-xs text-spacex sm:text-right">{formatTufteValue(row.value, unit)}</p>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function TufteReadouts({ data }) {
+  const annualPeriods = ['2023', '2024', '2025']
+  const segments = ['Space', 'Connectivity', 'AI']
+  const segmentCards = segments.map((segment) => {
+    const rows = data.financials.segments.filter((row) => row.segment === segment && annualPeriods.includes(row.period)).sort((a, b) => annualPeriods.indexOf(a.period) - annualPeriods.indexOf(b.period))
+    const latest = rows[rows.length - 1]
+    return { segment, rows, latest }
+  })
+  const tamRows = (data.kubinModel?.tam?.segments || []).map((row) => ({
+    label: row.Segment,
+    value: row['TAM ($B)'],
+    detail: `${(Number(row['% of Quantified TAM']) * 100).toFixed(1)}%`,
+    color: SEGMENT_COLORS[row.Segment] || '#B7D8FF',
+  }))
+  const latestBalance = data.financials.balance.find((row) => row.date === 'Mar 31 2026') || data.financials.balance[data.financials.balance.length - 1]
+  const capitalRows = [
+    { label: 'Cash + securities', value: (latestBalance.cash || 0) + (latestBalance.marketable_securities || 0), color: '#7DD3FC' },
+    { label: 'Long-term debt', value: capitalValue(data.capital, 'Total long-term debt'), color: '#FBBF24' },
+    { label: 'Preferred stock', value: capitalValue(data.capital, 'Redeemable convertible preferred stock'), color: '#C084FC' },
+    { label: 'Shareholders’ equity', value: capitalValue(data.capital, 'Total shareholders’ equity'), color: '#B7D8FF' },
+  ]
+  const operatingPanels = [
+    { title: 'Falcon launches', unit: 'number', source: 'filed operating metrics / MD&A', points: data.financials.metrics.falcon_launches.filter((row) => annualPeriods.includes(row.period)).map((row) => ({ period: row.period, value: row.total })) },
+    { title: 'Mass to orbit', unit: 'tons', source: 'filed operating metrics / MD&A', points: data.financials.metrics.mass_to_orbit.filter((row) => annualPeriods.includes(row.period)).map((row) => ({ period: row.period, value: row.total })) },
+    { title: 'Starlink subscribers', unit: 'millions', source: 'filed Starlink metrics / MD&A', points: data.financials.metrics.starlink.filter((row) => annualPeriods.includes(row.period)).map((row) => ({ period: row.period, value: row.subscribers_m })) },
+    { title: 'Starlink ARPU', unit: 'arpu', source: 'filed Starlink metrics / MD&A', points: data.financials.metrics.starlink.filter((row) => annualPeriods.includes(row.period)).map((row) => ({ period: row.period, value: row.arpu })) },
+  ]
+  const method = [
+    ['Small multiples', 'One invariant chart grammar per segment; changes in slope carry the message.'],
+    ['Range frames', 'Axes are trimmed to the actual data range instead of wasting space on decorative baselines.'],
+    ['Direct labels', 'Endpoint labels replace legends so the eye does not shuttle between chart and key.'],
+    ['No chartjunk', 'No 3D, no gradients, no thick grids; the filing numbers are the visual object.'],
+  ]
+  return (
+    <Section dense eyebrow="Tufte VDQI layer" title="Four minimalist readouts for the SpaceX S‑1." aside="Built with the new Tufte skills: small multiples, range frames, direct labels and stripped non-data ink. Filed facts stay separate from Jared Kubin’s credited external model layer.">
+      <div className="grid gap-3 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,.85fr)]">
+        <Panel pad="p-4 sm:p-5" className="border-cyan/16 bg-cyan/5">
+          <p className="font-mono text-[10px] uppercase tracking-normal text-cyan/80">Small multiples · filed segment economics</p>
+          <h3 className="mt-1 text-2xl font-[720] leading-tight text-spacex">Connectivity is the only clean positive 2025 segment; AI carries the heaviest capex load.</h3>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-white/68">Same 2023–2025 frame in every card. Revenue gets the range-frame line; the 2025 side labels put capex and adjusted EBITDA next to the segment they explain.</p>
+          <div className="mt-4 grid gap-3 lg:grid-cols-3">
+            {segmentCards.map(({ segment, rows, latest }) => (
+              <div key={segment} className="rounded-xl border border-white/[0.08] bg-black/24 p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-base font-[740] text-white/90">{segment}</p>
+                    <p className="mt-1 font-mono text-[10px] uppercase tracking-normal text-white/52">Revenue range frame</p>
+                  </div>
+                  <span className="h-2.5 w-2.5 rounded-full" style={{ background: SEGMENT_COLORS[segment] || '#B7D8FF' }} />
+                </div>
+                <div className="mt-3"><TufteSparkline label={`${segment} revenue, 2023 to 2025`} points={rows.map((row) => ({ period: row.period, value: row.revenue }))} unit="money" color={SEGMENT_COLORS[segment] || '#B7D8FF'} /></div>
+                <div className="mt-3 grid gap-2 text-xs leading-5 text-white/68">
+                  <div className="flex items-center justify-between gap-3"><span>2025 Adj. EBITDA</span><b className={cn('font-mono', Number(latest?.adj_ebitda) < 0 ? 'text-red' : 'text-cyan')}>{money(latest?.adj_ebitda)}</b></div>
+                  <div className="flex items-center justify-between gap-3"><span>2025 capex</span><b className="font-mono text-amber">{money(latest?.capex)}</b></div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <Source>Segment revenue, adjusted EBITDA and capex: audited statements / MD&A tables.</Source>
+        </Panel>
+
+        <Panel pad="p-4" className="border-white/[0.09]">
+          <p className="font-mono text-[10px] uppercase tracking-normal text-white/58">VDQI operating rule</p>
+          <div className="mt-3 grid gap-2">
+            {method.map(([title, detail]) => (
+              <div key={title} className="rounded-lg border border-white/[0.065] bg-white/[0.025] p-3">
+                <p className="text-sm font-[720] text-spacex">{title}</p>
+                <p className="mt-1 text-xs leading-5 text-white/64">{detail}</p>
+              </div>
+            ))}
+          </div>
+        </Panel>
+      </div>
+
+      <div className="mt-3 grid gap-3 xl:grid-cols-2">
+        <Panel pad="p-4" className="overflow-hidden">
+          <p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Dot plot · external model TAM layer</p>
+          <h3 className="mt-1 text-xl font-[720] text-spacex">Do not draw this as a pie chart.</h3>
+          <p className="mt-2 text-sm leading-6 text-white/66">A log-scaled dot plot keeps Space and Connectivity visible while preserving the conclusion: the quantified TAM story is overwhelmingly AI.</p>
+          <div className="mt-3"><TufteDotPlot rows={tamRows} unit="tam" log /></div>
+          <Source>Jared Kubin model TAM tab, based on SpaceX preliminary S‑1 company TAM framing; external model assumptions are not filed financial results.</Source>
+        </Panel>
+
+        <Panel pad="p-4">
+          <p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Capitalization · Mar. 31 2026</p>
+          <h3 className="mt-1 text-xl font-[720] text-spacex">The post-recast balance sheet is a financing problem, not just a revenue story.</h3>
+          <p className="mt-2 text-sm leading-6 text-white/66">Bars retain a zero baseline because these are magnitude comparisons. The useful read is scale: cash/securities cover part of the debt load, while equity reflects the recast merger structure.</p>
+          <div className="mt-4"><TufteBars rows={capitalRows} unit="money" /></div>
+          <Source>{data.capital?.src || 'capitalization lines 4740–4952; MD&A lines 10231–10333'}</Source>
+        </Panel>
+      </div>
+
+      <Panel pad="p-4" className="mt-3">
+        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-normal text-white/58">Operating small multiples · 2023–2025</p>
+            <h3 className="mt-1 text-xl font-[720] text-spacex">Throughput rises while Starlink pricing compresses.</h3>
+          </div>
+          <p className="max-w-2xl text-xs leading-5 text-white/60">The paired Starlink readout matters: subscriber scale is rising fast, but ARPU moves the other way. That is a cleaner S‑1 question than a single headline growth number.</p>
+        </div>
+        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          {operatingPanels.map((panel) => (
+            <div key={panel.title} className="rounded-xl border border-white/[0.075] bg-black/20 p-3">
+              <p className="text-sm font-[720] text-white/86">{panel.title}</p>
+              <div className="mt-2"><TufteSparkline label={`${panel.title}, 2023 to 2025`} points={panel.points} unit={panel.unit} color="#B7D8FF" height={96} /></div>
+              <p className="mt-2 font-mono text-[10px] leading-4 text-white/50">SRC · {panel.source}</p>
+            </div>
+          ))}
+        </div>
+      </Panel>
+    </Section>
+  )
+}
+
 function DebateHero({ data, active, setActive }) {
   const themes = data.debate?.lenses || []
   return (
@@ -2905,6 +3119,7 @@ function App() {
     atlas: <Atlas data={data} route={route} />,
     segments: <Segments data={data} />,
     financials: <Financials data={data} />,
+    tufte: <TufteReadouts data={data} />,
     risks: <Risks data={data} route={route} />,
     governance: <Governance data={data} />,
     model: <ExternalModel data={data} />,
