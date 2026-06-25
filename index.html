@@ -3,12 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#050506" />
+    <meta name="theme-color" content="#030812" />
+    <meta name="color-scheme" content="dark" />
     <title>SpaceX S-1 Atlas</title>
-    <meta name="description" content="A source-cited map of SpaceX's S-1: business stack, financials, risks, exhibits, OCR, and source packets." />
+    <meta name="description" content="A source-cited SpaceX S-1 dashboard for the business stack, financials, risks, exhibits, OCR, and source packets." />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="SpaceX S-1 Atlas" />
-    <meta property="og:description" content="A source-cited map of SpaceX's S-1: business stack, financials, risks, exhibits, OCR, and source packets." />
+    <meta property="og:description" content="A source-cited SpaceX S-1 dashboard for the business stack, financials, risks, exhibits, OCR, and source packets." />
     <meta property="og:image" content="https://henry.here.now/spacex-s1-atlas/social/spacex-s1-atlas-card.png" />
     <meta property="og:image:secure_url" content="https://henry.here.now/spacex-s1-atlas/social/spacex-s1-atlas-card.png" />
     <meta property="og:image:type" content="image/png" />
@@ -17,59 +18,324 @@
     <meta property="og:url" content="https://henry.here.now/spacex-s1-atlas/" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="SpaceX S-1 Atlas" />
-    <meta name="twitter:description" content="A source-cited map of SpaceX's S-1: business stack, financials, risks, exhibits, OCR, and source packets." />
+    <meta name="twitter:description" content="A source-cited SpaceX S-1 dashboard for the business stack, financials, risks, exhibits, OCR, and source packets." />
     <meta name="twitter:image" content="https://henry.here.now/spacex-s1-atlas/social/spacex-s1-atlas-card.png" />
     <link rel="canonical" href="https://henry.here.now/spacex-s1-atlas/" />
     <style>
-      html { background: #050506; color: #f7f8f8; }
-      body { margin: 0; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #050506; }
-      .static-flight-deck { min-height: 100svh; display: grid; place-items: center; padding: max(20px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left)); background: radial-gradient(circle at 50% 112%, rgba(183,216,255,.20), transparent 38%), linear-gradient(180deg,#050506,#07080a 52%,#030304); overflow: hidden; }
-      .static-flight-deck::before { content: ""; position: fixed; inset: -20%; background: radial-gradient(circle at 7% 12%, rgba(255,255,255,.9) 0 1.35px, transparent 2px), radial-gradient(circle at 18% 35%, rgba(255,255,255,.58) 0 1px, transparent 1.7px), radial-gradient(circle at 31% 8%, rgba(183,216,255,.7) 0 1.1px, transparent 1.8px), radial-gradient(circle at 49% 18%, rgba(255,255,255,.62) 0 1px, transparent 1.7px), radial-gradient(circle at 69% 10%, rgba(255,255,255,.68) 0 1.25px, transparent 1.9px), radial-gradient(circle at 84% 28%, rgba(255,255,255,.72) 0 1.35px, transparent 2px), radial-gradient(circle at 91% 7%, rgba(255,255,255,.52) 0 1px, transparent 1.7px), radial-gradient(circle at 15% 78%, rgba(255,255,255,.48) 0 1px, transparent 1.7px), radial-gradient(circle at 63% 78%, rgba(183,216,255,.52) 0 1px, transparent 1.7px); opacity: .9; }
-      .static-grid { position: relative; width: min(1500px, 100%); display: grid; gap: 14px; grid-template-columns: 390px 1fr 410px; }
-      .static-card { border: 1px solid rgba(255,255,255,.09); background: rgba(10,11,13,.9); border-radius: 18px; padding: 22px; box-shadow: inset 0 1px 0 rgba(255,255,255,.045); }
-      .static-eyebrow { color: rgba(255,255,255,.52); font: 700 10px ui-monospace, Menlo, monospace; text-transform: uppercase; letter-spacing: .28em; }
-      .static-title { margin: 14px 0 0; max-width: 620px; font-size: clamp(40px, 5vw, 64px); line-height: .9; letter-spacing: -.065em; font-weight: 560; }
-      .static-copy { color: rgba(255,255,255,.66); font-size: 15px; line-height: 1.65; }
-      .static-metrics { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; margin-top: 18px; }
-      .static-metric { border: 1px solid rgba(255,255,255,.07); border-radius: 12px; padding: 12px; background: rgba(255,255,255,.025); }
-      .static-metric span { display: block; color: rgba(255,255,255,.48); font: 700 9px ui-monospace, Menlo, monospace; letter-spacing: .18em; text-transform: uppercase; }
-      .static-metric strong { display: block; margin-top: 6px; font-size: 28px; letter-spacing: -.055em; }
-      .static-orbit { min-height: 420px; position: relative; overflow: hidden; }
-      .static-orbit::before, .static-orbit::after { content: ""; position: absolute; left: 50%; top: 58%; transform: translate(-50%,-50%); border: 1px solid rgba(183,216,255,.16); border-radius: 50%; }
-      .static-orbit::before { width: 760px; height: 360px; }
-      .static-orbit::after { width: 520px; height: 240px; border-style: dashed; opacity: .8; }
-      .static-shell { position: relative; margin: 18px 0; max-width: 360px; border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 14px; background: rgba(0,0,0,.28); }
-      .static-shell strong { display: block; font-size: 22px; letter-spacing: -.03em; }
-      .static-shell p { margin: 6px 0 0; color: rgba(255,255,255,.58); font-size: 13px; line-height: 1.5; }
-      @media (max-width: 1100px) { .static-grid { grid-template-columns: 1fr; } .static-orbit { min-height: 320px; } }
+      :root {
+        color-scheme: dark;
+        --bg: #030812;
+        --panel: rgba(5, 9, 16, .88);
+        --panel-strong: rgba(3, 6, 11, .94);
+        --line: rgba(255,255,255,.095);
+        --ink: #f7f8f8;
+        --muted: rgba(231,238,247,.66);
+        --soft: rgba(231,238,247,.48);
+        --accent: #B7D8FF;
+        --cyan: #74E3D4;
+        --amber: #F3BE63;
+      }
+      * { box-sizing: border-box; }
+      html { background: var(--bg); color: var(--ink); }
+      body { margin: 0; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); }
+      .static-flight-deck {
+        min-height: 100svh;
+        display: grid;
+        align-items: center;
+        padding: max(18px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+        background:
+          radial-gradient(circle at 50% -12%, rgba(183,216,255,.20), transparent 36rem),
+          radial-gradient(circle at 6% 12%, rgba(116,227,212,.12), transparent 26rem),
+          radial-gradient(circle at 100% 28%, rgba(243,190,99,.09), transparent 28rem),
+          linear-gradient(180deg,#081a30 0%, #030812 58%, #010308 100%);
+        overflow: hidden;
+      }
+      .static-flight-deck::before {
+        content: "";
+        position: fixed;
+        inset: -20%;
+        pointer-events: none;
+        background:
+          radial-gradient(circle at 7% 12%, rgba(255,255,255,.9) 0 1.35px, transparent 2px),
+          radial-gradient(circle at 18% 35%, rgba(255,255,255,.58) 0 1px, transparent 1.7px),
+          radial-gradient(circle at 31% 8%, rgba(183,216,255,.7) 0 1.1px, transparent 1.8px),
+          radial-gradient(circle at 49% 18%, rgba(255,255,255,.62) 0 1px, transparent 1.7px),
+          radial-gradient(circle at 69% 10%, rgba(255,255,255,.68) 0 1.25px, transparent 1.9px),
+          radial-gradient(circle at 84% 28%, rgba(255,255,255,.72) 0 1.35px, transparent 2px),
+          radial-gradient(circle at 91% 7%, rgba(255,255,255,.52) 0 1px, transparent 1.7px),
+          radial-gradient(circle at 15% 78%, rgba(255,255,255,.48) 0 1px, transparent 1.7px),
+          radial-gradient(circle at 63% 78%, rgba(183,216,255,.52) 0 1px, transparent 1.7px);
+        opacity: .62;
+      }
+      .static-shell {
+        position: relative;
+        z-index: 1;
+        width: min(1540px, 100%);
+        margin: 0 auto;
+      }
+      .static-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 10px;
+        background: rgba(3, 8, 18, .68);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 18px 70px rgba(0,0,0,.24);
+        backdrop-filter: blur(18px);
+      }
+      .static-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--ink);
+        font-weight: 700;
+        letter-spacing: -.01em;
+      }
+      .static-mark {
+        width: 36px;
+        height: 36px;
+        border: 1px solid rgba(255,255,255,.12);
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        background: rgba(255,255,255,.045);
+        color: var(--accent);
+      }
+      .static-pills { display: flex; flex-wrap: wrap; gap: 7px; justify-content: flex-end; }
+      .static-pill {
+        min-height: 32px;
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid rgba(255,255,255,.09);
+        border-radius: 999px;
+        padding: 0 12px;
+        color: var(--muted);
+        background: rgba(255,255,255,.025);
+        font-size: 12px;
+        font-weight: 650;
+      }
+      .static-grid {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: minmax(320px, .8fr) minmax(420px, 1.4fr) minmax(320px, .8fr);
+      }
+      .static-card {
+        border: 1px solid var(--line);
+        background:
+          linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.012)),
+          var(--panel);
+        border-radius: 22px;
+        padding: clamp(18px, 2vw, 28px);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.055), 0 22px 90px rgba(0,0,0,.30);
+        overflow: hidden;
+      }
+      .static-card.hero {
+        min-height: 470px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .static-eyebrow {
+        color: var(--cyan);
+        font: 750 10px ui-monospace, SFMono-Regular, Menlo, monospace;
+        text-transform: uppercase;
+        letter-spacing: .16em;
+      }
+      .static-title {
+        margin: 14px 0 0;
+        max-width: 720px;
+        color: var(--ink);
+        font-size: clamp(42px, 7vw, 78px);
+        line-height: .92;
+        letter-spacing: -.065em;
+        font-weight: 760;
+      }
+      .static-copy {
+        margin: 18px 0 0;
+        max-width: 660px;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.7;
+      }
+      .static-metrics {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0,1fr));
+        gap: 9px;
+        margin-top: 22px;
+      }
+      .static-metric {
+        border: 1px solid rgba(255,255,255,.075);
+        border-radius: 14px;
+        padding: 13px;
+        background: rgba(255,255,255,.025);
+      }
+      .static-metric span {
+        display: block;
+        color: var(--soft);
+        font: 720 9px ui-monospace, SFMono-Regular, Menlo, monospace;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+      }
+      .static-metric strong {
+        display: block;
+        margin-top: 7px;
+        color: var(--ink);
+        font-size: clamp(22px, 3vw, 32px);
+        line-height: 1;
+        letter-spacing: -.045em;
+      }
+      .static-orbit {
+        position: relative;
+        min-height: 470px;
+      }
+      .static-orbit::before,
+      .static-orbit::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 54%;
+        transform: translate(-50%,-50%);
+        border: 1px solid rgba(183,216,255,.16);
+        border-radius: 50%;
+      }
+      .static-orbit::before { width: 920px; height: 410px; }
+      .static-orbit::after { width: 620px; height: 270px; border-style: dashed; opacity: .78; }
+      .static-layer {
+        position: relative;
+        z-index: 1;
+        max-width: 420px;
+        border: 1px solid rgba(255,255,255,.085);
+        border-radius: 16px;
+        padding: 15px;
+        margin: 13px 0;
+        background: rgba(3,8,18,.46);
+      }
+      .static-layer strong {
+        display: block;
+        font-size: 23px;
+        letter-spacing: -.03em;
+      }
+      .static-layer p {
+        margin: 7px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .static-side {
+        display: grid;
+        gap: 12px;
+      }
+      .static-row {
+        border: 1px solid rgba(255,255,255,.075);
+        border-radius: 16px;
+        padding: 14px;
+        background: rgba(255,255,255,.023);
+      }
+      .static-row h2,
+      .static-row h3 {
+        margin: 6px 0 0;
+        color: var(--ink);
+        font-size: 22px;
+        line-height: 1.08;
+        letter-spacing: -.04em;
+      }
+      .static-row p {
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .static-loading {
+        margin-top: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--accent);
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .static-loading::before {
+        content: "";
+        width: 9px;
+        height: 9px;
+        border-radius: 999px;
+        background: var(--accent);
+        box-shadow: 0 0 24px rgba(183,216,255,.55);
+      }
+      @media (max-width: 1180px) {
+        .static-grid { grid-template-columns: 1fr; }
+        .static-card.hero,
+        .static-orbit { min-height: auto; }
+        .static-side { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+      @media (max-width: 700px) {
+        .static-topbar { align-items: flex-start; flex-direction: column; }
+        .static-pills { justify-content: flex-start; }
+        .static-side { grid-template-columns: 1fr; }
+        .static-title { font-size: clamp(40px, 14vw, 62px); }
+        .static-metrics { grid-template-columns: 1fr 1fr; }
+      }
     </style>
   </head>
   <body>
     <div id="root">
       <main class="static-flight-deck" aria-label="Static first-paint SpaceX S-1 Atlas preview">
-        <section class="static-grid">
-          <div class="static-card">
-            <div class="static-eyebrow">S‑1 Filing Map</div>
-            <h1 class="static-title">SpaceX S‑1 Atlas.</h1>
-            <p class="static-copy">Business stack, financials, risks and source links. Built to be read quickly and verified against the filing package.</p>
-            <div class="static-metrics">
-              <div class="static-metric"><span>Sections</span><strong>22</strong></div>
-              <div class="static-metric"><span>Exhibits</span><strong>17</strong></div>
-              <div class="static-metric"><span>Graphics / OCR</span><strong>82</strong></div>
-              <div class="static-metric"><span>Risk factors</span><strong>54</strong></div>
+        <section class="static-shell">
+          <header class="static-topbar" aria-label="Preview navigation">
+            <div class="static-brand">
+              <span class="static-mark" aria-hidden="true">◌</span>
+              <span>SpaceX S‑1 Atlas</span>
             </div>
-          </div>
-          <div class="static-card static-orbit">
-            <div class="static-eyebrow">Business Stack</div>
-            <div class="static-shell"><strong style="color:#B7D8FF">Space</strong><p>Launch, spacecraft, mission services and mass to orbit.</p></div>
-            <div class="static-shell"><strong style="color:#74E3D4">Connectivity</strong><p>Starlink broadband, mobile, enterprise, government and satellite-to-mobile services.</p></div>
-            <div class="static-shell"><strong style="color:#F3BE63">AI</strong><p>xAI, Grok, compute infrastructure and planned orbital AI compute.</p></div>
-          </div>
-          <div class="static-card">
-            <div class="static-eyebrow">Disclosure Packet</div>
-            <h2 style="font-size:28px;letter-spacing:-.04em;margin:14px 0 0;color:#f7f8f8">Risks · Financials · Sources</h2>
-            <p class="static-copy">Every claim stays tied to the S‑1 package: main filing, exhibits, filing-fee exhibit and OCR from filing graphics.</p>
-            <p class="static-copy" style="color:#B7D8FF">Loading the interactive atlas…</p>
+            <div class="static-pills" aria-hidden="true">
+              <span class="static-pill">Overview</span>
+              <span class="static-pill">Debate Map</span>
+              <span class="static-pill">Financials</span>
+              <span class="static-pill">Risk Radar</span>
+            </div>
+          </header>
+
+          <div class="static-grid">
+            <article class="static-card hero">
+              <div>
+                <div class="static-eyebrow">Source-cited filing map</div>
+                <h1 class="static-title">SpaceX S‑1 Atlas.</h1>
+                <p class="static-copy">A compact operating memo, financial workbench, risk map, and source browser for reading the S‑1 quickly while keeping every claim tied back to the filing package.</p>
+              </div>
+              <div class="static-metrics" aria-label="Source coverage preview">
+                <div class="static-metric"><span>Sections</span><strong>22</strong></div>
+                <div class="static-metric"><span>Exhibits</span><strong>17</strong></div>
+                <div class="static-metric"><span>Graphics / OCR</span><strong>82</strong></div>
+                <div class="static-metric"><span>Risk factors</span><strong>54</strong></div>
+              </div>
+            </article>
+
+            <article class="static-card static-orbit">
+              <div class="static-eyebrow">Business stack</div>
+              <div class="static-layer"><strong style="color:#B7D8FF">Space</strong><p>Launch, spacecraft, mission services, Starship dependencies, and mass-to-orbit operating metrics.</p></div>
+              <div class="static-layer"><strong style="color:#74E3D4">Connectivity</strong><p>Starlink broadband, satellite-to-mobile, enterprise, government services, and the clearest filed segment economics.</p></div>
+              <div class="static-layer"><strong style="color:#F3BE63">AI</strong><p>xAI, Grok, compute infrastructure, and the capital-intensity questions the filing makes visible.</p></div>
+            </article>
+
+            <aside class="static-side">
+              <article class="static-card static-row">
+                <div class="static-eyebrow">Critical readout</div>
+                <h2>Start from the memo spine.</h2>
+                <p>Revenue scale, Q1 losses, Connectivity economics, AI capex, liquidity, and control terms are brought forward before the deeper tables.</p>
+              </article>
+              <article class="static-card static-row">
+                <div class="static-eyebrow">Disclosure packets</div>
+                <h3>Claims stay inspectable.</h3>
+                <p>Risks, financial rows, exhibits, source text, and shareable cards remain available for drilldown.</p>
+              </article>
+              <article class="static-card static-row" role="status" aria-live="polite">
+                <div class="static-eyebrow">Interactive dashboard</div>
+                <h3>Loading the atlas…</h3>
+                <p class="static-loading">Preparing source tables, charts, and navigation.</p>
+              </article>
+            </aside>
           </div>
         </section>
       </main>
