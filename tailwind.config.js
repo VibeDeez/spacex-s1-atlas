@@ -8,12 +8,12 @@ export default {
         mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       colors: {
-        void: '#071426',
+        void: '#030812',
         ink: '#F7F8F8',
         muted: '#8A8F98',
-        panel: '#0D0E10',
-        panel2: '#14161A',
-        line: 'rgba(255,255,255,0.08)',
+        panel: '#0D1420',
+        panel2: '#111827',
+        line: 'rgba(255,255,255,0.095)',
         spacex: '#F0F0FA',
         violet: '#7170ff',
         cyan: '#74e3d4',
@@ -21,13 +21,23 @@ export default {
         green: '#10B981',
         red: '#EF7D7D',
       },
+      borderRadius: {
+        control: '0.78rem',
+        card: '1rem',
+        surface: '1.25rem',
+      },
       boxShadow: {
         mission: '0 24px 90px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.05)',
         glow: '0 0 48px rgba(113,112,255,.22)',
+        card: '0 18px 70px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.055)',
+        elevated: '0 30px 120px rgba(0,0,0,.46), inset 0 1px 0 rgba(255,255,255,.07)',
       },
       backgroundImage: {
         'mission-grid': 'linear-gradient(rgba(255,255,255,.055) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.055) 1px, transparent 1px)',
-        'radial-stage': 'radial-gradient(circle at 20% -10%, rgba(113,112,255,.32), transparent 28rem), radial-gradient(circle at 80% 10%, rgba(116,227,212,.14), transparent 28rem), linear-gradient(180deg,#050506,#08090A 42%,#050506)',
+        'radial-stage': 'radial-gradient(circle at 20% -10%, rgba(113,112,255,.32), transparent 28rem), radial-gradient(circle at 80% 10%, rgba(116,227,212,.14), transparent 28rem), linear-gradient(180deg,#030812,#071426 42%,#02050a)',
+      },
+      transitionTimingFunction: {
+        smooth: 'cubic-bezier(.22, 1, .36, 1)',
       },
       keyframes: {
         orbit: {
